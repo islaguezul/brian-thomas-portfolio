@@ -41,7 +41,7 @@ const MainPortfolio = () => {
   const [siteMetrics] = useState({
     performance: 98,
     accessibility: 96,
-    seo: 94,
+    SEO: 94,
     uptime: 99.9
   });
 
@@ -222,10 +222,10 @@ const MainPortfolio = () => {
   const particleData = useMemo(() => {
     if (!isClient) return [];
     
-    return Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: 3000 }, (_, i) => ({ // Doubled from 1500 to 3000
       id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
+      left: (Math.random() * 800) - 300, // -300% to 500% (huge coverage area)
+      top: (Math.random() * 800) - 300,  // -300% to 500% (huge coverage area)
       animationDelay: Math.random() * 3,
       animationDuration: 2 + Math.random() * 3,
       transformX: (Math.random() - 0.5) * 20,
@@ -241,7 +241,12 @@ const MainPortfolio = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white">
       {/* Animated background particles */}
       {isClient && (
-        <div className="fixed inset-0 pointer-events-none">
+        <div 
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            transform: `translate(${(mousePosition.x - window.innerWidth / 2) * 5}px, ${(mousePosition.y - window.innerHeight / 2) * 5}px)`
+          }}
+        >
           {particleData.map((particle) => (
             <div
               key={particle.id}
@@ -417,7 +422,7 @@ const MainPortfolio = () => {
                     )}
 
                     <div className="text-xs text-slate-400 bg-slate-700/20 rounded-lg p-3">
-                      <strong>Live Demo:</strong> RSS feed analysis using OpenAI GPT-4.1 for market sentiment detection. 
+                      <strong>Live Demo:</strong> RSS feed analysis using OpenAI GPT-4.1 for the same market sentiment detection as with AI Crypto Trading Bot. 
                       Currently in fine-tuning phase - achieved 10% returns with contrarian model in backtesting.
                     </div>
                   </div>
