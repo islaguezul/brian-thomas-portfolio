@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, Github, Play, Calendar, Users, BarChart3, Zap, Database, Brain, Code, Smartphone, Globe, Download, Mail, Phone, MapPin, FileText, Activity, Layers, Cpu, Rocket, Shield } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import Resume from './Resume';
+import ParticleBackground from './ParticleBackground';
 
 
 interface Project {
@@ -31,7 +32,6 @@ const MainPortfolio = () => {
   const [currentSection, setCurrentSection] = useState('home');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isClient, setIsClient] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   // Hero section state
@@ -218,50 +218,10 @@ const MainPortfolio = () => {
     handleSectionTransition('project-detail');
   };
 
-  // Generate stable particle data only on client
-  const particleData = useMemo(() => {
-    if (!isClient) return [];
-    
-    return Array.from({ length: 3000 }, (_, i) => ({ // Doubled from 1500 to 3000
-      id: i,
-      left: (Math.random() * 800) - 300, // -300% to 500% (huge coverage area)
-      top: (Math.random() * 800) - 300,  // -300% to 500% (huge coverage area)
-      animationDelay: Math.random() * 3,
-      animationDuration: 2 + Math.random() * 3,
-      transformX: (Math.random() - 0.5) * 20,
-      transformY: (Math.random() - 0.5) * 20
-    }));
-  }, [isClient]);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white">
-      {/* Animated background particles */}
-      {isClient && (
-        <div 
-          className="fixed inset-0 pointer-events-none"
-          style={{
-            transform: `translate(${(mousePosition.x - window.innerWidth / 2) * 5}px, ${(mousePosition.y - window.innerHeight / 2) * 5}px)`
-          }}
-        >
-          {particleData.map((particle) => (
-            <div
-              key={particle.id}
-              className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-30 animate-pulse"
-              style={{
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-                animationDelay: `${particle.animationDelay}s`,
-                animationDuration: `${particle.animationDuration}s`,
-                transform: `translate(${particle.transformX}px, ${particle.transformY}px)`
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* Replace the entire particle section with: */}
+      <ParticleBackground mousePosition={mousePosition} />
 
       {/* Navigation */}
       <nav className="relative z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
