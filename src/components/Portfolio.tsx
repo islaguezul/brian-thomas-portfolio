@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ExternalLink, Github, Play, Calendar, Users,
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import Resume from './Resume';
 import ParticleBackground from './ParticleBackground';
+import Navigation from './Navigation';
 
 
 interface Project {
@@ -224,37 +225,10 @@ const MainPortfolio = () => {
       <ParticleBackground mousePosition={mousePosition} />
 
       {/* Navigation */}
-      <nav className="relative z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <button 
-              onClick={() => handleSectionTransition('home')}
-              className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent hover:scale-105 transition-transform"
-            >
-              Brian Thomas
-            </button>
-            <div className="flex items-center space-x-6">
-              <button 
-                onClick={() => handleSectionTransition('home')} 
-                className={`hover:text-blue-400 transition-colors ${currentSection === 'home' ? 'text-blue-400' : ''}`}
-              >
-                Home
-              </button>
-              <button 
-                onClick={() => handleSectionTransition('resume')} 
-                className={`hover:text-blue-400 transition-colors ${currentSection === 'resume' ? 'text-blue-400' : ''}`}
-              >
-                Resume
-              </button>
-              <a href="mailto:brianjamesthomas@outlook.com" className="hover:text-blue-400 transition-colors">Contact</a>
-              <div className="flex items-center space-x-2 text-sm">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-green-400">Live</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation 
+        currentSection={currentSection} 
+        onSectionChange={handleSectionTransition} 
+      />
 
       {/* Content with transition animation */}
       <div className={`transition-opacity duration-300 ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
