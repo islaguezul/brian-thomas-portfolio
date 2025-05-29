@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { JSX } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { Brain, FileText, ChevronRight, Activity, Users, Globe, Database, Layers, Cpu, Shield, TrendingUp, Rocket } from 'lucide-react';
 
 
@@ -31,6 +31,8 @@ const MainPortfolio = () => {
   const [currentSection, setCurrentSection] = useState('home');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   // Hero section state
   const [sentimentData, setSentimentData] = useState<SentimentData[]>([]);
@@ -44,7 +46,6 @@ const MainPortfolio = () => {
   });
 
   const heroRef = useRef(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Project data structure
   const projects = [
@@ -217,26 +218,45 @@ const MainPortfolio = () => {
     handleSectionTransition('project-detail');
   };
 
+  // Generate stable particle data only on client
+  const particleData = useMemo(() => {
+    if (!isClient) return [];
+    
+    return Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      animationDelay: Math.random() * 3,
+      animationDuration: 2 + Math.random() * 3,
+      transformX: (Math.random() - 0.5) * 20,
+      transformY: (Math.random() - 0.5) * 20
+    }));
+  }, [isClient]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white">
       {/* Animated background particles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-30 animate-pulse"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`,
-              transform: typeof window !== 'undefined' ? 
-                `translate(${(mousePosition.x - (window.innerWidth || 0) / 2) * 0.01}px, ${(mousePosition.y - (window.innerHeight || 0) / 2) * 0.01}px)` : 
-                'translate(0px, 0px)'
-            }}
-          />
-        ))}
-      </div>
+      {isClient && (
+        <div className="fixed inset-0 pointer-events-none">
+          {particleData.map((particle) => (
+            <div
+              key={particle.id}
+              className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-30 animate-pulse"
+              style={{
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
+                animationDelay: `${particle.animationDelay}s`,
+                animationDuration: `${particle.animationDuration}s`,
+                transform: `translate(${particle.transformX}px, ${particle.transformY}px)`
+              }}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="relative z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-700">
@@ -379,7 +399,7 @@ const MainPortfolio = () => {
                                 borderRadius: '8px',
                                 color: '#e2e8f0'
                               }}
-                              formatter={(value, name) => [
+                              formatter={(value: number | string, name: string) => [
                                 `${(Number(value) * 100).toFixed(1)}%`,
                                 name === 'sentiment' ? 'Market Sentiment' : name
                               ]}
@@ -641,7 +661,7 @@ const MainPortfolio = () => {
                 </h2>
                 <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
                   Ready to bring technical innovation and systematic product management to your team? 
-                  Let's discuss how AI integration and process excellence can drive your business forward.
+                  Let&apos;s discuss how AI integration and process excellence can drive your business forward.
                 </p>
                 
                 <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -672,7 +692,7 @@ const MainPortfolio = () => {
 
         {currentSection === 'resume' && (
           <div className="min-h-screen py-20">
-            <div className="max-w-4xl mx-auto px-6">
+            <div className="max-w-5xl mx-auto px-6">
               <div className="flex items-center justify-between mb-8">
                 <button 
                   onClick={() => handleSectionTransition('home')}
@@ -691,42 +711,42 @@ const MainPortfolio = () => {
                 </button>
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-8">
+              <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-8 print:bg-white print:text-black">
                 <div className="text-center mb-8 pb-6 border-b border-slate-700">
                   <h1 className="text-5xl font-bold mb-4">
-                    <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent print:text-black">
                       Brian Thomas
                     </span>
                   </h1>
-                  <h2 className="text-2xl text-slate-300 mb-6 font-semibold">Technical Product Manager</h2>
+                  <h2 className="text-2xl text-slate-300 mb-6 font-semibold print:text-gray-800">Technical Product Manager</h2>
                   
-                  <div className="flex flex-wrap justify-center gap-6 text-slate-300">
+                  <div className="flex flex-wrap justify-center gap-6 text-slate-300 print:text-gray-700">
                     <div className="flex items-center">
-                      <span className="text-blue-400 mr-2">📍</span>
+                      <span className="text-blue-400 mr-2 print:text-gray-800">📍</span>
                       Tacoma, WA 98406
                     </div>
                     <div className="flex items-center">
-                      <span className="text-blue-400 mr-2">📞</span>
+                      <span className="text-blue-400 mr-2 print:text-gray-800">📞</span>
                       (707) 536-8398
                     </div>
                     <div className="flex items-center">
-                      <span className="text-blue-400 mr-2">✉️</span>
+                      <span className="text-blue-400 mr-2 print:text-gray-800">✉️</span>
                       brianjamesthomas@outlook.com
                     </div>
                     <div className="flex items-center">
-                      <span className="text-blue-400 mr-2">💼</span>
+                      <span className="text-blue-400 mr-2 print:text-gray-800">💼</span>
                       linkedin.com/in/brianjamesthomas
                     </div>
                     <div className="flex items-center">
-                      <span className="text-blue-400 mr-2">🐙</span>
+                      <span className="text-blue-400 mr-2 print:text-gray-800">🐙</span>
                       github.com/islaguezul
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h3 className="text-2xl font-bold mb-4 text-blue-400">Executive Summary</h3>
-                  <p className="text-lg text-slate-300 leading-relaxed">
+                <div className="mb-10">
+                  <h3 className="text-2xl font-bold mb-4 text-blue-400 print:text-gray-800">Executive Summary</h3>
+                  <p className="text-lg text-slate-300 leading-relaxed print:text-gray-700">
                     Technical Product Manager with 10+ years of experience transforming complex technical challenges into scalable business solutions. 
                     Proven track record in process improvement, AI integration, and enterprise architecture across aerospace, utilities, and fintech sectors. 
                     Expert in BPMN 2.0, systematic product development, and driving organizational transformation through innovative technology adoption. 
@@ -734,13 +754,215 @@ const MainPortfolio = () => {
                   </p>
                 </div>
 
-                <div className="text-center text-slate-300 py-8">
-                  <p>Complete resume content available in dedicated Resume Component...</p>
+                {/* Experience Section */}
+                <div className="mb-10">
+                  <h3 className="text-2xl font-bold mb-6 text-blue-400 print:text-gray-800 border-b border-slate-700 pb-2">Professional Experience</h3>
+                  
+                  {/* Blue Origin */}
+                  <div className="mb-8">
+                    <div className="flex flex-wrap justify-between items-start mb-2">
+                      <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Business Process Analyst</h4>
+                      <div className="flex items-center">
+                        <span className="text-blue-400 font-semibold mr-2 print:text-gray-700">Blue Origin</span>
+                        <span className="text-slate-400 print:text-gray-600">JAN 2022 - Present</span>
+                      </div>
+                    </div>
+                    <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                      <li>Developed and implemented the organization$apos;s first process management function, including evangelizing BPMN 2.0 across Blue Origin, implementing a process maturity model and roadmap, and modeling the Engines business unit$apos;s end-to-end processes.</li>
+                      <li>Established data infrastructure for all planned engine configurations in the Engines Build Manifest tool, building key relationships and developing advanced knowledge of Windchill PLM and its data architecture.</li>
+                      <li>Conducted gap analyses of Engines$apos; test management, configuration management, and program management products to define the product roadmap for the BEARS team.</li>
+                      <li>Led process modeling project for the BE-4 program to enable Rate Production program director to make process improvements and achieve rate production goals.</li>
+                    </ul>
+                  </div>
+                  
+                  {/* Chelan PUD */}
+                  <div className="mb-8">
+                    <div className="flex flex-wrap justify-between items-start mb-2">
+                      <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Business Process Analyst</h4>
+                      <div className="flex items-center">
+                        <span className="text-blue-400 font-semibold mr-2 print:text-gray-700">Chelan PUD</span>
+                        <span className="text-slate-400 print:text-gray-600">NOV 2017 - DEC 2021</span>
+                      </div>
+                    </div>
+                    <p className="mb-2 text-slate-300 print:text-gray-700">Internal consulting for process management, with a mission to improve work quality and efficiency, and to reduce errors.</p>
+                    <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                      <li><strong>Professional Expertise:</strong> Designed and implemented the process analysis discipline, with maturity model and roadmap, best practices, modeling syntax, implementation strategy, and tools & technology.</li>
+                      <li><strong>Process Transformations:</strong> Facilitated the business process development for the implementation of the Oracle Utilities Analytics C2M upgrade project and Advanced Metering Infrastructure (AMI) projects.</li>
+                      <li><strong>New Challenges:</strong> Assisted in development of processes for handling high-density loads to address cryptocurrency mining challenges, and fulfilled the full change management needs of the Pole Attachment Program implementation.</li>
+                    </ul>
+                  </div>
+                  
+                  {/* Contractor */}
+                  <div className="mb-8">
+                    <div className="flex flex-wrap justify-between items-start mb-2">
+                      <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Change Management Consultant</h4>
+                      <div className="flex items-center">
+                        <span className="text-blue-400 font-semibold mr-2 print:text-gray-700">Contractor</span>
+                        <span className="text-slate-400 print:text-gray-600">JAN 2016 - OCT 2017</span>
+                      </div>
+                    </div>
+                    <p className="mb-2 text-slate-300 print:text-gray-700">Worked alongside clients to create and execute a user-centric change management strategy for various projects, including a worldwide SAP implementation affecting 21,000+ employees.</p>
+                    <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                      <li><strong>Change Impact Analysis:</strong> Collaborated with value stream and scrum leads, and technical project managers, to define and document process and user change impacts.</li>
+                      <li><strong>Project Management:</strong> Managed the team$apos;s work structure, burndown tracking, and dependencies, using both Visual Studio Online (VSO) and MS Project.</li>
+                      <li><strong>Change Communications:</strong> Established a change communications plan and associated templates for the program to push information to the global user group.</li>
+                    </ul>
+                  </div>
+                  
+                  {/* Mosaic */}
+                  <div className="mb-8">
+                    <div className="flex flex-wrap justify-between items-start mb-2">
+                      <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Consultant (Utilities)</h4>
+                      <div className="flex items-center">
+                        <span className="text-blue-400 font-semibold mr-2 print:text-gray-700">Mosaic</span>
+                        <span className="text-slate-400 print:text-gray-600">JUL 2011 - JAN 2016</span>
+                      </div>
+                    </div>
+                    <p className="mb-2 text-slate-300 print:text-gray-700">Developed training programs and created customized performance improvement and knowledge management software solutions.</p>
+                    <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                      <li><strong>Analysis Expertise:</strong> Conducted front-end, training needs, and occupational analyses, consulted on program management, and developed program management models.</li>
+                      <li><strong>Program Alignment:</strong> Developed solutions with metrics aligned to business needs, in accordance with human performance improvement (HPI) principles.</li>
+                      <li><strong>Human Performance Improvement:</strong> Planned and developed blended human-performance solutions comprised of process change recommendations, SCORM-compliant eLearning, and other training materials.</li>
+                    </ul>
+                  </div>
+                  
+                  {/* US Coast Guard Positions */}
+                  <div>
+                    <div className="flex flex-wrap justify-between items-start mb-2">
+                      <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Multiple Positions</h4>
+                      <div className="flex items-center">
+                        <span className="text-blue-400 font-semibold mr-2 print:text-gray-700">U.S. Coast Guard</span>
+                        <span className="text-slate-400 print:text-gray-600">2002 - 2011</span>
+                      </div>
+                    </div>
+                    <ul className="list-disc pl-5 text-slate-300 space-y-4 print:text-gray-700">
+                      <li>
+                        <strong>Master Training Specialist (2009-2011):</strong> Provided professional development coaching and program management expertise. Recognized expert on program management and adult learning theory.
+                      </li>
+                      <li>
+                        <strong>Training Program Manager (2005-2009):</strong> Managed multiple, concurrent projects including staff supervision and leadership mentoring. Spearheaded an OJT mentorship-based leadership development program and championed student throughput workflow improvements saving $110,000 in expenses.
+                      </li>
+                      <li>
+                        <strong>Telecommunications Center Supervisor (2002-2005):</strong> Supervised telecommunications systems maintenance and divisional training programs. Streamlined the qualifications process, reducing time invested by 40%.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Education Section */}
+                <div className="mb-10">
+                  <h3 className="text-2xl font-bold mb-6 text-blue-400 print:text-gray-800 border-b border-slate-700 pb-2">Education</h3>
+                  
+                  <div className="grid md:grid-cols-2 gap-8">
+                    {/* MBA */}
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-lg p-6 border border-slate-700 print:bg-white print:border-gray-300">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Master of Business Administration</h4>
+                        <span className="text-slate-400 print:text-gray-600">2014</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-blue-400 font-semibold print:text-gray-700">Columbia College</span>
+                      </div>
+                      <div className="mb-4">
+                        <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-sm print:bg-gray-200 print:text-gray-800">GPA: 4.0</span>
+                      </div>
+                      <div>
+                        <p className="text-slate-300 text-sm mb-2 print:text-gray-700">Most relevant courses include:</p>
+                        <ul className="list-disc pl-5 text-slate-300 text-sm space-y-1 print:text-gray-700">
+                          <li>Human Resource Management & Theory</li>
+                          <li>Organizational Theory</li>
+                          <li>Decision Science for Business</li>
+                          <li>Legal & Ethical Environment</li>
+                        </ul>
+                      </div>
+                    </div>
+                    
+                    {/* Bachelor's */}
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-lg p-6 border border-slate-700 print:bg-white print:border-gray-300">
+                      <div className="flex justify-between items-start mb-4">
+                        <h4 className="text-xl font-bold text-slate-200 print:text-gray-800">Bachelor of Science, Business Administration</h4>
+                        <span className="text-slate-400 print:text-gray-600">2011</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-blue-400 font-semibold print:text-gray-700">Columbia College</span>
+                      </div>
+                      <div className="mb-4">
+                        <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full text-sm print:bg-gray-200 print:text-gray-800">Graduated with honors</span>
+                      </div>
+                      <div>
+                        <p className="text-slate-300 text-sm mb-2 print:text-gray-700">Relevant courses include:</p>
+                        <ul className="list-disc pl-5 text-slate-300 text-sm space-y-1 print:text-gray-700">
+                          <li>Labor Relations</li>
+                          <li>Management Training & Development</li>
+                          <li>Human Resource Management</li>
+                          <li>Organizational Behavior</li>
+                          <li>Cross-Cultural Management</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Skills Section */}
+                <div className="mb-10">
+                  <h3 className="text-2xl font-bold mb-6 text-blue-400 print:text-gray-800 border-b border-slate-700 pb-2">Professional Skills</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Process Management */}
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-lg p-6 border border-slate-700 print:bg-white print:border-gray-300">
+                      <h4 className="text-lg font-bold mb-4 text-green-400 print:text-gray-800 flex items-center">
+                        <Database className="w-5 h-5 mr-2" />
+                        Process Management
+                      </h4>
+                      <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                        <li>BPMN 2.0 Modeling</li>
+                        <li>Process Maturity Models</li>
+                        <li>Process Analysis & Design</li>
+                        <li>Change Management</li>
+                        <li>Kaizen / Lean Methodologies</li>
+                      </ul>
+                    </div>
+                    
+                    {/* Product Management */}
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-lg p-6 border border-slate-700 print:bg-white print:border-gray-300">
+                      <h4 className="text-lg font-bold mb-4 text-blue-400 print:text-gray-800 flex items-center">
+                        <Rocket className="w-5 h-5 mr-2" />
+                        Product Management
+                      </h4>
+                      <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                        <li>Requirements Gathering</li>
+                        <li>User Story Development</li>
+                        <li>MVP Definition & Roadmapping</li>
+                        <li>Agile/Scrum Methodologies</li>
+                        <li>Product Strategy</li>
+                      </ul>
+                    </div>
+                    
+                    {/* Technical Skills */}
+                    <div className="bg-slate-800/30 backdrop-blur-sm rounded-lg p-6 border border-slate-700 print:bg-white print:border-gray-300">
+                      <h4 className="text-lg font-bold mb-4 text-purple-400 print:text-gray-800 flex items-center">
+                        <Cpu className="w-5 h-5 mr-2" />
+                        Technical Skills
+                      </h4>
+                      <ul className="list-disc pl-5 text-slate-300 space-y-2 print:text-gray-700">
+                        <li>Full-Stack Architecture</li>
+                        <li>AI/ML Integration</li>
+                        <li>Data Analysis & Visualization</li>
+                        <li>PLM Systems (Windchill)</li>
+                        <li>Software Development Lifecycle</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Download Button */}
+                <div className="text-center mt-8">
                   <button 
-                    onClick={() => handleSectionTransition('home')}
-                    className="mt-4 text-blue-400 hover:text-blue-300 transition-colors"
+                    onClick={() => window.print()}
+                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-all duration-300 inline-flex items-center no-print"
                   >
-                    ← Return to Portfolio
+                    <FileText className="w-4 h-4 mr-2" />
+                    Download Resume as PDF
                   </button>
                 </div>
               </div>
