@@ -24,6 +24,20 @@
   .animate-pulse-slow {
     animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+  
+  .animate-float {
+    animation: float 20s ease-in-out infinite;
+  }
+  
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+  
+  .hover-lift {
+    @apply hover:shadow-2xl hover:-translate-y-1;
+  }
 }
 
 /* Custom animations */
@@ -34,6 +48,47 @@
   50% {
     opacity: 0.5;
   }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  50% {
+    transform: translateY(10px) translateX(-5px);
+  }
+  75% {
+    transform: translateY(-10px) translateX(15px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Glass morphism effects */
+.glass {
+  backdrop-filter: blur(10px);
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Premium hover effects */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 /* Print styles for resume */
