@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react';
-import { X, ExternalLink, Github, Play, Calendar, Users, BarChart3 } from 'lucide-react';
+import { X, Github, ExternalLink, Play } from 'lucide-react';
 
 interface Project {
   id: string;

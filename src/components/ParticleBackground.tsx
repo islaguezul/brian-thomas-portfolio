@@ -3,28 +3,28 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 interface ParticleBackgroundProps {
-  mousePosition: { x: number; y: number };
+  mousePosition?: { x: number; y: number };
 }
 
-const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ mousePosition }) => {
+const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ mousePosition: externalMousePosition }) => {
   const [isClient, setIsClient] = useState(false);
+  const [internalMousePosition, setInternalMousePosition] = useState({ x: 0, y: 0 });
+  
+  // Use external mouse position if provided, otherwise use internal
+  const mousePosition = externalMousePosition || internalMousePosition;
 
-  // Generate dense, visible particles with coverage for 5x movement
+  // Generate stable particle data only on client
   const particleData = useMemo(() => {
     if (!isClient) return [];
     
-    return Array.from({ length: 3000 }, (_, i) => ({
+    return Array.from({ length: 3000 }, (_, i) => ({ // Doubled from 1500 to 3000
       id: i,
-      // Need much larger coverage for 5x movement
-      // If mouse moves to edge (50% of viewport), particles move 250% (5x50%)
-      // So we need coverage from -300% to +400% to handle all mouse positions
-      left: (Math.random() * 700) - 300, // -300% to 400%
-      top: (Math.random() * 700) - 300,  // -300% to 400%
-      animationDelay: Math.random() * 4,
-      animationDuration: 3 + Math.random() * 4, // 3-7 seconds
-      size: Math.random() * 2 + 1, // 1-3px
-      opacity: Math.random() * 0.6 + 0.4, // 0.4-1.0 opacity (much more visible)
-      color: Math.random() < 0.7 ? 'bg-blue-400' : Math.random() < 0.5 ? 'bg-purple-400' : 'bg-cyan-400'
+      left: (Math.random() * 800) - 300, // -300% to 500% (huge coverage area)
+      top: (Math.random() * 800) - 300,  // -300% to 500% (huge coverage area)
+      animationDelay: Math.random() * 3,
+      animationDuration: 2 + Math.random() * 3,
+      transformX: (Math.random() - 0.5) * 20,
+      transformY: (Math.random() - 0.5) * 20
     }));
   }, [isClient]);
 
@@ -32,36 +32,43 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ mousePosition }
     setIsClient(true);
   }, []);
 
-  if (!isClient) return null;
+  // Add internal mouse tracking if no external position is provided
+  useEffect(() => {
+    if (externalMousePosition) return; // Don't track if external position is provided
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setInternalMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [externalMousePosition]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Use CSS transform on the container instead of inline transforms on 3000 elements */}
-      <div 
-        className="absolute inset-0 w-full h-full will-change-transform"
-        style={{
-          // Single transform for the entire particle field - much more performant
-          transform: `translate(${(mousePosition.x - (typeof window !== 'undefined' ? window.innerWidth / 2 : 960)) * 5}px, ${(mousePosition.y - (typeof window !== 'undefined' ? window.innerHeight / 2 : 540)) * 5}px)`
-        }}
-      >
-        {particleData.map((particle) => (
-          <div
-            key={particle.id}
-            className={`absolute rounded-full ${particle.color} animate-pulse`}
-            style={{
-              left: `${particle.left}%`,
-              top: `${particle.top}%`,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-              opacity: particle.opacity,
-              animationDelay: `${particle.animationDelay}s`,
-              animationDuration: `${particle.animationDuration}s`,
-              // Remove individual transforms - now handled by parent container
-            }}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      {isClient && (
+        <div 
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            transform: `translate(${(mousePosition.x - window.innerWidth / 2) * 5}px, ${(mousePosition.y - window.innerHeight / 2) * 5}px)`
+          }}
+        >
+          {particleData.map((particle) => (
+            <div
+              key={particle.id}
+              className="absolute w-1 h-1 bg-blue-400 rounded-full opacity-30 animate-pulse"
+              style={{
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
+                animationDelay: `${particle.animationDelay}s`,
+                animationDuration: `${particle.animationDuration}s`,
+                transform: `translate(${particle.transformX}px, ${particle.transformY}px)`
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </>
   );
 };
 

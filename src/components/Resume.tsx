@@ -1,28 +1,37 @@
 'use client'
 
-import React from 'react';
+import React, { memo } from 'react';
+import dynamic from 'next/dynamic';
 import { Download, Mail, Phone, MapPin, Globe, Database, Users, BarChart3 } from 'lucide-react';
+
+// Dynamically import PDF component to avoid SSR issues
+const PDFResumeDownload = dynamic(
+  () => import('./PDFResume'),
+  { 
+    ssr: false,
+    loading: () => (
+      <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center gap-2 opacity-50 cursor-not-allowed">
+        <Download className="w-5 h-5" />
+        Loading PDF Generator...
+      </button>
+    )
+  }
+);
 
 const Resume: React.FC = () => {
   return (
     <div className="min-h-screen py-20">
       <div className="max-w-5xl mx-auto px-6">
-        {/* Print Button */}
+        {/* PDF Download Button */}
         <div className="mb-8 text-center print:hidden">
-          <button
-            onClick={() => window.print()}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center gap-2"
-          >
-            <Download className="w-5 h-5" />
-            Download / Print Resume
-          </button>
+          <PDFResumeDownload />
         </div>
 
         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-8 print:bg-white print:text-black">
           {/* Professional Header */}
           <div className="mb-10">
-            <h1 className="text-4xl font-bold mb-4 text-blue-400 print:text-gray-800">Brian Thomas</h1>
-            <p className="text-xl text-slate-300 mb-6 print:text-gray-600">Senior Operations Manager & Technical Leader</p>
+            <h1 className="text-4xl font-bold mb-2 text-blue-400 print:text-gray-800">Brian Thomas</h1>
+            <p className="text-xl text-slate-300 mb-6 print:text-gray-600">Technical Product Manager</p>
             
             <div className="grid md:grid-cols-2 gap-4 text-slate-300 print:text-gray-600">
               <div className="flex items-center gap-2">
@@ -243,4 +252,4 @@ const Resume: React.FC = () => {
   );
 };
 
-export default Resume;
+export default memo(Resume);
