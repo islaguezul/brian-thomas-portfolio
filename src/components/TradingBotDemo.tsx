@@ -230,7 +230,7 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
                 yAxisId="pnl"
                 type="monotone"
                 dataKey="pnl"
-                stroke={tradingState && tradingState.pnl >= 0 ? '#10b981' : '#ef4444'}
+                stroke={(chartData && chartData.length > 0 && chartData[chartData.length - 1].pnl >= 0) ? '#10b981' : '#ef4444'}
                 strokeWidth={3}
                 dot={false}
                 name="P&L (Demo)"

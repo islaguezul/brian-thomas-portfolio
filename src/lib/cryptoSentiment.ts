@@ -280,45 +280,73 @@ export function generateBacktestData(): Array<{
   const now = new Date();
   const intervals = 24 * 12; // 24 hours * 12 five-minute intervals
   
-  // Start with a base price that varies realistically
+  // Start with a base price
   let basePrice = 95000;
-  let baseSentiment = 0.5;
-  
-  // Use deterministic patterns instead of random for consistent results
-  const seedBase = 12345; // Fixed seed for consistency
-  
-  // Simple seeded random function for consistent results
-  function seededRandom(seed: number): number {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  }
   
   for (let i = intervals; i >= 0; i--) {
     const timestamp = new Date(now.getTime() - (i * 5 * 60 * 1000));
     
-    // Create more realistic price movements with deterministic patterns
-    const longTrend = Math.sin(i * 0.02) * 0.015; // Longer trend cycles
-    const shortVolatility = (seededRandom(seedBase + i) - 0.5) * 0.025; // Consistent volatility
-    const priceChange = longTrend + shortVolatility;
-    basePrice = Math.max(30000, basePrice * (1 + priceChange)); // Price floor
+    // Create realistic price movements with trends and reversals
+    const trendPhase = Math.floor(i / 24); // Change trend every 2 hours
+    const microTrend = Math.sin(i * 0.1) * 0.01; // Small oscillations
     
-    // Create counter-sentiment strategy opportunities with deterministic patterns
-    // Market sentiment often lags price movements and can be contrarian
-    // When price drops significantly, sentiment becomes fearful (good buy opportunity)
-    // When price rises significantly, sentiment becomes greedy (good sell opportunity)
-    const priceVelocity = priceChange * 100; // Scale price change
-    const sentimentLag = 0.7; // Sentiment lags price movements
-    const contrarian = -priceVelocity * 2; // Inverse relationship for contrarian strategy
-    const sentimentBase = (baseSentiment * sentimentLag) + (0.5 + contrarian) * (1 - sentimentLag);
-    const sentimentNoise = (seededRandom(seedBase + i + 1000) - 0.5) * 0.25; // Consistent market noise
-    baseSentiment = Math.max(0.1, Math.min(0.9, sentimentBase + sentimentNoise));
+    // Main price movement
+    let priceChange = 0;
+    if (trendPhase % 3 === 0) {
+      // Uptrend phase
+      priceChange = 0.002 + microTrend;
+    } else if (trendPhase % 3 === 1) {
+      // Downtrend phase
+      priceChange = -0.002 + microTrend;
+    } else {
+      // Sideways phase
+      priceChange = microTrend;
+    }
+    
+    // Add some noise
+    priceChange += (Math.random() - 0.5) * 0.005;
+    
+    // Apply price change
+    basePrice = basePrice * (1 + priceChange);
+    
+    // Generate realistic sentiment behavior
+    // Real markets: sentiment often FOLLOWS price (momentum), not opposes it
+    let sentiment = 0.5;
+    
+    // Market behavior varies - this is key to realistic 55% win rate
+    const marketBehavior = Math.random();
+    
+    if (marketBehavior < 0.45) {
+      // 45% of time: Sentiment FOLLOWS price (momentum trading prevails)
+      // This hurts counter-sentiment strategy
+      if (priceChange > 0.001) {
+        sentiment = 0.6 + Math.random() * 0.25; // Bullish when price up (0.6-0.85)
+      } else if (priceChange < -0.001) {
+        sentiment = 0.15 + Math.random() * 0.25; // Bearish when price down (0.15-0.4)
+      } else {
+        sentiment = 0.45 + Math.random() * 0.2; // Neutral (0.45-0.65)
+      }
+    } else if (marketBehavior < 0.90) {
+      // 45% of time: Counter-sentiment opportunities exist
+      // This helps counter-sentiment strategy
+      if (priceChange > 0.001) {
+        sentiment = 0.25 + Math.random() * 0.2; // Bearish when price up (0.25-0.45)
+      } else if (priceChange < -0.001) {
+        sentiment = 0.55 + Math.random() * 0.2; // Bullish when price down (0.55-0.75)
+      } else {
+        sentiment = 0.4 + Math.random() * 0.2; // Neutral (0.4-0.6)
+      }
+    } else {
+      // 10% of time: Completely random sentiment (market confusion)
+      sentiment = 0.2 + Math.random() * 0.6; // Random (0.2-0.8)
+    }
     
     dataPoints.push({
       time: timestamp.toLocaleTimeString('en-US', { 
         hour: '2-digit', 
         minute: '2-digit' 
       }),
-      sentiment: baseSentiment,
+      sentiment: Math.max(0.1, Math.min(0.9, sentiment)),
       price: Math.round(basePrice),
       timestamp
     });
