@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import ProjectCard from './ProjectCard';
 import ProjectModal from './ProjectModal';
+import LegacyProjectModal from './LegacyProjectModal';
 
 interface Project {
   id: string;
@@ -15,6 +16,7 @@ interface Project {
   impact: Record<string, string | undefined>;
   features: string[];
   experimental: boolean;
+  legacy?: boolean;
 }
 
 interface ProjectListProps {
@@ -47,11 +49,19 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
         ))}
       </div>
 
-      <ProjectModal
-        project={selectedProject}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-      />
+      {selectedProject?.legacy ? (
+        <LegacyProjectModal
+          project={selectedProject}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      ) : (
+        <ProjectModal
+          project={selectedProject}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </>
   );
 };

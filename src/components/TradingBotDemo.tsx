@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { BookOpen, TrendingUp, TrendingDown, Activity, AlertCircle } from 'lucide-react';
 import { ResponsiveContainer, Area, XAxis, YAxis, Tooltip, ComposedChart, Line, Legend, ReferenceLine } from 'recharts';
-import { tradingSimulator, type TradingState } from '../lib/tradingSimulation';
+import { createTradingSimulator, type TradingState } from '../lib/tradingSimulation';
 import { generateBacktestData, type CryptoSentimentData } from '../lib/cryptoSentiment';
 
 interface TradingBotDemoProps {
@@ -26,6 +26,7 @@ interface TradingBotDemoProps {
     price: number;
   }>) => void;
   onTradingStateUpdate: (state: TradingState) => void;
+  tradingSimulator: ReturnType<typeof createTradingSimulator>;
 }
 
 const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
@@ -37,7 +38,8 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
   onShowDocumentation,
   onRiskAppetiteChange,
   onChartDataUpdate,
-  onTradingStateUpdate
+  onTradingStateUpdate,
+  tradingSimulator
 }) => {
   const getSentimentColor = useMemo(() => (sentiment: number): string => {
     if (sentiment > 0.6) return 'text-green-400';
@@ -230,7 +232,7 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
                 yAxisId="pnl"
                 type="monotone"
                 dataKey="pnl"
-                stroke={(chartData && chartData.length > 0 && chartData[chartData.length - 1].pnl >= 0) ? '#10b981' : '#ef4444'}
+                stroke={(tradingState && tradingState.pnl >= 0) ? '#10b981' : '#ef4444'}
                 strokeWidth={3}
                 dot={false}
                 name="P&L (Demo)"
@@ -320,13 +322,13 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
             <div className="bg-slate-800/50 rounded-lg p-3">
               <div className="text-xs text-slate-400 mb-1">Simulated Cash Balance</div>
               <div className="text-lg font-semibold text-white">
-                ${tradingState?.balance.toFixed(2) || '10,000.00'}
+                ${tradingState ? tradingState.balance.toFixed(2) : '10,000.00'}
               </div>
             </div>
             <div className="bg-slate-800/50 rounded-lg p-3">
               <div className="text-xs text-slate-400 mb-1">BTC Holdings</div>
               <div className="text-lg font-semibold text-white">
-                {tradingState?.btcHoldings.toFixed(6) || '0.000000'}
+                {tradingState ? tradingState.btcHoldings.toFixed(6) : '0.000000'}
               </div>
             </div>
           </div>

@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react';
-import { X, Github, ExternalLink, Play } from 'lucide-react';
+import Image from 'next/image';
+import { X, GithubIcon, ExternalLink, Play } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -14,6 +15,15 @@ interface Project {
   impact: Record<string, string | undefined>;
   features: string[];
   experimental: boolean;
+  screenshots?: string[];
+  detailedDescription?: string;
+  challenges?: string[];
+  outcomes?: string[];
+  links?: {
+    live?: string;
+    github?: string;
+    demo?: string;
+  };
 }
 
 interface ProjectModalProps {
@@ -64,10 +74,36 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
 
         {/* Content */}
         <div className="p-6 space-y-8">
+          {/* Screenshots Section */}
+          {project.screenshots && project.screenshots.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-slate-200">Screenshots</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {project.screenshots.map((screenshot, index) => (
+                  <div key={index} className="relative group">
+                    <Image 
+                      src={screenshot} 
+                      alt={`${project.name} screenshot ${index + 1}`}
+                      width={400}
+                      height={256}
+                      className="w-full h-64 object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-colors"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Description */}
           <div>
             <h3 className="text-xl font-bold mb-4 text-slate-200">Project Overview</h3>
             <p className="text-slate-300 text-lg leading-relaxed">{project.description}</p>
+            {project.detailedDescription && (
+              <div className="mt-4 p-4 bg-slate-800/30 rounded-lg">
+                <p className="text-slate-300 leading-relaxed">{project.detailedDescription}</p>
+              </div>
+            )}
           </div>
 
           {/* Progress and Metrics */}
@@ -130,20 +166,71 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
             </div>
           </div>
 
+          {/* Challenges & Solutions */}
+          {project.challenges && project.challenges.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-slate-200">Key Challenges & Solutions</h3>
+              <div className="space-y-3">
+                {project.challenges.map((challenge, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-4 bg-slate-800/30 rounded-lg">
+                    <div className="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-slate-300">{challenge}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Outcomes & Impact */}
+          {project.outcomes && project.outcomes.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-slate-200">Outcomes & Impact</h3>
+              <div className="space-y-3">
+                {project.outcomes.map((outcome, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-4 bg-slate-800/30 rounded-lg">
+                    <div className="w-2 h-2 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-slate-300">{outcome}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Action Buttons */}
-          <div className="flex space-x-4 pt-6 border-t border-slate-700">
-            <button className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
-              <ExternalLink className="w-5 h-5" />
-              <span>View Live</span>
-            </button>
-            <button className="flex items-center space-x-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
-              <Github className="w-5 h-5" />
-              <span>Source Code</span>
-            </button>
-            <button className="flex items-center space-x-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors">
-              <Play className="w-5 h-5" />
-              <span>Demo</span>
-            </button>
+          <div className="flex flex-wrap gap-4 pt-6 border-t border-slate-700">
+            {project.links?.live && (
+              <a 
+                href={project.links.live}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              >
+                <ExternalLink className="w-5 h-5" />
+                <span>View Live</span>
+              </a>
+            )}
+            {project.links?.github && (
+              <a 
+                href={project.links.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 px-6 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+              >
+                <GithubIcon className="w-5 h-5" />
+                <span>Source Code</span>
+              </a>
+            )}
+            {project.links?.demo && (
+              <a 
+                href={project.links.demo}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+              >
+                <Play className="w-5 h-5" />
+                <span>Demo</span>
+              </a>
+            )}
           </div>
         </div>
       </div>

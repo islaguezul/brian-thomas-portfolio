@@ -14,6 +14,7 @@ interface Project {
   impact: Record<string, string | undefined>;
   features: string[];
   experimental: boolean;
+  legacy?: boolean;
 }
 
 interface ProjectCardProps {
@@ -29,6 +30,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect }) => {
       case 'backend': return 'bg-purple-500';
       case 'concept': return 'bg-yellow-500';
       case 'research': return 'bg-orange-500';
+      case 'legacy': return 'bg-slate-500';
       default: return 'bg-gray-500';
     }
   };
@@ -40,6 +42,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect }) => {
       case 'ecco-stream': return <Globe className="w-8 h-8 text-green-400" />;
       case 'process-hub': return <Database className="w-8 h-8 text-orange-400" />;
       case 'portfolio-site': return <Layers className="w-8 h-8 text-cyan-400" />;
+      case 'knowledge-management': return <Database className="w-8 h-8 text-slate-400" />;
       default: return <Cpu className="w-8 h-8 text-gray-400" />;
     }
   };
@@ -67,6 +70,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect }) => {
                 {project.experimental && (
                   <span className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 animate-pulse">
                     Experimental
+                  </span>
+                )}
+                {project.legacy && (
+                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-500/20 text-slate-400 border border-slate-500/30">
+                    Legacy
                   </span>
                 )}
               </div>

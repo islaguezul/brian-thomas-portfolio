@@ -7,8 +7,8 @@ import Resume from './Resume';
 import ParticleBackground from './ParticleBackground';
 import Navigation from './Navigation';
 import ProjectList from './ProjectList';
-import { fetchRealCryptoSentiment, generateInitialSentimentData, generateBacktestData, type CryptoSentimentData } from '../lib/cryptoSentiment';
-import { tradingSimulator, type TradingState } from '../lib/tradingSimulation';
+import { fetchRealCryptoSentiment, generateInitialSentimentData, generateBacktestData } from '../lib/cryptoSentiment';
+import { createTradingSimulator, type TradingState } from '../lib/tradingSimulation';
 import TradingBotDocumentation from './TradingBotDocumentation';
 import TradingBotDemo from './TradingBotDemo';
 
@@ -34,9 +34,10 @@ const MainPortfolio = () => {
   // Add back the missing ref:
   const heroRef = useRef<HTMLDivElement>(null);
   const lastTradeCheck = useRef<Date>(new Date());
+  
+  // Create fresh trading simulator instance - don't use useRef to ensure fresh instance
+  const [tradingSimulator] = useState(() => createTradingSimulator());
 
-  // Update sentiment data to use the new real data structure - start empty to avoid hydration issues
-  const [sentimentData, setSentimentData] = useState<CryptoSentimentData[]>([]);
 
   // Add back the techSkills data:
   const techSkills = [
@@ -74,63 +75,86 @@ const MainPortfolio = () => {
     // Run backtest on mount with historical data
     const historicalData = generateBacktestData();
     console.log('📊 Generated historical data:', historicalData.length, 'points');
+    console.log('📊 First 5 data points:', historicalData.slice(0, 5));
+    console.log('📊 Last 5 data points:', historicalData.slice(-5));
     
     tradingSimulator.setRiskAppetite(0.5); // Use default risk on page load
     const backtestResults = tradingSimulator.backtest(historicalData);
     console.log('🎯 Backtest results:', {
       trades: backtestResults.trades.length,
       pnl: backtestResults.pnl,
+      pnlPercent: backtestResults.pnlPercent,
       metrics: backtestResults.metrics,
       balance: backtestResults.balance,
-      btcHoldings: backtestResults.btcHoldings
+      btcHoldings: backtestResults.btcHoldings,
+      winRate: backtestResults.metrics.winRate
     });
+    console.log('🎯 Sample trades:', backtestResults.trades.slice(0, 5));
     setTradingState(backtestResults);
     
-    // Calculate actual chart data by replaying the trades chronologically
-    const sortedData = historicalData.slice(-36);
-    const chartPoints = sortedData.map((point) => {
-      // Find all trades that happened at or before this time point
-      const tradesUpToPoint = backtestResults.trades.filter(trade => 
-        trade.timestamp.getTime() <= point.timestamp.getTime()
-      );
+    // Create smooth chart progression from backtest
+    const chartPoints = [];
+    const dataSlice = historicalData.slice(-48); // Get last 4 hours
+    
+    // Track running values for accurate chart
+    let runningCash = 10000;
+    let runningBtc = 0;
+    let tradeIndex = 0;
+    const sortedTrades = [...backtestResults.trades].sort((a, b) => 
+      a.timestamp.getTime() - b.timestamp.getTime()
+    );
+    
+    for (let i = 0; i < dataSlice.length; i++) {
+      const point = dataSlice[i];
       
-      // Calculate portfolio state at this point in time
-      let cashBalance = 10000;
-      let btcHoldings = 0;
-      
-      tradesUpToPoint.forEach(trade => {
+      // Apply trades that occurred before this point
+      while (tradeIndex < sortedTrades.length && 
+             sortedTrades[tradeIndex].timestamp <= point.timestamp) {
+        const trade = sortedTrades[tradeIndex];
+        runningCash = trade.balance; // Use the balance from trade record
         if (trade.action === 'BUY') {
-          const spendAmount = trade.price * trade.amount;
-          cashBalance -= spendAmount;
-          btcHoldings += trade.amount;
-        } else if (trade.action === 'SELL') {
-          const receiveAmount = trade.price * trade.amount;
-          cashBalance += receiveAmount;
-          btcHoldings -= trade.amount;
+          runningBtc += trade.amount;
+        } else {
+          runningBtc = 0; // Sells all BTC
         }
-      });
+        tradeIndex++;
+      }
       
-      // Calculate total portfolio value at current price
-      const totalValue = cashBalance + (btcHoldings * point.price);
+      // Calculate P&L at this point
+      const totalValue = runningCash + (runningBtc * point.price);
       const pnl = totalValue - 10000;
       
-      return {
+      chartPoints.push({
         time: point.time,
         sentiment: point.sentiment,
         pnl: pnl,
         price: point.price,
-        btcHoldings: btcHoldings,
-        cashBalance: cashBalance
-      };
-    });
+        btcHoldings: runningBtc,
+        cashBalance: runningCash
+      });
+    }
     
     // Only show last 12 points in the chart for clarity
     const finalChartData = chartPoints.slice(-12);
-    console.log('📈 Chart data prepared:', finalChartData.length, 'points');
-    console.log('📈 First chart point:', finalChartData[0]);
-    console.log('📈 Last chart point:', finalChartData[finalChartData.length - 1]);
-    setChartData(finalChartData);
-  }, []);
+    
+    // Validate chart data doesn't have extreme values
+    const maxReasonablePnL = 500; // Max reasonable P&L for initial display
+    const validatedChartData = finalChartData.map((point, index) => {
+      if (Math.abs(point.pnl) > maxReasonablePnL) {
+        console.warn('📊 Extreme P&L detected in backtest:', point.pnl);
+        // Smooth it out
+        const prevPoint = index > 0 ? finalChartData[index - 1] : null;
+        const smoothedPnL = prevPoint ? prevPoint.pnl * 0.9 + point.pnl * 0.1 : point.pnl * 0.1;
+        return { ...point, pnl: smoothedPnL };
+      }
+      return point;
+    });
+    
+    console.log('📈 Chart data prepared:', validatedChartData.length, 'points');
+    console.log('📈 First chart point:', validatedChartData[0]);
+    console.log('📈 Last chart point:', validatedChartData[validatedChartData.length - 1]);
+    setChartData(validatedChartData);
+  }, [tradingSimulator]);
 
   // Update the sentiment fetching effect to only run on client
   useEffect(() => {
@@ -144,7 +168,6 @@ const MainPortfolio = () => {
     // Initialize with historical data on client
     const initialData = generateInitialSentimentData();
     console.log('📊 Initial sentiment data generated:', initialData.length, 'points');
-    setSentimentData(initialData);
     
     // Don't reinitialize trading state - it was already set in the first effect with backtest results
     console.log('🔄 Trading state already set from backtest, not reinitializing');
@@ -155,11 +178,7 @@ const MainPortfolio = () => {
         const newData = await fetchRealCryptoSentiment();
         console.log('📊 New data received:', { sentiment: newData.sentiment, price: newData.price, time: newData.time });
         
-        setSentimentData(prev => {
-          const updated = [...prev, newData];
-          // Keep last 12 data points for the chart
-          return updated.length > 12 ? updated.slice(-12) : updated;
-        });
+        // Sentiment data is now handled directly in the chart updates
         
         setCurrentSentiment(newData.sentiment);
         
@@ -187,24 +206,43 @@ const MainPortfolio = () => {
           lastTradeCheck.current = now;
           
           // Update chart data by extending with current trading state values
+          // IMPORTANT: Only extend the chart, don't replace the backtest progression
           setChartData(prev => {
-            // Use the current trading state to calculate the new portfolio value
-            const currentValue = newTradingState.balance + (newTradingState.btcHoldings * newData.price);
-            const currentPnL = currentValue - 10000;
+            // Calculate the actual portfolio value for chart continuity
+            const portfolioValue = newTradingState.balance + (newTradingState.btcHoldings * newData.price);
+            const actualPnL = portfolioValue - 10000;
             
+            // Create new point with proper P&L calculation
             const newPoint = {
               time: newData.time,
               sentiment: newData.sentiment,
-              pnl: currentPnL,
+              pnl: actualPnL, // Use calculated P&L for consistency
               price: newData.price,
               cashBalance: newTradingState.balance,
               btcHoldings: newTradingState.btcHoldings
             };
             
-            const updated = [...prev, newPoint];
-            console.log('📊 Chart updated with new point:', newPoint);
-            console.log('📊 Current state: Cash:', newTradingState.balance.toFixed(2), 'BTC:', newTradingState.btcHoldings.toFixed(6), 'P&L:', currentPnL.toFixed(2));
-            return updated.length > 12 ? updated.slice(-12) : updated;
+            // Only add the new point if it's actually new (don't overwrite backtest)
+            const lastPoint = prev[prev.length - 1];
+            if (!lastPoint || lastPoint.time !== newPoint.time) {
+              // Validate that P&L change is reasonable (not a cliff)
+              if (lastPoint && Math.abs(newPoint.pnl - lastPoint.pnl) > 1000) {
+                console.warn('⚠️ Large P&L jump detected:', lastPoint.pnl, '->', newPoint.pnl);
+                // Use a smoothed transition instead
+                newPoint.pnl = lastPoint.pnl + (newPoint.pnl - lastPoint.pnl) * 0.1;
+              }
+              
+              const updated = [...prev, newPoint];
+              console.log('📊 Chart extended with live point:', newPoint);
+              console.log('📊 Live state: Cash:', newTradingState.balance.toFixed(2), 'BTC:', newTradingState.btcHoldings.toFixed(6), 'P&L:', actualPnL.toFixed(2));
+              
+              // Slide window to maintain 12 points
+              if (updated.length > 12) {
+                return updated.slice(-12);
+              }
+              return updated;
+            }
+            return prev; // No change if duplicate time
           });
         } else {
           console.log('⏰ Time since last check:', Math.round(timeSinceLastCheck / 1000), 'seconds (need 120)');
@@ -214,18 +252,22 @@ const MainPortfolio = () => {
       }
     };
 
-    // Initial load
-    console.log('🔄 Starting initial sentiment update...');
-    updateSentiment();
+    // Initial load - wait a bit to ensure backtest is complete
+    console.log('🔄 Waiting 2 seconds before starting sentiment updates...');
+    const initialTimeout = setTimeout(() => {
+      console.log('🔄 Starting initial sentiment update...');
+      updateSentiment();
+    }, 2000);
     
     // Update every 60 seconds (realistic for demo, not too aggressive)
     console.log('⏰ Setting up 60-second interval for sentiment updates');
     const interval = setInterval(updateSentiment, 60000);
     return () => {
-      console.log('🛑 Clearing sentiment update interval');
+      console.log('🛑 Clearing sentiment update interval and timeout');
+      clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isClient, riskAppetite]); // Add dependencies
+  }, [isClient, riskAppetite, tradingSimulator]); // Add dependencies
 
 
   // Callback functions for TradingBotDemo
@@ -334,6 +376,32 @@ const MainPortfolio = () => {
       impact: { performance: '98/100', accessibility: '96/100', innovation: 'High' },
       features: ['Live data integration', 'Responsive design', 'Performance optimization', 'AI personalization'],
       experimental: false
+    },
+    {
+      id: 'knowledge-management',
+      name: 'Enterprise Process Knowledge System',
+      status: 'Legacy Project',
+      description: 'SharePoint-based knowledge management platform with custom process modeling that connected employees to role-specific training and job aids within two clicks, while visualizing organizational workflows.',
+      tech: ['SharePoint', 'HTML/CSS', 'JavaScript', 'SQL Server', 'Custom SVG Graphics', 'D3.js'],
+      stage: 'legacy',
+      progress: 100,
+      impact: { 
+        'adoption': '2,500+ Users',
+        'efficiency': '40% Task Time Reduction',
+        'training': '85% Self-Service Rate'
+      },
+      features: [
+        'Custom-built SVG process modeling visualization',
+        'Role-based content delivery',
+        'Two-click navigation to any resource',
+        'Upstream/downstream dependency mapping',
+        'Integrated training modules',
+        'Real-time process documentation',
+        'Automated workflow triggers',
+        'Performance analytics dashboard'
+      ],
+      experimental: false,
+      legacy: true
     }
   ];
 
@@ -485,6 +553,7 @@ const MainPortfolio = () => {
                       onRiskAppetiteChange={handleRiskAppetiteChange}
                       onChartDataUpdate={handleChartDataUpdate}
                       onTradingStateUpdate={handleTradingStateUpdate}
+                      tradingSimulator={tradingSimulator}
                     />
                   </div>
                 </div>
@@ -505,7 +574,23 @@ const MainPortfolio = () => {
                   </p>
                 </div>
 
-                <ProjectList projects={projects} />
+                <ProjectList projects={projects.filter(p => !p.legacy)} />
+                
+                {/* Legacy Projects Section */}
+                <div className="mt-20">
+                  <div className="text-center mb-12">
+                    <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+                      <span className="bg-gradient-to-r from-slate-400 to-slate-600 bg-clip-text text-transparent">
+                        Historical Projects
+                      </span>
+                    </h2>
+                    <p className="text-lg text-slate-400 max-w-3xl mx-auto">
+                      Enterprise-scale solutions from previous roles that demonstrate deep technical expertise and business impact.
+                    </p>
+                  </div>
+                  
+                  <ProjectList projects={projects.filter(p => p.legacy)} />
+                </div>
               </div>
             </section>
 
