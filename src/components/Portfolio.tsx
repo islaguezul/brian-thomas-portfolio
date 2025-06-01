@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Mail, Phone, FileText, Layers, Zap, Database, Rocket, Shield, TrendingUp, TrendingDown, Activity, AlertCircle, BookOpen } from 'lucide-react';
-import { ResponsiveContainer, Area, XAxis, YAxis, Tooltip, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ComposedChart, Line, Legend, ReferenceLine } from 'recharts';
+import { ChevronRight, Mail, Phone, FileText, Layers, Zap, Database, Rocket, Shield } from 'lucide-react';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import Resume from './Resume';
 import ParticleBackground from './ParticleBackground';
 import Navigation from './Navigation';
@@ -10,6 +10,7 @@ import ProjectList from './ProjectList';
 import { fetchRealCryptoSentiment, generateInitialSentimentData, generateBacktestData, type CryptoSentimentData } from '../lib/cryptoSentiment';
 import { tradingSimulator, type TradingState } from '../lib/tradingSimulation';
 import TradingBotDocumentation from './TradingBotDocumentation';
+import TradingBotDemo from './TradingBotDemo';
 
 const MainPortfolio = () => {
   // Add client-only state
@@ -59,34 +60,41 @@ const MainPortfolio = () => {
 
   // Add client detection effect and run initial backtest
   useEffect(() => {
+    console.log('🚀 Portfolio component mounting...');
     setIsClient(true);
     
     // Always reset to fresh $10,000 starting balance on page load
     tradingSimulator.reset();
+    console.log('💰 Trading simulator reset to $10,000');
     
     // Reset risk appetite to default on page load
     setRiskAppetite(0.5);
+    console.log('⚖️ Risk appetite set to 50%');
     
     // Run backtest on mount with historical data
     const historicalData = generateBacktestData();
+    console.log('📊 Generated historical data:', historicalData.length, 'points');
+    
     tradingSimulator.setRiskAppetite(0.5); // Use default risk on page load
     const backtestResults = tradingSimulator.backtest(historicalData);
-    console.log('Backtest results:', {
+    console.log('🎯 Backtest results:', {
       trades: backtestResults.trades.length,
       pnl: backtestResults.pnl,
-      metrics: backtestResults.metrics
+      metrics: backtestResults.metrics,
+      balance: backtestResults.balance,
+      btcHoldings: backtestResults.btcHoldings
     });
     setTradingState(backtestResults);
     
-    // Prepare chart data from backtest with accurate P&L
-    // We need to show more data points to see the P&L progression
-    const chartPoints = historicalData.slice(-36).map((point) => {
-      // Calculate actual portfolio value at this point in time
-      const tradesUpToPoint = backtestResults.trades.filter(t => 
-        t.timestamp.getTime() <= point.timestamp.getTime()
+    // Calculate actual chart data by replaying the trades chronologically
+    const sortedData = historicalData.slice(-36);
+    const chartPoints = sortedData.map((point) => {
+      // Find all trades that happened at or before this time point
+      const tradesUpToPoint = backtestResults.trades.filter(trade => 
+        trade.timestamp.getTime() <= point.timestamp.getTime()
       );
       
-      // Calculate holdings and cash at this point
+      // Calculate portfolio state at this point in time
       let cashBalance = 10000;
       let btcHoldings = 0;
       
@@ -102,7 +110,7 @@ const MainPortfolio = () => {
         }
       });
       
-      // Calculate total value at current price
+      // Calculate total portfolio value at current price
       const totalValue = cashBalance + (btcHoldings * point.price);
       const pnl = totalValue - 10000;
       
@@ -117,25 +125,35 @@ const MainPortfolio = () => {
     });
     
     // Only show last 12 points in the chart for clarity
-    setChartData(chartPoints.slice(-12));
+    const finalChartData = chartPoints.slice(-12);
+    console.log('📈 Chart data prepared:', finalChartData.length, 'points');
+    console.log('📈 First chart point:', finalChartData[0]);
+    console.log('📈 Last chart point:', finalChartData[finalChartData.length - 1]);
+    setChartData(finalChartData);
   }, []);
 
   // Update the sentiment fetching effect to only run on client
   useEffect(() => {
-    if (!isClient) return; // Don't run on server
+    if (!isClient) {
+      console.log('⏳ Waiting for client-side mounting...');
+      return; // Don't run on server
+    }
 
+    console.log('🌐 Client-side effect starting...');
+    
     // Initialize with historical data on client
     const initialData = generateInitialSentimentData();
+    console.log('📊 Initial sentiment data generated:', initialData.length, 'points');
     setSentimentData(initialData);
     
-    // Initialize trading state
-    tradingSimulator.setRiskAppetite(riskAppetite);
-    const initialTradingState = tradingSimulator.getState();
-    setTradingState(initialTradingState);
+    // Don't reinitialize trading state - it was already set in the first effect with backtest results
+    console.log('🔄 Trading state already set from backtest, not reinitializing');
 
     const updateSentiment = async () => {
       try {
+        console.log('🔄 Fetching new sentiment data...');
         const newData = await fetchRealCryptoSentiment();
+        console.log('📊 New data received:', { sentiment: newData.sentiment, price: newData.price, time: newData.time });
         
         setSentimentData(prev => {
           const updated = [...prev, newData];
@@ -145,27 +163,51 @@ const MainPortfolio = () => {
         
         setCurrentSentiment(newData.sentiment);
         
+        // TEMPORARILY DISABLE chart updates to isolate the issue
+        console.log('📊 Skipping chart update to preserve backtest data');
+        console.log('📊 Current trading state:', {
+          balance: tradingSimulator.getState().balance,
+          btcHoldings: tradingSimulator.getState().btcHoldings,
+          trades: tradingSimulator.getState().trades.length
+        });
+        
         // Check if 15 minutes have passed since last trade check
         const now = new Date();
         const timeSinceLastCheck = now.getTime() - lastTradeCheck.current.getTime();
         
-        if (timeSinceLastCheck >= 15 * 60 * 1000) { // 15 minutes
+        if (timeSinceLastCheck >= 2 * 60 * 1000) { // 2 minutes for testing (was 15 minutes)
+          console.log('🔄 2 minutes passed, evaluating trade...');
+          console.log('Sentiment:', newData.sentiment, 'Price:', newData.price);
+          
           // Evaluate trading decision
           const newTradingState = tradingSimulator.evaluateTrade(newData.sentiment, newData.price);
+          console.log('Trade result:', newTradingState.currentAction, 'Trades:', newTradingState.trades.length);
+          
           setTradingState(newTradingState);
           lastTradeCheck.current = now;
           
-          // Update chart data with both sentiment and P&L
+          // Update chart data by extending with current trading state values
           setChartData(prev => {
+            // Use the current trading state to calculate the new portfolio value
+            const currentValue = newTradingState.balance + (newTradingState.btcHoldings * newData.price);
+            const currentPnL = currentValue - 10000;
+            
             const newPoint = {
               time: newData.time,
               sentiment: newData.sentiment,
-              pnl: newTradingState.pnl,
-              price: newData.price
+              pnl: currentPnL,
+              price: newData.price,
+              cashBalance: newTradingState.balance,
+              btcHoldings: newTradingState.btcHoldings
             };
+            
             const updated = [...prev, newPoint];
+            console.log('📊 Chart updated with new point:', newPoint);
+            console.log('📊 Current state: Cash:', newTradingState.balance.toFixed(2), 'BTC:', newTradingState.btcHoldings.toFixed(6), 'P&L:', currentPnL.toFixed(2));
             return updated.length > 12 ? updated.slice(-12) : updated;
           });
+        } else {
+          console.log('⏰ Time since last check:', Math.round(timeSinceLastCheck / 1000), 'seconds (need 120)');
         }
       } catch (error) {
         console.error('Failed to fetch sentiment:', error);
@@ -173,25 +215,39 @@ const MainPortfolio = () => {
     };
 
     // Initial load
+    console.log('🔄 Starting initial sentiment update...');
     updateSentiment();
     
     // Update every 60 seconds (realistic for demo, not too aggressive)
+    console.log('⏰ Setting up 60-second interval for sentiment updates');
     const interval = setInterval(updateSentiment, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      console.log('🛑 Clearing sentiment update interval');
+      clearInterval(interval);
+    };
   }, [isClient, riskAppetite]); // Add dependencies
 
-  // Keep all existing functions exactly as they were:
-  const getSentimentColor = (sentiment: number): string => {
-    if (sentiment > 0.6) return 'text-green-400';
-    if (sentiment > 0.4) return 'text-yellow-400';
-    return 'text-red-400';
+
+  // Callback functions for TradingBotDemo
+  const handleRiskAppetiteChange = (newRisk: number) => {
+    setRiskAppetite(newRisk);
   };
 
-  // Add back the missing getSentimentLabel function:
-  const getSentimentLabel = (sentiment: number): string => {
-    if (sentiment > 0.7) return 'Bullish';
-    if (sentiment > 0.5) return 'Neutral';
-    return 'Bearish';
+  const handleChartDataUpdate = (data: Array<{
+    time: string;
+    sentiment: number;
+    pnl: number;
+    price: number;
+  }>) => {
+    setChartData(data);
+  };
+
+  const handleTradingStateUpdate = (state: TradingState) => {
+    setTradingState(state);
+  };
+
+  const handleShowDocumentation = () => {
+    setShowDocumentation(true);
   };
 
   const handleSectionTransition = (newSection: string) => {
@@ -366,7 +422,7 @@ const MainPortfolio = () => {
                     </div>
 
                     {/* Live Site Metrics */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-4 mb-6">
                       {Object.entries(siteMetrics).map(([key, value]) => (
                         <div key={key} className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-500 group overflow-hidden hover-lift">
                           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-500"></div>
@@ -379,321 +435,9 @@ const MainPortfolio = () => {
                         </div>
                       ))}
                     </div>
-                  </div>
 
-                  {/* Right Column - Live AI Trading Demo */}
-                  <div className="lg:pt-[4.5rem]">
-                    {/* Enhanced Crypto Bot Analytics */}
-                    <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-8 shadow-2xl hover:border-blue-500/30 transition-all duration-500 hover-lift">
-                      <div className="flex items-center justify-between mb-6">
-                        <div>
-                          <h3 className="text-xl font-semibold text-white">
-                            AI Trading Bot Integration Demo
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 text-green-400 text-sm">
-                          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
-                          <span className="font-medium">Live</span>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-4">
-                        <button
-                          onClick={() => setShowDocumentation(true)}
-                          className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-blue-400 text-sm hover:bg-blue-500/20 transition-all duration-300 hover:scale-105"
-                        >
-                          <BookOpen className="w-4 h-4 mr-1" />
-                          <span className="font-medium">Documentation</span>
-                        </button>
-                      </div>
-                      
-                      <p className="text-sm text-slate-300 mb-6">
-                        Real-time demonstration of AI integration from my crypto trading bot. 
-                        Uses ChatGPT-4.1-mini to analyze news headlines for sentiment, combined with market data for counter-sentiment trading.
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-6 mb-6">
-                        <div className="bg-slate-800/30 rounded-lg p-4">
-                          <div className={`text-2xl font-bold ${getSentimentColor(currentSentiment)} mb-1`}>
-                            {isClient ? `${(currentSentiment * 100).toFixed(1)}%` : '---'}
-                          </div>
-                          <div className="text-sm text-slate-400 mb-1">Market Sentiment</div>
-                          <div className={`text-sm font-medium ${getSentimentColor(currentSentiment)}`}>
-                            {isClient ? getSentimentLabel(currentSentiment) : '---'}
-                          </div>
-                        </div>
-                        <div className="bg-slate-800/30 rounded-lg p-4">
-                          <div className={`text-2xl font-bold ${tradingState && tradingState.pnl >= 0 ? 'text-green-400' : 'text-red-400'} mb-1`}>
-                            {tradingState ? `$${tradingState.pnl.toFixed(2)}` : '$0.00'}
-                          </div>
-                          <div className="text-sm text-slate-400 mb-1">P&L (Demo)</div>
-                          <div className={`text-sm font-medium ${tradingState && tradingState.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {tradingState ? `${tradingState.pnlPercent > 0 ? '+' : ''}${tradingState.pnlPercent.toFixed(2)}%` : '0.00%'}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="h-64 -mx-4 mb-6">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <ComposedChart data={chartData.length > 0 ? chartData : sentimentData} margin={{ top: 5, right: 50, left: 0, bottom: 5 }}>
-                            <defs>
-                              <linearGradient id="sentimentGradient" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.8}/>
-                                <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
-                              </linearGradient>
-                            </defs>
-                            <XAxis 
-                              dataKey="time" 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tick={{ fontSize: 10, fill: '#64748b' }}
-                              tickMargin={8}
-                            />
-                            <YAxis 
-                              yAxisId="sentiment"
-                              domain={[0, 1]} 
-                              axisLine={false} 
-                              tickLine={false} 
-                              tick={{ fontSize: 10, fill: '#64748b' }}
-                              tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
-                            />
-                            <YAxis
-                              yAxisId="pnl"
-                              orientation="right"
-                              axisLine={false}
-                              tickLine={false}
-                              tick={{ fontSize: 10, fill: '#64748b' }}
-                              tickFormatter={(value) => `$${value}`}
-                            />
-                            <Tooltip 
-                              contentStyle={{ 
-                                backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                                border: '1px solid #334155',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                color: '#e2e8f0'
-                              }}
-                              formatter={(value: number, name: string) => {
-                                if (name === 'sentiment') return [`${(value * 100).toFixed(1)}%`, 'Sentiment'];
-                                if (name === 'pnl') return [`$${value.toFixed(2)}`, 'P&L'];
-                                return [value, name];
-                              }}
-                            />
-                            <Legend 
-                              verticalAlign="top" 
-                              height={36}
-                              iconType="line"
-                              wrapperStyle={{ fontSize: '12px' }}
-                            />
-                            <ReferenceLine yAxisId="pnl" y={0} stroke="#666" strokeDasharray="3 3" />
-                            <Area 
-                              yAxisId="sentiment"
-                              type="monotone" 
-                              dataKey="sentiment" 
-                              stroke="#60A5FA" 
-                              fillOpacity={1} 
-                              fill="url(#sentimentGradient)"
-                              strokeWidth={2}
-                              name="Market Sentiment"
-                            />
-                            {chartData.length > 0 && (
-                              <Line
-                                yAxisId="pnl"
-                                type="monotone"
-                                dataKey="pnl"
-                                stroke={tradingState && tradingState.pnl >= 0 ? '#10b981' : '#ef4444'}
-                                strokeWidth={3}
-                                dot={false}
-                                name="P&L (Demo)"
-                              />
-                            )}
-                          </ComposedChart>
-                        </ResponsiveContainer>
-                      </div>
-                      
-                      {/* Trading Controls and Status */}
-                      <div className="space-y-4">
-                        {/* Current Action Indicator */}
-                        <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg">
-                          <span className="text-sm text-slate-400">Current Action</span>
-                          <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${
-                            tradingState?.currentAction === 'BUY' ? 'bg-green-500/20 text-green-400' :
-                            tradingState?.currentAction === 'SELL' ? 'bg-red-500/20 text-red-400' :
-                            'bg-yellow-500/20 text-yellow-400'
-                          }`}>
-                            {
-                              tradingState?.currentAction === 'BUY' ? <TrendingUp className="w-4 h-4" /> :
-                              tradingState?.currentAction === 'SELL' ? <TrendingDown className="w-4 h-4" /> :
-                              <Activity className="w-4 h-4" />
-                            }
-                            <span className="font-medium">{tradingState?.currentAction || 'HOLD'}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Risk Appetite Slider */}
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-slate-400">Risk Appetite</span>
-                            <span className="text-white font-medium">{(riskAppetite * 100).toFixed(0)}%</span>
-                          </div>
-                          <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={riskAppetite * 100}
-                            onChange={(e) => {
-                              const newRisk = parseInt(e.target.value) / 100;
-                              setRiskAppetite(newRisk);
-                              
-                              // Re-run backtest with new risk level
-                              tradingSimulator.reset(); // Reset to $10,000 starting balance
-                              const historicalData = generateBacktestData();
-                              tradingSimulator.setRiskAppetite(newRisk);
-                              const backtestResults = tradingSimulator.backtest(historicalData);
-                              setTradingState(backtestResults);
-                              
-                              // Update chart with new results and accurate P&L
-                              const chartPoints = historicalData.slice(-36).map((point) => {
-                                // Calculate actual portfolio value at this point in time
-                                const tradesUpToPoint = backtestResults.trades.filter(t => 
-                                  t.timestamp.getTime() <= point.timestamp.getTime()
-                                );
-                                
-                                // Calculate holdings and cash at this point
-                                let cashBalance = 10000;
-                                let btcHoldings = 0;
-                                
-                                tradesUpToPoint.forEach(trade => {
-                                  if (trade.action === 'BUY') {
-                                    const spendAmount = trade.price * trade.amount;
-                                    cashBalance -= spendAmount;
-                                    btcHoldings += trade.amount;
-                                  } else if (trade.action === 'SELL') {
-                                    const receiveAmount = trade.price * trade.amount;
-                                    cashBalance += receiveAmount;
-                                    btcHoldings -= trade.amount;
-                                  }
-                                });
-                                
-                                // Calculate total value at current price
-                                const totalValue = cashBalance + (btcHoldings * point.price);
-                                const pnl = totalValue - 10000;
-                                
-                                return {
-                                  time: point.time,
-                                  sentiment: point.sentiment,
-                                  pnl: pnl,
-                                  price: point.price,
-                                  btcHoldings: btcHoldings,
-                                  cashBalance: cashBalance
-                                };
-                              });
-                              
-                              // Only show last 12 points in the chart for clarity
-                              setChartData(chartPoints.slice(-12));
-                            }}
-                            className="slider w-full h-2 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <div className="flex justify-between text-xs text-slate-500">
-                            <span>Conservative</span>
-                            <span>Moderate</span>
-                            <span>Aggressive</span>
-                          </div>
-                        </div>
-                        
-                        {/* Performance Metrics */}
-                        <div className="mb-4 p-4 bg-gradient-to-r from-slate-800/50 to-slate-900/50 rounded-lg">
-                          <h4 className="text-sm font-medium text-slate-300 mb-3">Performance Metrics (24h Backtest)</h4>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <div className="text-xs text-slate-400">Win Rate</div>
-                              <div className={`text-lg font-bold ${
-                                (tradingState?.metrics?.winRate ?? 0) >= 50 ? 'text-green-400' : 'text-yellow-400'
-                              }`}>
-                                {tradingState?.metrics?.winRate?.toFixed(1) || '0.0'}%
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-slate-400">Avg Return</div>
-                              <div className={`text-lg font-bold ${
-                                (tradingState?.metrics?.avgReturn ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
-                              }`}>
-                                {tradingState?.metrics?.avgReturn && tradingState.metrics.avgReturn > 0 ? '+' : ''}
-                                {tradingState?.metrics?.avgReturn?.toFixed(2) || '0.00'}%
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-slate-400">Max Drawdown</div>
-                              <div className="text-lg font-bold text-orange-400">
-                                -{tradingState?.metrics?.maxDrawdown?.toFixed(1) || '0.0'}%
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-slate-400">Total Trades</div>
-                              <div className="text-lg font-bold text-blue-400">
-                                {tradingState?.metrics?.totalTrades || 0}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Portfolio Status */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="bg-slate-800/50 rounded-lg p-3">
-                            <div className="text-xs text-slate-400 mb-1">Simulated Cash Balance</div>
-                            <div className="text-lg font-semibold text-white">
-                              ${tradingState?.balance.toFixed(2) || '10,000.00'}
-                            </div>
-                          </div>
-                          <div className="bg-slate-800/50 rounded-lg p-3">
-                            <div className="text-xs text-slate-400 mb-1">BTC Holdings</div>
-                            <div className="text-lg font-semibold text-white">
-                              {tradingState?.btcHoldings.toFixed(6) || '0.000000'}
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Recent Trades */}
-                        {tradingState && tradingState.trades.length > 0 && (
-                          <div className="space-y-2">
-                            <h4 className="text-sm font-medium text-slate-300">Recent Trades</h4>
-                            <div className="space-y-1 max-h-24 overflow-y-auto">
-                              {tradingState.trades.slice(-3).reverse().map((trade, idx) => (
-                                <div key={idx} className="flex items-center justify-between text-xs p-2 bg-slate-800/30 rounded">
-                                  <span className={trade.action === 'BUY' ? 'text-green-400' : 'text-red-400'}>
-                                    {trade.action}
-                                  </span>
-                                  <span className="text-slate-400">
-                                    {trade.amount.toFixed(4)} BTC @ ${trade.price.toFixed(0)}
-                                  </span>
-                                  <span className="text-slate-500">
-                                    {new Date(trade.timestamp).toLocaleTimeString('en-US', { 
-                                      hour: '2-digit', 
-                                      minute: '2-digit' 
-                                    })}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="mt-6 p-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
-                        <div className="flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                          <div className="text-xs text-slate-400 leading-relaxed">
-                            <strong className="text-slate-300">AI Integration Demo:</strong> This showcases AI-powered trading decisions from my crypto bot. 
-                            The backtest shows 24 hours of historical performance based on your selected risk level. Going forward, it evaluates 
-                            new trades every 15 minutes using live sentiment data. Features include counter-sentiment strategy, dynamic position sizing, 
-                            and stop-loss protection (5% adjusted by risk tolerance).
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tech Stack Visualization */}
-                    <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-2xl hover:border-purple-500/30 transition-all duration-500 hover-lift mt-6">
+                    {/* Current Tech Stack */}
+                    <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 shadow-2xl hover:border-purple-500/30 transition-all duration-500 hover-lift">
                       <h3 className="text-lg font-bold mb-4 flex items-center">
                         <Layers className="w-5 h-5 mr-2 text-purple-400" />
                         <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -727,6 +471,21 @@ const MainPortfolio = () => {
                         ))}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Right Column - Live AI Trading Demo */}
+                  <div className="lg:pt-[4.5rem]">
+                    <TradingBotDemo
+                      currentSentiment={currentSentiment}
+                      tradingState={tradingState}
+                      riskAppetite={riskAppetite}
+                      chartData={chartData}
+                      isClient={isClient}
+                      onShowDocumentation={handleShowDocumentation}
+                      onRiskAppetiteChange={handleRiskAppetiteChange}
+                      onChartDataUpdate={handleChartDataUpdate}
+                      onTradingStateUpdate={handleTradingStateUpdate}
+                    />
                   </div>
                 </div>
               </div>

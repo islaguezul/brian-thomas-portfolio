@@ -113,22 +113,22 @@ const TradingBotDocumentation: React.FC<TradingBotDocumentationProps> = ({
                       <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 mb-2">
                         <span className="text-green-400 font-semibold">BUY Signal</span>
                       </div>
-                      <p className="text-slate-300">Sentiment &lt; 42%</p>
-                      <p className="text-slate-400 text-xs">(Market Fear)</p>
+                      <p className="text-slate-300">Sentiment &lt; 35%</p>
+                      <p className="text-slate-400 text-xs">(Extreme Fear)</p>
                     </div>
                     <div className="text-center">
                       <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3 mb-2">
                         <span className="text-yellow-400 font-semibold">HOLD Signal</span>
                       </div>
-                      <p className="text-slate-300">42% ≤ Sentiment ≤ 58%</p>
+                      <p className="text-slate-300">35% ≤ Sentiment ≤ 65%</p>
                       <p className="text-slate-400 text-xs">(Neutral Zone)</p>
                     </div>
                     <div className="text-center">
                       <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-2">
                         <span className="text-red-400 font-semibold">SELL Signal</span>
                       </div>
-                      <p className="text-slate-300">Sentiment &gt; 58%</p>
-                      <p className="text-slate-400 text-xs">(Market Greed)</p>
+                      <p className="text-slate-300">Sentiment &gt; 65%</p>
+                      <p className="text-slate-400 text-xs">(Extreme Greed)</p>
                     </div>
                   </div>
                 </div>
@@ -143,11 +143,11 @@ const TradingBotDocumentation: React.FC<TradingBotDocumentationProps> = ({
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-green-400 font-semibold">Base Size:</span>
-                      <span className="text-slate-300"> 40% of available capital</span>
+                      <span className="text-slate-300"> 30% of available capital</span>
                     </div>
                     <div>
                       <span className="text-purple-400 font-semibold">Risk Range:</span>
-                      <span className="text-slate-300"> 20% - 60% of capital</span>
+                      <span className="text-slate-300"> 15% - 45% of capital (with ±10% randomization)</span>
                     </div>
                   </div>
                 </div>
@@ -252,20 +252,20 @@ const TradingBotDocumentation: React.FC<TradingBotDocumentationProps> = ({
                 <div className="bg-gradient-to-r from-red-900/20 to-orange-900/20 rounded-xl p-4 border border-red-500/30">
                   <h4 className="font-semibold text-white mb-3">Stop-Loss Protection</h4>
                   <p className="text-slate-300 text-sm mb-2">
-                    Automatic position exit when losses exceed 5% (adjusted by risk tolerance)
+                    Automatic position exit when losses exceed 3% (adjusted by risk tolerance)
                   </p>
                   <div className="text-xs text-slate-400">
-                    Lower risk tolerance = tighter stop-loss (more protection)
+                    Lower risk tolerance = tighter stop-loss (more protection). Includes panic slippage modeling.
                   </div>
                 </div>
                 
                 <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl p-4 border border-blue-500/30">
                   <h4 className="font-semibold text-white mb-3">Position Limits</h4>
                   <p className="text-slate-300 text-sm mb-2">
-                    Maximum 60% of capital per trade, minimum $100 trade size
+                    Maximum 15-45% of capital per trade (risk-adjusted), minimum $100 trade size
                   </p>
                   <div className="text-xs text-slate-400">
-                    Prevents over-exposure and ensures meaningful trade execution
+                    Prevents over-exposure with randomized position sizing for realistic variance
                   </div>
                 </div>
                 
@@ -276,6 +276,32 @@ const TradingBotDocumentation: React.FC<TradingBotDocumentationProps> = ({
                   </p>
                   <div className="text-xs text-slate-400">
                     Allows sentiment to stabilize and reduces transaction costs
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Realistic Trading Factors */}
+            <section>
+              <h3 className="text-xl font-semibold text-purple-400 mb-4">Realistic Market Simulation</h3>
+              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/30">
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="text-yellow-400 font-semibold">Market Realism Features:</span>
+                    <ul className="list-disc list-inside text-slate-300 mt-2 ml-4 space-y-1">
+                      <li><strong>Market Noise:</strong> 15% chance of false signals to simulate unpredictable market behavior</li>
+                      <li><strong>Slippage:</strong> 0.1-0.2% price slippage on all trades (higher during stop-loss events)</li>
+                      <li><strong>Transaction Fees:</strong> 0.15% fee on all trades, reducing profitability</li>
+                      <li><strong>Flash Events:</strong> 5% chance of sudden 2-5% price movements (crashes/pumps)</li>
+                      <li><strong>Momentum Checks:</strong> Prevents trading against strong market momentum</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <span className="text-cyan-400 font-semibold">Realistic Performance Targets:</span>
+                    <p className="text-slate-300 mt-2">
+                      Win rates typically range from 55-65%, reflecting real trading conditions. The system experiences 
+                      regular losses and drawdowns, demonstrating honest market dynamics rather than unrealistic perfection.
+                    </p>
                   </div>
                 </div>
               </div>
