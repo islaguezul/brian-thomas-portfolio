@@ -79,9 +79,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect }) => {
                 )}
               </div>
               
-              <p className="text-slate-300 text-lg mb-4 leading-relaxed">
-                {project.description}
-              </p>
             </div>
           </div>
 

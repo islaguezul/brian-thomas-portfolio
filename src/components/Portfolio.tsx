@@ -11,10 +11,21 @@ import { fetchRealCryptoSentiment, generateInitialSentimentData, generateBacktes
 import { createTradingSimulator, type TradingState } from '../lib/tradingSimulation';
 import TradingBotDocumentation from './TradingBotDocumentation';
 import TradingBotDemo from './TradingBotDemo';
+import type { Project as DBProject } from '@/lib/database/types';
+import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 
 const MainPortfolio = () => {
   // Add client-only state
   const [isClient, setIsClient] = useState(false);
+  const [dbProjects, setDbProjects] = useState<DBProject[]>([]);
+
+  // Real-time updates listener
+  useRealtimeUpdates((message) => {
+    if (message.type === 'content-update' && message.data?.contentType === 'Projects') {
+      // Refetch projects when admin updates them
+      fetchProjects();
+    }
+  });
 
   // Keep all existing state:
   const [currentSection, setCurrentSection] = useState('home');
@@ -38,6 +49,18 @@ const MainPortfolio = () => {
   // Create fresh trading simulator instance - don't use useRef to ensure fresh instance
   const [tradingSimulator] = useState(() => createTradingSimulator());
 
+  // Fetch database projects function
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch('/api/projects');
+      if (response.ok) {
+        const fetchedProjects = await response.json();
+        setDbProjects(fetchedProjects);
+      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
 
   // Add back the techSkills data:
   const techSkills = [
@@ -57,6 +80,11 @@ const MainPortfolio = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Fetch database projects on mount
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
   // Add client detection effect and run initial backtest
@@ -303,7 +331,28 @@ const MainPortfolio = () => {
   };
 
   // Keep the projects data exactly as is...
-  const projects = [
+  const projects: Array<{
+    id: string;
+    name: string;
+    status: string;
+    description: string;
+    tech: string[];
+    stage: string;
+    progress: number;
+    impact: Record<string, string>;
+    features: string[];
+    experimental: boolean;
+    legacy?: boolean;
+    screenshots?: Array<{ filePath: string; altText?: string; displayOrder?: number }>;
+    detailedDescription?: string;
+    challenges?: string[];
+    outcomes?: string[];
+    links?: {
+      live?: string | null;
+      github?: string | null;
+      demo?: string | null;
+    };
+  }> = [
     {
       id: 'crypto-bot',
       name: 'Crypto Trading Bot',
@@ -405,6 +454,51 @@ const MainPortfolio = () => {
     }
   ];
 
+  // Transform database projects to match the expected interface and merge with hardcoded projects
+  const transformedDbProjects = dbProjects
+    .filter(project => project.screenshots && project.screenshots.length > 0) // Only show projects with screenshots
+    .map(project => ({
+      id: project.id?.toString() || 'unknown',
+      name: project.name,
+      status: project.status || 'Unknown',
+      description: project.description || '',
+      tech: project.technologies || [],
+      stage: project.stage,
+      progress: project.progress || 0,
+      impact: project.impacts?.reduce((acc, impact) => {
+        acc[impact.metricKey] = impact.metricValue;
+        return acc;
+      }, {} as Record<string, string>) || {},
+      features: project.features?.map(f => f.feature) || [],
+      experimental: project.experimental || false,
+      legacy: project.legacy || false,
+      screenshots: project.screenshots,
+      detailedDescription: project.detailedDescription,
+      challenges: project.challenges?.map(c => c.challenge) || [],
+      outcomes: project.outcomes?.map(o => o.outcome) || [],
+      links: {
+        live: project.liveUrl,
+        github: project.githubUrl,
+        demo: project.demoUrl
+      }
+    }));
+
+  // Merge database projects with hardcoded projects, preferring database projects by name
+  const mergedProjects = [...projects];
+  transformedDbProjects.forEach(dbProject => {
+    const existingIndex = mergedProjects.findIndex(p => p.name === dbProject.name);
+    if (existingIndex >= 0) {
+      // Replace existing hardcoded project with database version
+      mergedProjects[existingIndex] = dbProject;
+    } else {
+      // Add new database project
+      mergedProjects.push(dbProject);
+    }
+  });
+
+  // Use merged projects for display
+  const finalProjects = mergedProjects;
+
   // Calculate real metrics dynamically
   const deployDate = new Date('2024-12-01'); // Adjust this to your actual deploy date
   const currentDate = new Date();
@@ -417,7 +511,7 @@ const MainPortfolio = () => {
   
   // Count unique technologies across all projects
   const uniqueTechs = new Set<string>();
-  projects.forEach(project => {
+  finalProjects.forEach(project => {
     project.tech.forEach(tech => uniqueTechs.add(tech));
   });
   const techStackSize = uniqueTechs.size;
@@ -574,7 +668,7 @@ const MainPortfolio = () => {
                   </p>
                 </div>
 
-                <ProjectList projects={projects.filter(p => !p.legacy)} />
+                <ProjectList projects={finalProjects.filter(p => !p.legacy)} />
                 
                 {/* Legacy Projects Section */}
                 <div className="mt-20">
@@ -589,7 +683,7 @@ const MainPortfolio = () => {
                     </p>
                   </div>
                   
-                  <ProjectList projects={projects.filter(p => p.legacy)} />
+                  <ProjectList projects={finalProjects.filter(p => p.legacy)} />
                 </div>
               </div>
             </section>
@@ -743,6 +837,15 @@ const MainPortfolio = () => {
               <p className="text-xs text-slate-500">
                 © 2024 Brian Thomas. Crafted with React, Next.js, and a passion for exceptional product experiences.
               </p>
+              <div className="mt-2">
+                <a 
+                  href="/admin" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block w-2 h-2 bg-slate-800 hover:bg-slate-700 rounded-full transition-colors duration-300"
+                  aria-label="Admin"
+                />
+              </div>
             </div>
           </div>
         </footer>

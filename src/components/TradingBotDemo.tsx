@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 import { BookOpen, TrendingUp, TrendingDown, Activity, AlertCircle } from 'lucide-react';
 import { ResponsiveContainer, Area, XAxis, YAxis, Tooltip, ComposedChart, Line, Legend, ReferenceLine } from 'recharts';
 import { createTradingSimulator, type TradingState } from '../lib/tradingSimulation';
-import { generateBacktestData, type CryptoSentimentData } from '../lib/cryptoSentiment';
+import { generateBacktestData } from '../lib/cryptoSentiment';
 
 interface TradingBotDemoProps {
   currentSentiment: number;
@@ -111,7 +111,7 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
     
     // Show last 12 points for chart clarity
     onChartDataUpdate(chartPoints.slice(-12));
-  }, [onRiskAppetiteChange, onTradingStateUpdate, onChartDataUpdate]);
+  }, [onRiskAppetiteChange, onTradingStateUpdate, onChartDataUpdate, tradingSimulator]);
 
   return (
     <div>

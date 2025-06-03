@@ -39,7 +39,17 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects }) => {
 
   return (
     <>
-      <div className="grid gap-8 lg:grid-cols-2">
+      <div className={`grid gap-8 ${
+        projects.length === 1 
+          ? 'max-w-2xl mx-auto' 
+          : projects.length === 2 
+          ? 'lg:grid-cols-2' 
+          : projects.length === 3 
+          ? 'lg:grid-cols-3' 
+          : projects.length >= 4 
+          ? 'lg:grid-cols-2 xl:grid-cols-3' 
+          : ''
+      }`}>
         {projects.map((project) => (
           <ProjectCard
             key={project.id}

@@ -69,7 +69,7 @@ export async function fetchRealCryptoSentiment(): Promise<CryptoSentimentData> {
 }
 
 // Fetch Bitcoin price data from CoinGecko (free API)
-async function fetchCoinGeckoBTC(): Promise<BitcoinData> {
+export async function fetchCoinGeckoBTC(): Promise<BitcoinData> {
   try {
     const response = await fetch(
       'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true',
@@ -101,7 +101,7 @@ async function fetchCoinGeckoBTC(): Promise<BitcoinData> {
 }
 
 // Fetch Fear & Greed Index (free API)
-async function fetchFearGreedIndex(): Promise<FearGreedData> {
+export async function fetchFearGreedIndex(): Promise<FearGreedData> {
   try {
     const response = await fetch(
       'https://api.alternative.me/fng/?limit=1',

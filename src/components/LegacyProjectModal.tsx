@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Layers, Users, Target, BarChart3, Clock, Award } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Layers, Target, BarChart3, Award } from 'lucide-react';
 
 interface LegacyProjectModalProps {
   isOpen: boolean;
@@ -227,7 +227,7 @@ const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose
                 <div className="space-y-3 text-slate-300">
                   <p>
                     This project demonstrated the power of thoughtful information architecture combined 
-                    with user-centered design. By focusing on the "two-click rule" and understanding 
+                    with user-centered design. By focusing on the &ldquo;two-click rule&rdquo; and understanding 
                     how different roles interact with processes, we created a system that became 
                     indispensable to daily operations.
                   </p>

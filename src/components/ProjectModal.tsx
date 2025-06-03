@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { X, GithubIcon, ExternalLink, Play } from 'lucide-react';
+import type { ProjectScreenshot } from '@/lib/database/types';
 
 interface Project {
   id: string;
@@ -15,7 +16,7 @@ interface Project {
   impact: Record<string, string | undefined>;
   features: string[];
   experimental: boolean;
-  screenshots?: string[];
+  screenshots?: (string | ProjectScreenshot)[];
   detailedDescription?: string;
   challenges?: string[];
   outcomes?: string[];
@@ -79,18 +80,26 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
             <div>
               <h3 className="text-xl font-bold mb-4 text-slate-200">Screenshots</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {project.screenshots.map((screenshot, index) => (
-                  <div key={index} className="relative group">
-                    <Image 
-                      src={screenshot} 
-                      alt={`${project.name} screenshot ${index + 1}`}
-                      width={400}
-                      height={256}
-                      className="w-full h-64 object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-colors"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg"></div>
-                  </div>
-                ))}
+                {project.screenshots.map((screenshot, index) => {
+                  // Handle both string paths and ProjectScreenshot objects
+                  const imageSrc = typeof screenshot === 'string' ? screenshot : screenshot.filePath;
+                  const imageAlt = typeof screenshot === 'string' 
+                    ? `${project.name} screenshot ${index + 1}` 
+                    : screenshot.altText || `${project.name} screenshot ${index + 1}`;
+                  
+                  return (
+                    <div key={index} className="relative group">
+                      <Image 
+                        src={imageSrc} 
+                        alt={imageAlt}
+                        width={400}
+                        height={256}
+                        className="w-full h-64 object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-colors"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg"></div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
