@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Brian Thomas - Technical Product Manager',
     description: 'Transforming complex technical challenges into scalable business solutions through systematic product development and AI integration.',
-    url: 'https://brianthomas.dev', // Update with your actual domain
+    url: 'https://briantpm.com',
     siteName: 'Brian Thomas Portfolio',
     type: 'website',
   },

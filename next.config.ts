@@ -5,9 +5,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['recharts', 'lucide-react']
   },
   images: {
-    remotePatterns: [
-      // Add any remote image patterns you'll use
-    ],
+    remotePatterns: [],
   },
   typescript: {
     ignoreBuildErrors: false,
@@ -15,7 +13,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
-  // Remove swcMinify - it's enabled by default in Next.js 15
   reactStrictMode: true,
 }
 

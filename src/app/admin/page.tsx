@@ -1,4 +1,4 @@
-import { Activity, FolderOpen, FileText, Code2, Calendar, TrendingUp } from 'lucide-react';
+import { Activity, FolderOpen, FileText, Code2, Calendar } from 'lucide-react';
 // Import our database functions that handle the environment variable mapping
 import { getProjects, getWorkExperience, getEducation, getTechStack } from '@/lib/database/db';
 

@@ -33,7 +33,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection, onSectionChange
               onClick={() => onSectionChange('resume')} 
               className={`relative hover:text-blue-400 transition-all duration-300 font-medium ${currentSection === 'resume' ? 'text-blue-400' : ''}`}
             >
-              Resume
+              Résumé
               {currentSection === 'resume' && (
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-blue-400 to-purple-400"></span>
               )}

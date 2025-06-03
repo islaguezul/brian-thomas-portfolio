@@ -7,7 +7,7 @@ import Resume from './Resume';
 import ParticleBackground from './ParticleBackground';
 import Navigation from './Navigation';
 import ProjectList from './ProjectList';
-import { fetchRealCryptoSentiment, generateInitialSentimentData, generateBacktestData } from '../lib/cryptoSentiment';
+import { fetchRealCryptoSentiment, generateBacktestData } from '../lib/cryptoSentiment';
 import { createTradingSimulator, type TradingState } from '../lib/tradingSimulation';
 import TradingBotDocumentation from './TradingBotDocumentation';
 import TradingBotDemo from './TradingBotDemo';
@@ -15,25 +15,20 @@ import type { Project as DBProject } from '@/lib/database/types';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 
 const MainPortfolio = () => {
-  // Add client-only state
   const [isClient, setIsClient] = useState(false);
   const [dbProjects, setDbProjects] = useState<DBProject[]>([]);
   const [personalInfo, setPersonalInfo] = useState<{ bio?: string } | null>(null);
 
-  // Real-time updates listener
   useRealtimeUpdates((message) => {
     if (message.type === 'content-update') {
       if (message.data?.contentType === 'Projects') {
-        // Refetch projects when admin updates them
         fetchProjects();
       } else if (message.data?.contentType === 'Personal Info') {
-        // Refetch personal info when admin updates it
         fetchPersonalInfo();
       }
     }
   });
 
-  // Keep all existing state:
   const [currentSection, setCurrentSection] = useState('home');
   const [isAnimating, setIsAnimating] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -48,14 +43,11 @@ const MainPortfolio = () => {
   }>>([]);
   const [showDocumentation, setShowDocumentation] = useState(false);
 
-  // Add back the missing ref:
   const heroRef = useRef<HTMLDivElement>(null);
   const lastTradeCheck = useRef<Date>(new Date());
   
-  // Create fresh trading simulator instance - don't use useRef to ensure fresh instance
   const [tradingSimulator] = useState(() => createTradingSimulator());
 
-  // Fetch database projects function
   const fetchProjects = async () => {
     try {
       const response = await fetch('/api/projects');
@@ -68,7 +60,6 @@ const MainPortfolio = () => {
     }
   };
 
-  // Fetch personal info function
   const fetchPersonalInfo = async () => {
     try {
       const response = await fetch(`/api/personal?t=${Date.now()}`, {
@@ -80,7 +71,6 @@ const MainPortfolio = () => {
       });
       if (response.ok) {
         const info = await response.json();
-        console.log('Personal info fetched:', info);
         setPersonalInfo(info);
       }
     } catch (error) {
@@ -88,7 +78,6 @@ const MainPortfolio = () => {
     }
   };
 
-  // Add back the techSkills data:
   const techSkills = [
     { subject: 'React/Next.js', A: 95, fullMark: 100 },
     { subject: 'Python/AI', A: 88, fullMark: 100 },
@@ -98,7 +87,6 @@ const MainPortfolio = () => {
     { subject: 'Cloud/AWS', A: 82, fullMark: 100 }
   ];
 
-  // Keep existing mouse effect:
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
@@ -108,50 +96,36 @@ const MainPortfolio = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Fetch database projects and personal info on mount
   useEffect(() => {
     fetchProjects();
     fetchPersonalInfo();
   }, []);
 
-  // Add client detection effect and run initial backtest
+  // Initialize trading simulation with backtest data
   useEffect(() => {
     console.log('🚀 Portfolio component mounting...');
     setIsClient(true);
     
-    // Always reset to fresh $10,000 starting balance on page load
     tradingSimulator.reset();
+    setRiskAppetite(0.5);
     console.log('💰 Trading simulator reset to $10,000');
     
-    // Reset risk appetite to default on page load
-    setRiskAppetite(0.5);
-    console.log('⚖️ Risk appetite set to 50%');
-    
-    // Run backtest on mount with historical data
     const historicalData = generateBacktestData();
     console.log('📊 Generated historical data:', historicalData.length, 'points');
-    console.log('📊 First 5 data points:', historicalData.slice(0, 5));
-    console.log('📊 Last 5 data points:', historicalData.slice(-5));
-    
-    tradingSimulator.setRiskAppetite(0.5); // Use default risk on page load
+    tradingSimulator.setRiskAppetite(0.5);
     const backtestResults = tradingSimulator.backtest(historicalData);
     console.log('🎯 Backtest results:', {
       trades: backtestResults.trades.length,
       pnl: backtestResults.pnl,
       pnlPercent: backtestResults.pnlPercent,
-      metrics: backtestResults.metrics,
       balance: backtestResults.balance,
-      btcHoldings: backtestResults.btcHoldings,
-      winRate: backtestResults.metrics.winRate
+      btcHoldings: backtestResults.btcHoldings
     });
-    console.log('🎯 Sample trades:', backtestResults.trades.slice(0, 5));
     setTradingState(backtestResults);
     
-    // Create smooth chart progression from backtest
     const chartPoints = [];
-    const dataSlice = historicalData.slice(-48); // Get last 4 hours
+    const dataSlice = historicalData.slice(-48);
     
-    // Track running values for accurate chart
     let runningCash = 10000;
     let runningBtc = 0;
     let tradeIndex = 0;
@@ -162,20 +136,18 @@ const MainPortfolio = () => {
     for (let i = 0; i < dataSlice.length; i++) {
       const point = dataSlice[i];
       
-      // Apply trades that occurred before this point
       while (tradeIndex < sortedTrades.length && 
              sortedTrades[tradeIndex].timestamp <= point.timestamp) {
         const trade = sortedTrades[tradeIndex];
-        runningCash = trade.balance; // Use the balance from trade record
+        runningCash = trade.balance;
         if (trade.action === 'BUY') {
           runningBtc += trade.amount;
         } else {
-          runningBtc = 0; // Sells all BTC
+          runningBtc = 0;
         }
         tradeIndex++;
       }
       
-      // Calculate P&L at this point
       const totalValue = runningCash + (runningBtc * point.price);
       const pnl = totalValue - 10000;
       
@@ -189,15 +161,11 @@ const MainPortfolio = () => {
       });
     }
     
-    // Only show last 12 points in the chart for clarity
     const finalChartData = chartPoints.slice(-12);
     
-    // Validate chart data doesn't have extreme values
-    const maxReasonablePnL = 500; // Max reasonable P&L for initial display
+    const maxReasonablePnL = 500;
     const validatedChartData = finalChartData.map((point, index) => {
       if (Math.abs(point.pnl) > maxReasonablePnL) {
-        console.warn('📊 Extreme P&L detected in backtest:', point.pnl);
-        // Smooth it out
         const prevPoint = index > 0 ? finalChartData[index - 1] : null;
         const smoothedPnL = prevPoint ? prevPoint.pnl * 0.9 + point.pnl * 0.1 : point.pnl * 0.1;
         return { ...point, pnl: smoothedPnL };
@@ -206,126 +174,82 @@ const MainPortfolio = () => {
     });
     
     console.log('📈 Chart data prepared:', validatedChartData.length, 'points');
-    console.log('📈 First chart point:', validatedChartData[0]);
-    console.log('📈 Last chart point:', validatedChartData[validatedChartData.length - 1]);
     setChartData(validatedChartData);
   }, [tradingSimulator]);
 
-  // Update the sentiment fetching effect to only run on client
+  // Handle real-time sentiment updates and trading evaluation
   useEffect(() => {
     if (!isClient) {
       console.log('⏳ Waiting for client-side mounting...');
-      return; // Don't run on server
+      return;
     }
 
     console.log('🌐 Client-side effect starting...');
-    
-    // Initialize with historical data on client
-    const initialData = generateInitialSentimentData();
-    console.log('📊 Initial sentiment data generated:', initialData.length, 'points');
-    
-    // Don't reinitialize trading state - it was already set in the first effect with backtest results
-    console.log('🔄 Trading state already set from backtest, not reinitializing');
 
     const updateSentiment = async () => {
       try {
         console.log('🔄 Fetching new sentiment data...');
         const newData = await fetchRealCryptoSentiment();
         console.log('📊 New data received:', { sentiment: newData.sentiment, price: newData.price, time: newData.time });
-        
-        // Sentiment data is now handled directly in the chart updates
-        
         setCurrentSentiment(newData.sentiment);
         
-        // TEMPORARILY DISABLE chart updates to isolate the issue
-        console.log('📊 Skipping chart update to preserve backtest data');
-        console.log('📊 Current trading state:', {
-          balance: tradingSimulator.getState().balance,
-          btcHoldings: tradingSimulator.getState().btcHoldings,
-          trades: tradingSimulator.getState().trades.length
-        });
-        
-        // Check if 15 minutes have passed since last trade check
         const now = new Date();
         const timeSinceLastCheck = now.getTime() - lastTradeCheck.current.getTime();
         
-        if (timeSinceLastCheck >= 2 * 60 * 1000) { // 2 minutes for testing (was 15 minutes)
+        if (timeSinceLastCheck >= 2 * 60 * 1000) {
           console.log('🔄 2 minutes passed, evaluating trade...');
-          console.log('Sentiment:', newData.sentiment, 'Price:', newData.price);
-          
-          // Evaluate trading decision
           const newTradingState = tradingSimulator.evaluateTrade(newData.sentiment, newData.price);
           console.log('Trade result:', newTradingState.currentAction, 'Trades:', newTradingState.trades.length);
-          
           setTradingState(newTradingState);
           lastTradeCheck.current = now;
           
-          // Update chart data by extending with current trading state values
-          // IMPORTANT: Only extend the chart, don't replace the backtest progression
           setChartData(prev => {
-            // Calculate the actual portfolio value for chart continuity
             const portfolioValue = newTradingState.balance + (newTradingState.btcHoldings * newData.price);
             const actualPnL = portfolioValue - 10000;
             
-            // Create new point with proper P&L calculation
             const newPoint = {
               time: newData.time,
               sentiment: newData.sentiment,
-              pnl: actualPnL, // Use calculated P&L for consistency
+              pnl: actualPnL,
               price: newData.price,
               cashBalance: newTradingState.balance,
               btcHoldings: newTradingState.btcHoldings
             };
             
-            // Only add the new point if it's actually new (don't overwrite backtest)
             const lastPoint = prev[prev.length - 1];
             if (!lastPoint || lastPoint.time !== newPoint.time) {
-              // Validate that P&L change is reasonable (not a cliff)
               if (lastPoint && Math.abs(newPoint.pnl - lastPoint.pnl) > 1000) {
-                console.warn('⚠️ Large P&L jump detected:', lastPoint.pnl, '->', newPoint.pnl);
-                // Use a smoothed transition instead
                 newPoint.pnl = lastPoint.pnl + (newPoint.pnl - lastPoint.pnl) * 0.1;
               }
               
               const updated = [...prev, newPoint];
-              console.log('📊 Chart extended with live point:', newPoint);
-              console.log('📊 Live state: Cash:', newTradingState.balance.toFixed(2), 'BTC:', newTradingState.btcHoldings.toFixed(6), 'P&L:', actualPnL.toFixed(2));
               
-              // Slide window to maintain 12 points
               if (updated.length > 12) {
                 return updated.slice(-12);
               }
               return updated;
             }
-            return prev; // No change if duplicate time
+            return prev;
           });
-        } else {
-          console.log('⏰ Time since last check:', Math.round(timeSinceLastCheck / 1000), 'seconds (need 120)');
         }
       } catch (error) {
         console.error('Failed to fetch sentiment:', error);
       }
     };
 
-    // Initial load - wait a bit to ensure backtest is complete
     console.log('🔄 Waiting 2 seconds before starting sentiment updates...');
     const initialTimeout = setTimeout(() => {
       console.log('🔄 Starting initial sentiment update...');
       updateSentiment();
     }, 2000);
     
-    // Update every 60 seconds (realistic for demo, not too aggressive)
-    console.log('⏰ Setting up 60-second interval for sentiment updates');
     const interval = setInterval(updateSentiment, 60000);
     return () => {
-      console.log('🛑 Clearing sentiment update interval and timeout');
       clearTimeout(initialTimeout);
       clearInterval(interval);
     };
-  }, [isClient, riskAppetite, tradingSimulator]); // Add dependencies
+  }, [isClient, riskAppetite, tradingSimulator]);
 
-
-  // Callback functions for TradingBotDemo
   const handleRiskAppetiteChange = (newRisk: number) => {
     setRiskAppetite(newRisk);
   };
@@ -357,7 +281,7 @@ const MainPortfolio = () => {
     }, 150);
   };
 
-  // Keep the projects data exactly as is...
+  // Project data structure
   const projects: Array<{
     id: string;
     name: string;
@@ -481,9 +405,8 @@ const MainPortfolio = () => {
     }
   ];
 
-  // Transform database projects to match the expected interface and merge with hardcoded projects
   const transformedDbProjects = dbProjects
-    .filter(project => project.screenshots && project.screenshots.length > 0) // Only show projects with screenshots
+    .filter(project => project.screenshots && project.screenshots.length > 0)
     .map(project => ({
       id: project.id?.toString() || 'unknown',
       name: project.name,
@@ -510,33 +433,26 @@ const MainPortfolio = () => {
       }
     }));
 
-  // Merge database projects with hardcoded projects, preferring database projects by name
   const mergedProjects = [...projects];
   transformedDbProjects.forEach(dbProject => {
     const existingIndex = mergedProjects.findIndex(p => p.name === dbProject.name);
     if (existingIndex >= 0) {
-      // Replace existing hardcoded project with database version
       mergedProjects[existingIndex] = dbProject;
     } else {
-      // Add new database project
       mergedProjects.push(dbProject);
     }
   });
 
-  // Use merged projects for display
   const finalProjects = mergedProjects;
 
-  // Calculate real metrics dynamically
-  const deployDate = new Date('2024-12-01'); // Adjust this to your actual deploy date
+  const deployDate = new Date('2024-12-01');
   const currentDate = new Date();
   const daysLive = Math.floor((currentDate.getTime() - deployDate.getTime()) / (1000 * 60 * 60 * 24));
   
-  // Calculate years of experience
-  const startYear = 2011; // Started in relevant product/tech roles
+  const startYear = 2011;
   const currentYear = new Date().getFullYear();
   const yearsExperience = currentYear - startYear;
   
-  // Count unique technologies across all projects
   const uniqueTechs = new Set<string>();
   finalProjects.forEach(project => {
     project.tech.forEach(tech => uniqueTechs.add(tech));
@@ -552,7 +468,6 @@ const MainPortfolio = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 text-white">
-      {/* Replace the entire particle section with: */}
       <ParticleBackground mousePosition={currentSection === 'resume' ? undefined : mousePosition} />
 
       {/* Navigation */}
@@ -608,7 +523,7 @@ const MainPortfolio = () => {
                         className="group border-2 border-slate-600 hover:border-blue-500 hover:bg-blue-500/10 px-8 py-4 rounded-xl font-semibold transition-all duration-300 flex items-center hover:scale-105 transform backdrop-blur-sm"
                       >
                         <FileText className="w-5 h-5 mr-2 group-hover:rotate-12 transition-transform" />
-                        View Resume
+                        View Résumé
                       </button>
                     </div>
 

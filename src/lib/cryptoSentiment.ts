@@ -23,36 +23,28 @@ interface NewsData {
   count: number;
 }
 
-// Main function to generate realistic simulated sentiment
 export async function fetchRealCryptoSentiment(): Promise<CryptoSentimentData> {
-  // Simulate a realistic async delay
   await new Promise(resolve => setTimeout(resolve, 100));
   
-  // Use time-based seed for consistent but evolving values
   const now = new Date();
   const timeSeed = now.getMinutes() * 60 + now.getSeconds();
-  const dayProgress = (now.getHours() * 60 + now.getMinutes()) / 1440; // 0-1 through the day
+  const dayProgress = (now.getHours() * 60 + now.getMinutes()) / 1440;
   
-  // Generate believable market patterns
-  const marketCycle = Math.sin(dayProgress * Math.PI * 4) * 0.15; // 4 cycles per day
+  const marketCycle = Math.sin(dayProgress * Math.PI * 4) * 0.15;
   const microTrend = Math.sin(timeSeed * 0.1) * 0.1;
   const noise = (Math.random() - 0.5) * 0.08;
   
-  // Base sentiment oscillates naturally throughout the day
   const baseSentiment = 0.5 + marketCycle + microTrend + noise;
   const sentiment = Math.max(0.2, Math.min(0.8, baseSentiment));
   
-  // Price follows realistic patterns with modest movements
   const basePrice = 94000;
   const priceVariation = Math.sin(timeSeed * 0.05) * 1500 + Math.random() * 500;
   const currentPrice = Math.round(basePrice + priceVariation);
   
-  // Calculate realistic price change
   const prevPrice = basePrice + Math.sin((timeSeed - 60) * 0.05) * 1500;
   const priceChange = ((currentPrice - prevPrice) / prevPrice) * 100;
   
-  // Generate believable volume
-  const baseVolume = 25000; // millions
+  const baseVolume = 25000;
   const volumeVariation = Math.sin(timeSeed * 0.03) * 5000 + Math.random() * 3000;
   
   return {
@@ -62,13 +54,12 @@ export async function fetchRealCryptoSentiment(): Promise<CryptoSentimentData> {
     }),
     sentiment: sentiment,
     volume: Math.round((baseVolume + volumeVariation) / 1000000),
-    confidence: 0.75 + Math.random() * 0.15, // 75-90% confidence
+    confidence: 0.75 + Math.random() * 0.15,
     price: currentPrice,
     priceChange: Number(priceChange.toFixed(2))
   };
 }
 
-// Fetch Bitcoin price data from CoinGecko (free API)
 export async function fetchCoinGeckoBTC(): Promise<BitcoinData> {
   try {
     const response = await fetch(
@@ -91,7 +82,6 @@ export async function fetchCoinGeckoBTC(): Promise<BitcoinData> {
     };
   } catch (error) {
     console.warn('CoinGecko API failed, using fallback data:', error);
-    // Return realistic fallback data
     return {
       price: 95000 + (Math.random() - 0.5) * 5000,
       change: (Math.random() - 0.5) * 6,
@@ -100,7 +90,6 @@ export async function fetchCoinGeckoBTC(): Promise<BitcoinData> {
   }
 }
 
-// Fetch Fear & Greed Index (free API)
 export async function fetchFearGreedIndex(): Promise<FearGreedData> {
   try {
     const response = await fetch(
