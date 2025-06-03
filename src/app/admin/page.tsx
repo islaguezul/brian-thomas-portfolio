@@ -49,13 +49,18 @@ export default async function AdminDashboard() {
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <Icon className={`w-8 h-8 ${stat.color}`} />
-                <TrendingUp className="w-4 h-4 text-gray-600" />
+            <div key={stat.label} className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-5 hover:border-gray-600 transition-all duration-200 hover:shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg bg-gray-800/50 border border-gray-700`}>
+                    <Icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-gray-400 text-sm font-medium">{stat.label}</p>
+                  </div>
+                </div>
               </div>
-              <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-gray-400 text-sm">{stat.label}</p>
             </div>
           );
         })}
