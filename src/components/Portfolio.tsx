@@ -18,12 +18,18 @@ const MainPortfolio = () => {
   // Add client-only state
   const [isClient, setIsClient] = useState(false);
   const [dbProjects, setDbProjects] = useState<DBProject[]>([]);
+  const [personalInfo, setPersonalInfo] = useState<{ bio?: string } | null>(null);
 
   // Real-time updates listener
   useRealtimeUpdates((message) => {
-    if (message.type === 'content-update' && message.data?.contentType === 'Projects') {
-      // Refetch projects when admin updates them
-      fetchProjects();
+    if (message.type === 'content-update') {
+      if (message.data?.contentType === 'Projects') {
+        // Refetch projects when admin updates them
+        fetchProjects();
+      } else if (message.data?.contentType === 'Personal Info') {
+        // Refetch personal info when admin updates it
+        fetchPersonalInfo();
+      }
     }
   });
 
@@ -62,6 +68,26 @@ const MainPortfolio = () => {
     }
   };
 
+  // Fetch personal info function
+  const fetchPersonalInfo = async () => {
+    try {
+      const response = await fetch(`/api/personal?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      if (response.ok) {
+        const info = await response.json();
+        console.log('Personal info fetched:', info);
+        setPersonalInfo(info);
+      }
+    } catch (error) {
+      console.error('Error fetching personal info:', error);
+    }
+  };
+
   // Add back the techSkills data:
   const techSkills = [
     { subject: 'React/Next.js', A: 95, fullMark: 100 },
@@ -82,9 +108,10 @@ const MainPortfolio = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Fetch database projects on mount
+  // Fetch database projects and personal info on mount
   useEffect(() => {
     fetchProjects();
+    fetchPersonalInfo();
   }, []);
 
   // Add client detection effect and run initial backtest
@@ -557,9 +584,11 @@ const MainPortfolio = () => {
                         <span className="text-white">Technical Product Manager</span>
                       </h1>
                       <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
-                        Transforming complex technical challenges into scalable business solutions through 
-                        systematic process improvement, AI integration, and enterprise-grade architecture. 
-                        10+ years driving product innovation across aerospace, utilities, and fintech.
+                        {personalInfo?.bio || 
+                          `Transforming complex technical challenges into scalable business solutions through 
+                          systematic process improvement, AI integration, and enterprise-grade architecture. 
+                          10+ years driving product innovation across aerospace, utilities, and tech.`
+                        }
                       </p>
                     </div>
 
