@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import { Mail } from 'lucide-react';
 
 interface NavigationProps {
   currentSection: string;
@@ -37,11 +38,13 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection, onSectionChange
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-blue-400 to-purple-400"></span>
               )}
             </button>
-            <a href="mailto:brianjamesthomas@outlook.com" className="hover:text-blue-400 transition-all duration-300 font-medium">Contact</a>
-            <div className="flex items-center space-x-2 text-sm px-3 py-1 rounded-full bg-green-400/10 border border-green-400/20">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
-              <span className="text-green-400">Live</span>
-            </div>
+            <a 
+              href="mailto:brianjamesthomas@outlook.com" 
+              className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-blue-600/20 border border-blue-500/30 hover:bg-blue-600/30 hover:border-blue-400/50 transition-all duration-300 text-blue-300 hover:text-blue-200 font-medium"
+            >
+              <Mail className="w-4 h-4" />
+              <span>Email Brian</span>
+            </a>
           </div>
         </div>
       </div>
