@@ -1,6 +1,6 @@
 import { pusherServer, ADMIN_UPDATE_CHANNEL, UPDATE_EVENTS } from './pusher';
 
-export async function notifyContentUpdate(contentType: string, details?: any) {
+export async function notifyContentUpdate(contentType: string, details?: Record<string, unknown>) {
   // Skip if Pusher is not configured
   if (!pusherServer) {
     console.log('Pusher not configured. Skipping real-time notification.');

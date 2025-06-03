@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import type { Project, ProjectScreenshot } from '@/lib/database/types';
 import { getTechEmoji } from '@/lib/icons';
-import SaveButton from './SaveButton';
 
 interface ProjectFormProps {
   project?: Project;

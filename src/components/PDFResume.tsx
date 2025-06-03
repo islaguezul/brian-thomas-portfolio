@@ -222,10 +222,10 @@ const PDFDocument = ({ personalInfo, experience, education }: PDFDocumentProps) 
         <Text style={styles.sectionTitle}>Professional Experience</Text>
         
         {experience.map((exp) => {
-          const formatDate = (date: string | null, isCurrent: boolean) => {
+          const formatDate = (date: string | Date | undefined | null, isCurrent: boolean | undefined) => {
             if (isCurrent) return 'Present';
             if (!date) return '';
-            const d = new Date(date);
+            const d = date instanceof Date ? date : new Date(date);
             return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
           };
 

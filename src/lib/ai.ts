@@ -20,7 +20,7 @@ interface EnhanceOptions {
 
 export async function enhanceText({
   field,
-  context,
+  context: _context,
   currentValue,
   role = 'Technical Product Manager'
 }: EnhanceOptions): Promise<string> {

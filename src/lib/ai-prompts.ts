@@ -146,7 +146,7 @@ SPECIFIC STYLE FOR THIS FIELD:
 - ${fieldContext.style}
 - Avoid: ${fieldContext.avoid}
 
-${fieldContext.constraints ? `STRICT CONSTRAINTS:
+${'constraints' in fieldContext && fieldContext.constraints ? `STRICT CONSTRAINTS:
 - MUST be between ${fieldContext.constraints.minWords}-${fieldContext.constraints.maxWords} words
 - Count words carefully before responding
 - DO NOT exceed word limit under any circumstances
@@ -175,7 +175,7 @@ Generate enhanced text that:
 
 IMPORTANT: Return ONLY the enhanced text without surrounding quotes, quotation marks, or any formatting.
 
-${fieldContext.constraints ? `
+${'constraints' in fieldContext && fieldContext.constraints ? `
 
 ⚠️  CRITICAL FOR ${context.field.toUpperCase()}: 
 Your response MUST be exactly ${fieldContext.constraints.minWords}-${fieldContext.constraints.maxWords} words. 

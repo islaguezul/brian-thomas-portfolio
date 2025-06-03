@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 
 interface UpdateMessage {
   type: string;
-  data?: any;
+  data?: Record<string, unknown>;
   message?: string;
   timestamp?: string;
 }
@@ -13,9 +13,14 @@ interface UpdateMessage {
 export function usePollingUpdates(onUpdate?: (message: UpdateMessage) => void) {
   const [lastUpdate, setLastUpdate] = useState<UpdateMessage | null>(null);
   const [lastCheckTime, setLastCheckTime] = useState<string>(() => new Date().toISOString());
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   useEffect(() => {
+    // Only start polling if we have an onUpdate callback
+    if (!onUpdate) {
+      return;
+    }
+
     const checkForUpdates = async () => {
       try {
         const response = await fetch(`/api/updates?since=${lastCheckTime}`);
@@ -36,15 +41,23 @@ export function usePollingUpdates(onUpdate?: (message: UpdateMessage) => void) {
             }
           }
         }
-      } catch (error) {
-        console.error('Failed to check for updates:', error);
+      } catch {
+        // Silently ignore errors during polling
+        // This prevents console spam when database is not available
       }
     };
 
-    // Check every 30 seconds
-    intervalRef.current = setInterval(checkForUpdates, 30000);
+    // Start checking after a delay to avoid immediate fetch on mount
+    const timeoutId = setTimeout(() => {
+      // Initial check
+      checkForUpdates();
+      
+      // Then check every 30 seconds
+      intervalRef.current = setInterval(checkForUpdates, 30000);
+    }, 5000); // Wait 5 seconds before starting polling
 
     return () => {
+      clearTimeout(timeoutId);
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }

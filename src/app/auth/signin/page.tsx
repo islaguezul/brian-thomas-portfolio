@@ -3,8 +3,9 @@
 import { signIn } from 'next-auth/react';
 import { Github, Shield, Lock } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function AdminLogin() {
+function SignInContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
 
@@ -53,5 +54,17 @@ export default function AdminLogin() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminLogin() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   );
 }

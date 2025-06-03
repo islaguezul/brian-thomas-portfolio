@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import PusherClient from 'pusher-js';
 import { ADMIN_UPDATE_CHANNEL, UPDATE_EVENTS } from '@/lib/pusher';
 
 interface UpdateMessage {
   type: string;
-  data?: any;
+  data?: Record<string, unknown>;
   message?: string;
   timestamp?: string;
 }
@@ -38,13 +38,13 @@ export function usePusherUpdates(onUpdate?: (message: UpdateMessage) => void) {
       setIsConnected(true);
     });
 
-    channel.bind('pusher:subscription_error', (error: any) => {
+    channel.bind('pusher:subscription_error', (error: Error) => {
       console.error('Pusher subscription error:', error);
       setIsConnected(false);
     });
 
     // Listen for content updates
-    channel.bind(UPDATE_EVENTS.CONTENT_UPDATE, (data: any) => {
+    channel.bind(UPDATE_EVENTS.CONTENT_UPDATE, (data: Record<string, unknown>) => {
       const message: UpdateMessage = {
         type: 'content-update',
         data,

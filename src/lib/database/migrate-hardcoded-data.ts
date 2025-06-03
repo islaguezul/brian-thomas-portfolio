@@ -1,12 +1,4 @@
 import { sql } from '@vercel/postgres';
-import type { 
-  PersonalInfo, 
-  Project, 
-  WorkExperience, 
-  Education, 
-  SkillCategory,
-  TechStackItem
-} from './types';
 
 export async function migrateHardcodedData() {
   console.log('🚀 Starting migration of hardcoded data...');

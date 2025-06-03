@@ -7,9 +7,10 @@ export function UpdateNotification() {
   const [showNotification, setShowNotification] = useState(false);
   const [updateMessage, setUpdateMessage] = useState('');
   
-  const { lastUpdate } = useRealtimeUpdates((message) => {
+  useRealtimeUpdates((message) => {
     if (message.type === 'content-update') {
-      setUpdateMessage(message.data?.message || 'Page content has been updated');
+      const msg = message.data?.message;
+      setUpdateMessage(typeof msg === 'string' ? msg : 'Page content has been updated');
       setShowNotification(true);
     }
   });

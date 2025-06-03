@@ -10,6 +10,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ hasUpdates: false });
     }
     
+    // Check if database is configured
+    if (!process.env.POSTGRES_URL) {
+      // Return no updates if database is not configured
+      return NextResponse.json({ hasUpdates: false });
+    }
+    
     // Check if any content has been updated since the given timestamp
     // Note: skills table doesn't have updated_at, so we exclude it
     const result = await sql`

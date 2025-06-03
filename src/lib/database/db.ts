@@ -1,6 +1,4 @@
 import { sql } from '@vercel/postgres';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 // Map environment variables to what Vercel Postgres expects
 if (!process.env.POSTGRES_URL) {
@@ -191,7 +189,7 @@ export async function getProjects(): Promise<Project[]> {
           impacts: impacts.rows as ProjectImpact[],
           challenges: challenges.rows as ProjectChallenge[],
           outcomes: outcomes.rows as ProjectOutcome[],
-          screenshots: screenshots.rows.map((s: any) => ({
+          screenshots: screenshots.rows.map((s) => ({
             id: s.id,
             projectId: s.project_id,
             filePath: s.file_path,
@@ -233,7 +231,7 @@ export async function getProject(id: number): Promise<Project | null> {
       impacts: impacts.rows as ProjectImpact[],
       challenges: challenges.rows as ProjectChallenge[],
       outcomes: outcomes.rows as ProjectOutcome[],
-      screenshots: screenshots.rows.map((s: any) => ({
+      screenshots: screenshots.rows.map((s) => ({
         id: s.id,
         projectId: s.project_id,
         filePath: s.file_path,
