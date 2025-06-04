@@ -14,7 +14,7 @@ export default function TechStackResetButton() {
     try {
       // First, try to run the migration to support decimal values
       setResult('Running database migration...');
-      const migrationResponse = await fetch('/api/admin/database/migrate-002', {
+      await fetch('/api/admin/database/migrate-002', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -39,7 +39,7 @@ export default function TechStackResetButton() {
       } else {
         setResult(`Error: ${data.error}`);
       }
-    } catch (error) {
+    } catch {
       setResult('Error: Failed to connect to server');
     } finally {
       setIsResetting(false);
