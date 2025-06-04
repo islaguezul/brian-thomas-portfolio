@@ -133,22 +133,19 @@ export default function TechStackForm({ tech, isNew = false }: TechStackFormProp
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Skill Level ({formData.level}%)
+              Years of Experience
             </label>
             <input
-              type="range"
+              type="number"
               min="0"
-              max="100"
-              step="5"
-              value={formData.level || 50}
-              onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
-              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              max="20"
+              step="0.5"
+              value={formData.level || 0}
+              onChange={(e) => setFormData({ ...formData, level: parseFloat(e.target.value) || 0 })}
+              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+              placeholder="e.g., 3.5"
             />
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>Beginner</span>
-              <span>Intermediate</span>
-              <span>Expert</span>
-            </div>
+            <p className="text-xs text-gray-500 mt-1">Enter years of experience (decimals allowed)</p>
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">

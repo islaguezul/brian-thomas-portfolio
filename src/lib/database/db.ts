@@ -697,6 +697,20 @@ export async function getTechStack(): Promise<TechStackItem[]> {
   }
 }
 
+export async function updateAllTechStackLevels(defaultLevel: number = 0.5): Promise<number> {
+  try {
+    const result = await sql`
+      UPDATE tech_stack 
+      SET level = ${defaultLevel}, updated_at = CURRENT_TIMESTAMP
+      WHERE level IS NULL OR level > 10 OR level = 0 OR level = 1
+    `;
+    return result.rowCount || 0;
+  } catch (error) {
+    console.error('Error updating tech stack levels:', error);
+    return 0;
+  }
+}
+
 export async function createTechStack(data: TechStackItem): Promise<TechStackItem | null> {
   try {
     const result = await sql<TechStackItem>`
@@ -946,6 +960,35 @@ export async function runMigration001(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Error running migration 001:', error);
+    return false;
+  }
+}
+
+export async function runMigration002(): Promise<boolean> {
+  try {
+    console.log('Running migration 002: Change tech_stack level to decimal...');
+    
+    // Check if migration has already been run by checking column type
+    const columnInfo = await sql`
+      SELECT data_type, numeric_precision, numeric_scale
+      FROM information_schema.columns 
+      WHERE table_name = 'tech_stack' 
+      AND column_name = 'level'
+    `;
+    
+    if (columnInfo.rows[0]?.data_type === 'numeric') {
+      console.log('Migration 002 already applied.');
+      return true;
+    }
+    
+    // Run the migration
+    await sql`ALTER TABLE tech_stack ALTER COLUMN level TYPE DECIMAL(5,2)`;
+    await sql`ALTER TABLE tech_stack ADD CONSTRAINT tech_stack_level_check CHECK (level >= 0 AND level <= 100)`;
+    
+    console.log('Migration 002 completed successfully.');
+    return true;
+  } catch (error) {
+    console.error('Error running migration 002:', error);
     return false;
   }
 }

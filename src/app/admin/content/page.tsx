@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { getTechStack, getSkillCategories, getProcessStrategies } from '@/lib/database/db';
 import Link from 'next/link';
+import TechStackCards from '@/components/admin/TechStackCards';
 
 export default async function ContentPage() {
   const [techStack, skillCategories, processStrategies] = await Promise.all([
@@ -35,50 +36,7 @@ export default async function ContentPage() {
           </Link>
         </div>
 
-        {techStack.length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-            <p className="text-gray-400 mb-4">No technologies added yet</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {techStack.map((tech) => (
-              <div key={tech.id} className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{tech.icon}</span>
-                    <div>
-                      <h3 className="font-medium text-white">{tech.name}</h3>
-                      <p className="text-sm text-gray-400">{tech.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Link
-                      href={`/admin/content/tech-stack/${tech.id}/edit`}
-                      className="p-1 hover:bg-gray-800 rounded transition-colors"
-                    >
-                      <SettingsIcon className="w-4 h-4 text-gray-400" />
-                    </Link>
-                    <button className="p-1 hover:bg-gray-800 rounded transition-colors">
-                      <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-400" />
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-sm mb-1">
-                    <span className="text-gray-400">Skill Level</span>
-                    <span className="text-white">{tech.level}%</span>
-                  </div>
-                  <div className="w-full bg-gray-800 rounded-full h-2">
-                    <div 
-                      className="bg-blue-500 h-2 rounded-full transition-all"
-                      style={{ width: `${tech.level}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <TechStackCards techStack={techStack} />
       </div>
 
       {/* Skills Section */}

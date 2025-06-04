@@ -3,6 +3,7 @@ import { Database, AlertCircle, CheckCircle } from 'lucide-react';
 import InitializeButton from '@/components/admin/InitializeButton';
 import SeedButton from '@/components/admin/SeedButton';
 import MigrateButton from '@/components/admin/MigrateButton';
+import TechStackResetButton from '@/components/admin/TechStackResetButton';
 
 async function checkDatabaseStatus() {
   try {
@@ -154,6 +155,14 @@ export default async function DatabasePage() {
           </p>
           <SeedButton disabled={!status.tablesExist} />
         </div>
+      </div>
+
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <h3 className="text-lg font-semibold text-white mb-3">Fix Tech Stack Years</h3>
+        <p className="text-gray-400 text-sm mb-4">
+          Reset all tech stack levels from old percentages (70s-90s) to realistic 0.5 years baseline.
+        </p>
+        <TechStackResetButton />
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">

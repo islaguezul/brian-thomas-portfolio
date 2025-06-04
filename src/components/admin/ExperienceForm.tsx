@@ -16,11 +16,11 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
   const [formData, setFormData] = useState<WorkExperience>({
     title: experience?.title || '',
     company: experience?.company || '',
-    startDate: experience?.startDate || '',
-    endDate: experience?.endDate || '',
-    isCurrent: experience?.isCurrent || false,
+    startDate: experience?.startDate || experience?.start_date || '',
+    endDate: experience?.endDate || experience?.end_date || '',
+    isCurrent: experience?.isCurrent || experience?.is_current || false,
     responsibilities: experience?.responsibilities || [],
-    displayOrder: experience?.displayOrder || 0,
+    displayOrder: experience?.displayOrder || experience?.display_order || 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,7 +108,7 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
   const formatDateForInput = (date: Date | string | undefined) => {
     if (!date) return '';
     const d = new Date(date);
-    return d.toISOString().split('T')[0];
+    return d.toISOString().slice(0, 7); // YYYY-MM format for month input
   };
 
   return (
@@ -146,10 +146,10 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Start Date *
+                Start Date (Month/Year) *
               </label>
               <input
-                type="date"
+                type="month"
                 value={formatDateForInput(formData.startDate)}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
@@ -159,10 +159,10 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                End Date
+                End Date (Month/Year)
               </label>
               <input
-                type="date"
+                type="month"
                 value={formatDateForInput(formData.endDate)}
                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                 disabled={formData.isCurrent}

@@ -60,7 +60,7 @@ export default async function ResumePage() {
                     <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
                       <Calendar className="w-4 h-4" />
                       <span>
-                        {formatDate(exp.startDate)} - {formatDate(exp.endDate, exp.isCurrent)}
+                        {formatDate(exp.startDate || exp.start_date)} - {formatDate(exp.endDate || exp.end_date, exp.isCurrent || exp.is_current)}
                       </span>
                     </div>
                     
