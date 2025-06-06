@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getTechStack, createTechStack } from '@/lib/database/db';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requireAuth();
-    const techStack = await getTechStack();
+    const tenant = getAdminTenant(request.headers);
+    const techStack = await getTechStack(tenant);
     return NextResponse.json(techStack);
   } catch (error) {
     console.error('Error fetching tech stack:', error);
@@ -19,8 +21,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const data = await request.json();
-    const tech = await createTechStack(data);
+    const tech = await createTechStack(tenant, data);
     
     if (!tech) {
       return NextResponse.json(

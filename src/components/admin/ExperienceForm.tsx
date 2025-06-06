@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Plus, Trash2, GripVertical, Sparkles } from 'lucide-react';
 import type { WorkExperience } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface ExperienceFormProps {
   experience?: WorkExperience;
@@ -32,7 +33,7 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
         ? '/api/admin/resume/experience' 
         : `/api/admin/resume/experience/${experience?.id}`;
       
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method: isNew ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -80,7 +81,7 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
         formData.responsibilities.map(async (resp) => {
           if (!resp.responsibility) return resp;
           
-          const response = await fetch('/api/admin/ai/enhance', {
+          const response = await adminFetch('/api/admin/ai/enhance', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

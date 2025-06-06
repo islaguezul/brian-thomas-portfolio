@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getEducation, createEducation } from '@/lib/database/db';
 import { notifyContentUpdate } from '@/lib/notify-updates';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requireAuth();
-    const education = await getEducation();
+    const tenant = getAdminTenant(request.headers);
+    const education = await getEducation(tenant);
     return NextResponse.json(education);
   } catch (error) {
     console.error('Error fetching education:', error);
@@ -20,8 +22,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const data = await request.json();
-    const education = await createEducation(data);
+    const education = await createEducation(tenant, data);
     
     if (!education) {
       return NextResponse.json(

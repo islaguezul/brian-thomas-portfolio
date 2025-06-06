@@ -5,6 +5,7 @@ import { Trash2, Settings as SettingsIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { TechStackItem } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface TechStackCardsProps {
   techStack: TechStackItem[];
@@ -22,7 +23,7 @@ export default function TechStackCards({ techStack }: TechStackCardsProps) {
     setDeletingId(id);
     
     try {
-      const response = await fetch(`/api/admin/content/tech-stack/${id}`, {
+      const response = await adminFetch(`/api/admin/content/tech-stack/${id}`, {
         method: 'DELETE',
       });
 

@@ -27,6 +27,8 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env*.backup
+*.sql
 
 # AI Configuration (keep private)
 AI_PROMPT_SETUP.md

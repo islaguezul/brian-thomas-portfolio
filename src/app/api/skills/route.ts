@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getSkillCategories } from '@/lib/database/db';
+import { getTenantFromHeaders } from '@/lib/tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const skills = await getSkillCategories();
+    const tenant = getTenantFromHeaders(request.headers);
+    const skills = await getSkillCategories(tenant);
     return NextResponse.json(skills);
   } catch (error) {
     console.error('Error fetching skills:', error);

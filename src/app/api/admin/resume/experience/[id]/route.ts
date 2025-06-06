@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { updateWorkExperience, deleteWorkExperience } from '@/lib/database/db';
 import { notifyContentUpdate } from '@/lib/notify-updates';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
 export async function PUT(
   request: Request,
@@ -9,9 +10,10 @@ export async function PUT(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
     const data = await request.json();
-    const experience = await updateWorkExperience(parseInt(id), data);
+    const experience = await updateWorkExperience(tenant, parseInt(id), data);
     
     if (!experience) {
       return NextResponse.json(
@@ -42,8 +44,9 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
-    const success = await deleteWorkExperience(parseInt(id));
+    const success = await deleteWorkExperience(tenant, parseInt(id));
     
     if (!success) {
       return NextResponse.json(

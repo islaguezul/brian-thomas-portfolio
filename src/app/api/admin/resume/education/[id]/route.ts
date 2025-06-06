@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { updateEducation, deleteEducation } from '@/lib/database/db';
 import { notifyContentUpdate } from '@/lib/notify-updates';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
 export async function PUT(
   request: Request,
@@ -9,9 +10,10 @@ export async function PUT(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
     const data = await request.json();
-    const education = await updateEducation(parseInt(id), data);
+    const education = await updateEducation(tenant, parseInt(id), data);
     
     if (!education) {
       return NextResponse.json(
@@ -42,8 +44,9 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
-    const success = await deleteEducation(parseInt(id));
+    const success = await deleteEducation(tenant, parseInt(id));
     
     if (!success) {
       return NextResponse.json(

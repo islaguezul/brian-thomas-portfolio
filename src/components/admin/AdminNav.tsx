@@ -11,7 +11,8 @@ import {
   
   LogOut,
   Database,
-  Sparkles
+  Sparkles,
+  TrendingUp
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +20,7 @@ const navItems = [
   { href: '/admin', label: 'Dashboard', icon: Home },
   { href: '/admin/personal', label: 'Personal Info', icon: User },
   { href: '/admin/projects', label: 'Projects', icon: FolderOpen },
+  { href: '/admin/metrics', label: 'Metrics', icon: TrendingUp },
   { href: '/admin/resume', label: 'Resume', icon: FileText },
   { href: '/admin/content', label: 'Content', icon: Sparkles },
   { href: '/admin/database', label: 'Database', icon: Database },

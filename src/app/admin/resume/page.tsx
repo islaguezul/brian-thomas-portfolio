@@ -1,12 +1,94 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Edit, Trash2, Calendar, Briefcase, GraduationCap, ChevronRight } from 'lucide-react';
-import { getWorkExperience, getEducation } from '@/lib/database/db';
+import type { WorkExperience, Education } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
-export default async function ResumePage() {
-  const [experience, education] = await Promise.all([
-    getWorkExperience(),
-    getEducation(),
-  ]);
+export default function ResumePage() {
+  const [experience, setExperience] = useState<WorkExperience[]>([]);
+  const [education, setEducation] = useState<Education[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deletingExpId, setDeletingExpId] = useState<number | null>(null);
+  const [deletingEduId, setDeletingEduId] = useState<number | null>(null);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      const [expResponse, eduResponse] = await Promise.all([
+        adminFetch('/api/admin/resume/experience'),
+        adminFetch('/api/admin/resume/education'),
+      ]);
+
+      if (expResponse.ok) {
+        const expData = await expResponse.json();
+        setExperience(expData);
+      }
+
+      if (eduResponse.ok) {
+        const eduData = await eduResponse.json();
+        setEducation(eduData);
+      }
+    } catch (error) {
+      console.error('Error loading resume data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleDeleteExperience = async (id: number, title: string, company: string) => {
+    if (!confirm(`Are you sure you want to delete "${title} at ${company}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingExpId(id);
+    
+    try {
+      const response = await adminFetch(`/api/admin/resume/experience/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setExperience(experience.filter(exp => exp.id !== id));
+      } else {
+        alert('Failed to delete work experience');
+      }
+    } catch (error) {
+      console.error('Error deleting experience:', error);
+      alert('Failed to delete work experience');
+    } finally {
+      setDeletingExpId(null);
+    }
+  };
+
+  const handleDeleteEducation = async (id: number, degree: string, school: string) => {
+    if (!confirm(`Are you sure you want to delete "${degree} from ${school}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingEduId(id);
+    
+    try {
+      const response = await adminFetch(`/api/admin/resume/education/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setEducation(education.filter(edu => edu.id !== id));
+      } else {
+        alert('Failed to delete education');
+      }
+    } catch (error) {
+      console.error('Error deleting education:', error);
+      alert('Failed to delete education');
+    } finally {
+      setDeletingEduId(null);
+    }
+  };
 
   const formatDate = (date: Date | string | undefined, isCurrent?: boolean) => {
     if (isCurrent) return 'Present';
@@ -14,6 +96,14 @@ export default async function ResumePage() {
     const d = new Date(date);
     return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -90,10 +180,12 @@ export default async function ResumePage() {
                       <Edit className="w-4 h-4 text-gray-300" />
                     </Link>
                     <button
-                      className="p-2 bg-gray-800 hover:bg-red-900/50 rounded-lg transition-colors"
+                      onClick={() => exp.id && handleDeleteExperience(exp.id, exp.title, exp.company)}
+                      disabled={deletingExpId === exp.id}
+                      className="p-2 bg-gray-800 hover:bg-red-900/50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete experience"
                     >
-                      <Trash2 className="w-4 h-4 text-gray-300 hover:text-red-400" />
+                      <Trash2 className={`w-4 h-4 ${deletingExpId === exp.id ? 'text-gray-600' : 'text-gray-300 hover:text-red-400'}`} />
                     </button>
                   </div>
                 </div>
@@ -175,10 +267,12 @@ export default async function ResumePage() {
                       <Edit className="w-4 h-4 text-gray-300" />
                     </Link>
                     <button
-                      className="p-2 bg-gray-800 hover:bg-red-900/50 rounded-lg transition-colors"
+                      onClick={() => edu.id && handleDeleteEducation(edu.id, edu.degree, edu.school)}
+                      disabled={deletingEduId === edu.id}
+                      className="p-2 bg-gray-800 hover:bg-red-900/50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete education"
                     >
-                      <Trash2 className="w-4 h-4 text-gray-300 hover:text-red-400" />
+                      <Trash2 className={`w-4 h-4 ${deletingEduId === edu.id ? 'text-gray-600' : 'text-gray-300 hover:text-red-400'}`} />
                     </button>
                   </div>
                 </div>

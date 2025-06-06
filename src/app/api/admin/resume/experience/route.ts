@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getWorkExperience, createWorkExperience } from '@/lib/database/db';
 import { notifyContentUpdate } from '@/lib/notify-updates';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requireAuth();
-    const experience = await getWorkExperience();
+    const tenant = getAdminTenant(request.headers);
+    const experience = await getWorkExperience(tenant);
     return NextResponse.json(experience);
   } catch (error) {
     console.error('Error fetching work experience:', error);
@@ -20,8 +22,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const data = await request.json();
-    const experience = await createWorkExperience(data);
+    const experience = await createWorkExperience(tenant, data);
     
     if (!experience) {
       return NextResponse.json(

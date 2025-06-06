@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Plus, Trash2, GripVertical } from 'lucide-react';
 import type { Education } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface EducationFormProps {
   education?: Education;
@@ -31,7 +32,7 @@ export default function EducationForm({ education, isNew = false }: EducationFor
         ? '/api/admin/resume/education' 
         : `/api/admin/resume/education/${education?.id}`;
       
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method: isNew ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

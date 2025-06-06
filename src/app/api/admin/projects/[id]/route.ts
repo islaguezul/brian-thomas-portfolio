@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getProject, updateProject, deleteProject } from '@/lib/database/db';
 import { notifyContentUpdate } from '@/lib/notify-updates';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
 export async function GET(
   request: Request,
@@ -9,8 +10,9 @@ export async function GET(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
-    const project = await getProject(parseInt(id));
+    const project = await getProject(tenant, parseInt(id));
     
     if (!project) {
       return NextResponse.json(
@@ -35,9 +37,10 @@ export async function PUT(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
     const data = await request.json();
-    const project = await updateProject(parseInt(id), data);
+    const project = await updateProject(tenant, parseInt(id), data);
     
     if (!project) {
       return NextResponse.json(
@@ -67,8 +70,9 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
-    const success = await deleteProject(parseInt(id));
+    const success = await deleteProject(tenant, parseInt(id));
     
     if (!success) {
       return NextResponse.json(

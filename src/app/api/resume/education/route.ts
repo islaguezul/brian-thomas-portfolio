@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getEducation } from '@/lib/database/db';
+import { getTenantFromHeaders } from '@/lib/tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const education = await getEducation();
+    const tenant = getTenantFromHeaders(request.headers);
+    const education = await getEducation(tenant);
     console.log('Public API - Education fetched:', education.length, 'items');
     return NextResponse.json(education);
   } catch (error) {

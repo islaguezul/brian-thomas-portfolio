@@ -1,5 +1,4 @@
 import { sql } from '@vercel/postgres';
-import type { Tenant } from '@/middleware';
 
 // Map environment variables to what Vercel Postgres expects
 if (!process.env.POSTGRES_URL) {
@@ -49,10 +48,10 @@ export async function initializeDatabase() {
 }
 
 // Personal Info
-export async function getPersonalInfo(tenant: Tenant): Promise<PersonalInfo | null> {
+export async function getPersonalInfo(): Promise<PersonalInfo | null> {
   try {
     const result = await sql`
-      SELECT * FROM personal_info WHERE tenant = ${tenant} LIMIT 1
+      SELECT * FROM personal_info LIMIT 1
     `;
     if (!result.rows[0]) return null;
     
@@ -80,11 +79,11 @@ export async function getPersonalInfo(tenant: Tenant): Promise<PersonalInfo | nu
   }
 }
 
-export async function updatePersonalInfo(tenant: Tenant, data: PersonalInfo): Promise<PersonalInfo | null> {
+export async function updatePersonalInfo(data: PersonalInfo): Promise<PersonalInfo | null> {
   try {
-    // Check if personal info already exists for this tenant
+    // Check if personal info already exists
     const existing = await sql`
-      SELECT * FROM personal_info WHERE tenant = ${tenant} LIMIT 1
+      SELECT * FROM personal_info LIMIT 1
     `;
 
     if (existing.rows.length > 0) {
@@ -104,7 +103,7 @@ export async function updatePersonalInfo(tenant: Tenant, data: PersonalInfo): Pr
           years_experience = ${data.yearsExperience},
           start_year = ${data.startYear},
           updated_at = CURRENT_TIMESTAMP
-        WHERE id = ${existing.rows[0].id} AND tenant = ${tenant}
+        WHERE id = ${existing.rows[0].id}
         RETURNING *
       `;
       const row = result.rows[0];
@@ -130,12 +129,12 @@ export async function updatePersonalInfo(tenant: Tenant, data: PersonalInfo): Pr
       const result = await sql`
         INSERT INTO personal_info (
           name, title, email, phone, location, linkedin_url, github_url,
-          bio, tagline, executive_summary, years_experience, start_year, tenant
+          bio, tagline, executive_summary, years_experience, start_year
         ) VALUES (
           ${data.name}, ${data.title}, ${data.email}, ${data.phone}, 
           ${data.location}, ${data.linkedinUrl}, ${data.githubUrl},
           ${data.bio}, ${data.tagline}, ${data.executiveSummary}, 
-          ${data.yearsExperience}, ${data.startYear}, ${tenant}
+          ${data.yearsExperience}, ${data.startYear}
         )
         RETURNING *
       `;
@@ -165,22 +164,22 @@ export async function updatePersonalInfo(tenant: Tenant, data: PersonalInfo): Pr
 }
 
 // Projects
-export async function getProjects(tenant: Tenant): Promise<Project[]> {
+export async function getProjects(): Promise<Project[]> {
   try {
     const projects = await sql<Project>`
-      SELECT * FROM projects WHERE tenant = ${tenant} ORDER BY display_order, created_at DESC
+      SELECT * FROM projects ORDER BY display_order, created_at DESC
     `;
     
     // Fetch related data for each project
     const projectsWithRelations = await Promise.all(
       projects.rows.map(async (project) => {
         const [technologies, features, impacts, challenges, outcomes, screenshots] = await Promise.all([
-          sql`SELECT technology FROM project_technologies WHERE project_id = ${project.id} AND tenant = ${tenant}`,
-          sql`SELECT * FROM project_features WHERE project_id = ${project.id} AND tenant = ${tenant} ORDER BY display_order`,
-          sql`SELECT * FROM project_impacts WHERE project_id = ${project.id} AND tenant = ${tenant}`,
-          sql`SELECT * FROM project_challenges WHERE project_id = ${project.id} AND tenant = ${tenant} ORDER BY display_order`,
-          sql`SELECT * FROM project_outcomes WHERE project_id = ${project.id} AND tenant = ${tenant} ORDER BY display_order`,
-          sql`SELECT * FROM project_screenshots WHERE project_id = ${project.id} AND tenant = ${tenant} ORDER BY display_order`,
+          sql`SELECT technology FROM project_technologies WHERE project_id = ${project.id}`,
+          sql`SELECT * FROM project_features WHERE project_id = ${project.id} ORDER BY display_order`,
+          sql`SELECT * FROM project_impacts WHERE project_id = ${project.id}`,
+          sql`SELECT * FROM project_challenges WHERE project_id = ${project.id} ORDER BY display_order`,
+          sql`SELECT * FROM project_outcomes WHERE project_id = ${project.id} ORDER BY display_order`,
+          sql`SELECT * FROM project_screenshots WHERE project_id = ${project.id} ORDER BY display_order`,
         ]);
 
         return {
@@ -208,21 +207,21 @@ export async function getProjects(tenant: Tenant): Promise<Project[]> {
   }
 }
 
-export async function getProject(tenant: Tenant, id: number): Promise<Project | null> {
+export async function getProject(id: number): Promise<Project | null> {
   try {
     const project = await sql<Project>`
-      SELECT * FROM projects WHERE id = ${id} AND tenant = ${tenant}
+      SELECT * FROM projects WHERE id = ${id}
     `;
     
     if (!project.rows[0]) return null;
 
     const [technologies, features, impacts, challenges, outcomes, screenshots] = await Promise.all([
-      sql`SELECT technology FROM project_technologies WHERE project_id = ${id} AND tenant = ${tenant}`,
-      sql`SELECT * FROM project_features WHERE project_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
-      sql`SELECT * FROM project_impacts WHERE project_id = ${id} AND tenant = ${tenant}`,
-      sql`SELECT * FROM project_challenges WHERE project_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
-      sql`SELECT * FROM project_outcomes WHERE project_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
-      sql`SELECT * FROM project_screenshots WHERE project_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
+      sql`SELECT technology FROM project_technologies WHERE project_id = ${id}`,
+      sql`SELECT * FROM project_features WHERE project_id = ${id} ORDER BY display_order`,
+      sql`SELECT * FROM project_impacts WHERE project_id = ${id}`,
+      sql`SELECT * FROM project_challenges WHERE project_id = ${id} ORDER BY display_order`,
+      sql`SELECT * FROM project_outcomes WHERE project_id = ${id} ORDER BY display_order`,
+      sql`SELECT * FROM project_screenshots WHERE project_id = ${id} ORDER BY display_order`,
     ]);
 
     return {
@@ -246,7 +245,7 @@ export async function getProject(tenant: Tenant, id: number): Promise<Project | 
   }
 }
 
-export async function createProject(tenant: Tenant, data: Project): Promise<Project | null> {
+export async function createProject(data: Project): Promise<Project | null> {
   const client = await sql.connect();
   
   try {
@@ -255,23 +254,23 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
     const project = await client.query(`
       INSERT INTO projects (
         name, status, description, detailed_description, stage, progress,
-        experimental, legacy, live_url, github_url, demo_url, display_order, tenant
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        experimental, legacy, live_url, github_url, demo_url, display_order
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
     `, [
       data.name, data.status, data.description, data.detailedDescription,
       data.stage, data.progress, data.experimental, data.legacy,
-      data.liveUrl, data.githubUrl, data.demoUrl, data.displayOrder || 0, tenant
+      data.liveUrl, data.githubUrl, data.demoUrl, data.displayOrder || 0
     ]);
     
     const projectId = project.rows[0].id;
     
-    // Insert related data with tenant
+    // Insert related data
     if (data.technologies?.length) {
       for (const tech of data.technologies) {
         await client.query(
-          'INSERT INTO project_technologies (project_id, technology, tenant) VALUES ($1, $2, $3)',
-          [projectId, tech, tenant]
+          'INSERT INTO project_technologies (project_id, technology) VALUES ($1, $2)',
+          [projectId, tech]
         );
       }
     }
@@ -279,8 +278,8 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
     if (data.features?.length) {
       for (let i = 0; i < data.features.length; i++) {
         await client.query(
-          'INSERT INTO project_features (project_id, feature, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [projectId, data.features[i].feature, i, tenant]
+          'INSERT INTO project_features (project_id, feature, display_order) VALUES ($1, $2, $3)',
+          [projectId, data.features[i].feature, i]
         );
       }
     }
@@ -289,8 +288,8 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
       for (const impact of data.impacts) {
         if (impact.metricKey && impact.metricValue) {
           await client.query(
-            'INSERT INTO project_impacts (project_id, metric_key, metric_value, tenant) VALUES ($1, $2, $3, $4)',
-            [projectId, impact.metricKey, impact.metricValue, tenant]
+            'INSERT INTO project_impacts (project_id, metric_key, metric_value) VALUES ($1, $2, $3)',
+            [projectId, impact.metricKey, impact.metricValue]
           );
         }
       }
@@ -300,8 +299,8 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
       for (let i = 0; i < data.challenges.length; i++) {
         if (data.challenges[i].challenge) {
           await client.query(
-            'INSERT INTO project_challenges (project_id, challenge, display_order, tenant) VALUES ($1, $2, $3, $4)',
-            [projectId, data.challenges[i].challenge, i, tenant]
+            'INSERT INTO project_challenges (project_id, challenge, display_order) VALUES ($1, $2, $3)',
+            [projectId, data.challenges[i].challenge, i]
           );
         }
       }
@@ -311,8 +310,8 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
       for (let i = 0; i < data.outcomes.length; i++) {
         if (data.outcomes[i].outcome) {
           await client.query(
-            'INSERT INTO project_outcomes (project_id, outcome, display_order, tenant) VALUES ($1, $2, $3, $4)',
-            [projectId, data.outcomes[i].outcome, i, tenant]
+            'INSERT INTO project_outcomes (project_id, outcome, display_order) VALUES ($1, $2, $3)',
+            [projectId, data.outcomes[i].outcome, i]
           );
         }
       }
@@ -322,15 +321,15 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
       for (let i = 0; i < data.screenshots.length; i++) {
         if (data.screenshots[i].filePath) {
           await client.query(
-            'INSERT INTO project_screenshots (project_id, file_path, alt_text, display_order, tenant) VALUES ($1, $2, $3, $4, $5)',
-            [projectId, data.screenshots[i].filePath, data.screenshots[i].altText || null, i, tenant]
+            'INSERT INTO project_screenshots (project_id, file_path, alt_text, display_order) VALUES ($1, $2, $3, $4)',
+            [projectId, data.screenshots[i].filePath, data.screenshots[i].altText || null, i]
           );
         }
       }
     }
     
     await client.query('COMMIT');
-    return await getProject(tenant, projectId);
+    return await getProject(projectId);
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error creating project:', error);
@@ -340,7 +339,7 @@ export async function createProject(tenant: Tenant, data: Project): Promise<Proj
   }
 }
 
-export async function updateProject(tenant: Tenant, id: number, data: Project): Promise<Project | null> {
+export async function updateProject(id: number, data: Project): Promise<Project | null> {
   const client = await sql.connect();
   
   try {
@@ -352,84 +351,84 @@ export async function updateProject(tenant: Tenant, id: number, data: Project): 
         stage = $5, progress = $6, experimental = $7, legacy = $8,
         live_url = $9, github_url = $10, demo_url = $11, display_order = $12,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $13 AND tenant = $14
+      WHERE id = $13
     `, [
       data.name, data.status, data.description, data.detailedDescription,
       data.stage, data.progress, data.experimental, data.legacy,
-      data.liveUrl, data.githubUrl, data.demoUrl, data.displayOrder || 0, id, tenant
+      data.liveUrl, data.githubUrl, data.demoUrl, data.displayOrder || 0, id
     ]);
     
     // Update related data
-    await client.query('DELETE FROM project_technologies WHERE project_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM project_technologies WHERE project_id = $1', [id]);
     if (data.technologies?.length) {
       for (const tech of data.technologies) {
         await client.query(
-          'INSERT INTO project_technologies (project_id, technology, tenant) VALUES ($1, $2, $3)',
-          [id, tech, tenant]
+          'INSERT INTO project_technologies (project_id, technology) VALUES ($1, $2)',
+          [id, tech]
         );
       }
     }
     
-    await client.query('DELETE FROM project_features WHERE project_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM project_features WHERE project_id = $1', [id]);
     if (data.features?.length) {
       for (let i = 0; i < data.features.length; i++) {
         await client.query(
-          'INSERT INTO project_features (project_id, feature, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [id, data.features[i].feature, i, tenant]
+          'INSERT INTO project_features (project_id, feature, display_order) VALUES ($1, $2, $3)',
+          [id, data.features[i].feature, i]
         );
       }
     }
     
-    await client.query('DELETE FROM project_impacts WHERE project_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM project_impacts WHERE project_id = $1', [id]);
     if (data.impacts?.length) {
       for (const impact of data.impacts) {
         if (impact.metricKey && impact.metricValue) {
           await client.query(
-            'INSERT INTO project_impacts (project_id, metric_key, metric_value, tenant) VALUES ($1, $2, $3, $4)',
-            [id, impact.metricKey, impact.metricValue, tenant]
+            'INSERT INTO project_impacts (project_id, metric_key, metric_value) VALUES ($1, $2, $3)',
+            [id, impact.metricKey, impact.metricValue]
           );
         }
       }
     }
     
-    await client.query('DELETE FROM project_challenges WHERE project_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM project_challenges WHERE project_id = $1', [id]);
     if (data.challenges?.length) {
       for (let i = 0; i < data.challenges.length; i++) {
         if (data.challenges[i].challenge) {
           await client.query(
-            'INSERT INTO project_challenges (project_id, challenge, display_order, tenant) VALUES ($1, $2, $3, $4)',
-            [id, data.challenges[i].challenge, i, tenant]
+            'INSERT INTO project_challenges (project_id, challenge, display_order) VALUES ($1, $2, $3)',
+            [id, data.challenges[i].challenge, i]
           );
         }
       }
     }
     
-    await client.query('DELETE FROM project_outcomes WHERE project_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM project_outcomes WHERE project_id = $1', [id]);
     if (data.outcomes?.length) {
       for (let i = 0; i < data.outcomes.length; i++) {
         if (data.outcomes[i].outcome) {
           await client.query(
-            'INSERT INTO project_outcomes (project_id, outcome, display_order, tenant) VALUES ($1, $2, $3, $4)',
-            [id, data.outcomes[i].outcome, i, tenant]
+            'INSERT INTO project_outcomes (project_id, outcome, display_order) VALUES ($1, $2, $3)',
+            [id, data.outcomes[i].outcome, i]
           );
         }
       }
     }
     
-    await client.query('DELETE FROM project_screenshots WHERE project_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM project_screenshots WHERE project_id = $1', [id]);
     if (data.screenshots?.length) {
       for (let i = 0; i < data.screenshots.length; i++) {
         if (data.screenshots[i].filePath) {
           await client.query(
-            'INSERT INTO project_screenshots (project_id, file_path, alt_text, display_order, tenant) VALUES ($1, $2, $3, $4, $5)',
-            [id, data.screenshots[i].filePath, data.screenshots[i].altText || null, i, tenant]
+            'INSERT INTO project_screenshots (project_id, file_path, alt_text, display_order) VALUES ($1, $2, $3, $4)',
+            [id, data.screenshots[i].filePath, data.screenshots[i].altText || null, i]
           );
         }
       }
     }
     
     await client.query('COMMIT');
-    return await getProject(tenant, id);
+    return await getProject(id);
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error updating project:', error);
@@ -439,9 +438,9 @@ export async function updateProject(tenant: Tenant, id: number, data: Project): 
   }
 }
 
-export async function deleteProject(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteProject(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM projects WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM projects WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting project:', error);
@@ -450,17 +449,17 @@ export async function deleteProject(tenant: Tenant, id: number): Promise<boolean
 }
 
 // Work Experience
-export async function getWorkExperience(tenant: Tenant): Promise<WorkExperience[]> {
+export async function getWorkExperience(): Promise<WorkExperience[]> {
   try {
     const experiences = await sql<WorkExperience>`
-      SELECT * FROM work_experience WHERE tenant = ${tenant} ORDER BY display_order, start_date DESC
+      SELECT * FROM work_experience ORDER BY display_order, start_date DESC
     `;
     
     const experiencesWithResponsibilities = await Promise.all(
       experiences.rows.map(async (exp) => {
         const responsibilities = await sql`
           SELECT * FROM work_responsibilities 
-          WHERE experience_id = ${exp.id} AND tenant = ${tenant}
+          WHERE experience_id = ${exp.id} 
           ORDER BY display_order
         `;
         return {
@@ -477,7 +476,7 @@ export async function getWorkExperience(tenant: Tenant): Promise<WorkExperience[
   }
 }
 
-export async function createWorkExperience(tenant: Tenant, data: WorkExperience): Promise<WorkExperience | null> {
+export async function createWorkExperience(data: WorkExperience): Promise<WorkExperience | null> {
   const client = await sql.connect();
   
   try {
@@ -485,12 +484,12 @@ export async function createWorkExperience(tenant: Tenant, data: WorkExperience)
     
     const experience = await client.query(`
       INSERT INTO work_experience (
-        title, company, start_date, end_date, is_current, display_order, tenant
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        title, company, start_date, end_date, is_current, display_order
+      ) VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *
     `, [
       data.title, data.company, data.startDate, data.endDate,
-      data.isCurrent, data.displayOrder || 0, tenant
+      data.isCurrent, data.displayOrder || 0
     ]);
     
     const expId = experience.rows[0].id;
@@ -499,8 +498,8 @@ export async function createWorkExperience(tenant: Tenant, data: WorkExperience)
     if (data.responsibilities?.length) {
       for (let i = 0; i < data.responsibilities.length; i++) {
         await client.query(
-          'INSERT INTO work_responsibilities (experience_id, responsibility, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [expId, data.responsibilities[i].responsibility, i, tenant]
+          'INSERT INTO work_responsibilities (experience_id, responsibility, display_order) VALUES ($1, $2, $3)',
+          [expId, data.responsibilities[i].responsibility, i]
         );
       }
     }
@@ -516,7 +515,7 @@ export async function createWorkExperience(tenant: Tenant, data: WorkExperience)
   }
 }
 
-export async function updateWorkExperience(tenant: Tenant, id: number, data: WorkExperience): Promise<WorkExperience | null> {
+export async function updateWorkExperience(id: number, data: WorkExperience): Promise<WorkExperience | null> {
   const client = await sql.connect();
   
   try {
@@ -526,26 +525,26 @@ export async function updateWorkExperience(tenant: Tenant, id: number, data: Wor
       UPDATE work_experience SET
         title = $1, company = $2, start_date = $3, end_date = $4,
         is_current = $5, display_order = $6, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $7 AND tenant = $8
+      WHERE id = $7
     `, [
       data.title, data.company, data.startDate, data.endDate,
-      data.isCurrent, data.displayOrder || 0, id, tenant
+      data.isCurrent, data.displayOrder || 0, id
     ]);
     
     // Update responsibilities
-    await client.query('DELETE FROM work_responsibilities WHERE experience_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM work_responsibilities WHERE experience_id = $1', [id]);
     if (data.responsibilities?.length) {
       for (let i = 0; i < data.responsibilities.length; i++) {
         await client.query(
-          'INSERT INTO work_responsibilities (experience_id, responsibility, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [id, data.responsibilities[i].responsibility, i, tenant]
+          'INSERT INTO work_responsibilities (experience_id, responsibility, display_order) VALUES ($1, $2, $3)',
+          [id, data.responsibilities[i].responsibility, i]
         );
       }
     }
     
     await client.query('COMMIT');
     
-    const updated = await sql<WorkExperience>`SELECT * FROM work_experience WHERE id = ${id} AND tenant = ${tenant}`;
+    const updated = await sql<WorkExperience>`SELECT * FROM work_experience WHERE id = ${id}`;
     return updated.rows[0] || null;
   } catch (error) {
     await client.query('ROLLBACK');
@@ -556,9 +555,9 @@ export async function updateWorkExperience(tenant: Tenant, id: number, data: Wor
   }
 }
 
-export async function deleteWorkExperience(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteWorkExperience(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM work_experience WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM work_experience WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting work experience:', error);
@@ -567,17 +566,17 @@ export async function deleteWorkExperience(tenant: Tenant, id: number): Promise<
 }
 
 // Education
-export async function getEducation(tenant: Tenant): Promise<Education[]> {
+export async function getEducation(): Promise<Education[]> {
   try {
     const education = await sql<Education>`
-      SELECT * FROM education WHERE tenant = ${tenant} ORDER BY display_order, graduation_year DESC
+      SELECT * FROM education ORDER BY display_order, graduation_year DESC
     `;
     
     const educationWithCourses = await Promise.all(
       education.rows.map(async (edu) => {
         const courses = await sql`
           SELECT * FROM education_courses 
-          WHERE education_id = ${edu.id} AND tenant = ${tenant}
+          WHERE education_id = ${edu.id} 
           ORDER BY display_order
         `;
         return {
@@ -594,7 +593,7 @@ export async function getEducation(tenant: Tenant): Promise<Education[]> {
   }
 }
 
-export async function createEducation(tenant: Tenant, data: Education): Promise<Education | null> {
+export async function createEducation(data: Education): Promise<Education | null> {
   const client = await sql.connect();
   
   try {
@@ -602,12 +601,12 @@ export async function createEducation(tenant: Tenant, data: Education): Promise<
     
     const education = await client.query(`
       INSERT INTO education (
-        degree, school, graduation_year, concentration, display_order, tenant
-      ) VALUES ($1, $2, $3, $4, $5, $6)
+        degree, school, graduation_year, concentration, display_order
+      ) VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `, [
       data.degree, data.school, data.graduationYear,
-      data.concentration, data.displayOrder || 0, tenant
+      data.concentration, data.displayOrder || 0
     ]);
     
     const eduId = education.rows[0].id;
@@ -616,8 +615,8 @@ export async function createEducation(tenant: Tenant, data: Education): Promise<
     if (data.courses?.length) {
       for (let i = 0; i < data.courses.length; i++) {
         await client.query(
-          'INSERT INTO education_courses (education_id, course_name, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [eduId, data.courses[i].courseName, i, tenant]
+          'INSERT INTO education_courses (education_id, course_name, display_order) VALUES ($1, $2, $3)',
+          [eduId, data.courses[i].courseName, i]
         );
       }
     }
@@ -633,7 +632,7 @@ export async function createEducation(tenant: Tenant, data: Education): Promise<
   }
 }
 
-export async function updateEducation(tenant: Tenant, id: number, data: Education): Promise<Education | null> {
+export async function updateEducation(id: number, data: Education): Promise<Education | null> {
   const client = await sql.connect();
   
   try {
@@ -643,26 +642,26 @@ export async function updateEducation(tenant: Tenant, id: number, data: Educatio
       UPDATE education SET
         degree = $1, school = $2, graduation_year = $3,
         concentration = $4, display_order = $5, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $6 AND tenant = $7
+      WHERE id = $6
     `, [
       data.degree, data.school, data.graduationYear,
-      data.concentration, data.displayOrder || 0, id, tenant
+      data.concentration, data.displayOrder || 0, id
     ]);
     
     // Update courses
-    await client.query('DELETE FROM education_courses WHERE education_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM education_courses WHERE education_id = $1', [id]);
     if (data.courses?.length) {
       for (let i = 0; i < data.courses.length; i++) {
         await client.query(
-          'INSERT INTO education_courses (education_id, course_name, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [id, data.courses[i].courseName, i, tenant]
+          'INSERT INTO education_courses (education_id, course_name, display_order) VALUES ($1, $2, $3)',
+          [id, data.courses[i].courseName, i]
         );
       }
     }
     
     await client.query('COMMIT');
     
-    const updated = await sql<Education>`SELECT * FROM education WHERE id = ${id} AND tenant = ${tenant}`;
+    const updated = await sql<Education>`SELECT * FROM education WHERE id = ${id}`;
     return updated.rows[0] || null;
   } catch (error) {
     await client.query('ROLLBACK');
@@ -673,9 +672,9 @@ export async function updateEducation(tenant: Tenant, id: number, data: Educatio
   }
 }
 
-export async function deleteEducation(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteEducation(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM education WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM education WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting education:', error);
@@ -684,11 +683,11 @@ export async function deleteEducation(tenant: Tenant, id: number): Promise<boole
 }
 
 // Tech Stack
-export async function getTechStack(tenant: Tenant): Promise<TechStackItem[]> {
+export async function getTechStack(): Promise<TechStackItem[]> {
   try {
     const result = await sql<TechStackItem>`
       SELECT * FROM tech_stack 
-      WHERE show_in_portfolio = true AND tenant = ${tenant}
+      WHERE show_in_portfolio = true 
       ORDER BY display_order, name
     `;
     return result.rows;
@@ -698,12 +697,12 @@ export async function getTechStack(tenant: Tenant): Promise<TechStackItem[]> {
   }
 }
 
-export async function updateAllTechStackLevels(tenant: Tenant, defaultLevel: number = 0.5): Promise<number> {
+export async function updateAllTechStackLevels(defaultLevel: number = 0.5): Promise<number> {
   try {
     const result = await sql`
       UPDATE tech_stack 
       SET level = ${defaultLevel}, updated_at = CURRENT_TIMESTAMP
-      WHERE tenant = ${tenant} AND (level IS NULL OR level > 10 OR level = 0 OR level = 1)
+      WHERE level IS NULL OR level > 10 OR level = 0 OR level = 1
     `;
     return result.rowCount || 0;
   } catch (error) {
@@ -712,14 +711,14 @@ export async function updateAllTechStackLevels(tenant: Tenant, defaultLevel: num
   }
 }
 
-export async function createTechStack(tenant: Tenant, data: TechStackItem): Promise<TechStackItem | null> {
+export async function createTechStack(data: TechStackItem): Promise<TechStackItem | null> {
   try {
     const result = await sql<TechStackItem>`
       INSERT INTO tech_stack (
-        name, icon, level, category, display_order, show_in_portfolio, tenant
+        name, icon, level, category, display_order, show_in_portfolio
       ) VALUES (
         ${data.name}, ${data.icon}, ${data.level}, ${data.category},
-        ${data.displayOrder || 0}, ${data.showInPortfolio ?? true}, ${tenant}
+        ${data.displayOrder || 0}, ${data.showInPortfolio ?? true}
       )
       RETURNING *
     `;
@@ -730,7 +729,7 @@ export async function createTechStack(tenant: Tenant, data: TechStackItem): Prom
   }
 }
 
-export async function updateTechStack(tenant: Tenant, id: number, data: TechStackItem): Promise<TechStackItem | null> {
+export async function updateTechStack(id: number, data: TechStackItem): Promise<TechStackItem | null> {
   try {
     const result = await sql<TechStackItem>`
       UPDATE tech_stack SET
@@ -741,7 +740,7 @@ export async function updateTechStack(tenant: Tenant, id: number, data: TechStac
         display_order = ${data.displayOrder || 0},
         show_in_portfolio = ${data.showInPortfolio ?? true},
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${id} AND tenant = ${tenant}
+      WHERE id = ${id}
       RETURNING *
     `;
     return result.rows[0];
@@ -751,9 +750,9 @@ export async function updateTechStack(tenant: Tenant, id: number, data: TechStac
   }
 }
 
-export async function deleteTechStack(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteTechStack(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM tech_stack WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM tech_stack WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting tech stack:', error);
@@ -762,17 +761,17 @@ export async function deleteTechStack(tenant: Tenant, id: number): Promise<boole
 }
 
 // Skills
-export async function getSkillCategories(tenant: Tenant): Promise<SkillCategory[]> {
+export async function getSkillCategories(): Promise<SkillCategory[]> {
   try {
     const categories = await sql<SkillCategory>`
-      SELECT * FROM skill_categories WHERE tenant = ${tenant} ORDER BY display_order
+      SELECT * FROM skill_categories ORDER BY display_order
     `;
     
     const categoriesWithSkills = await Promise.all(
       categories.rows.map(async (cat) => {
         const skills = await sql`
           SELECT * FROM skills 
-          WHERE category_id = ${cat.id} AND tenant = ${tenant}
+          WHERE category_id = ${cat.id} 
           ORDER BY display_order
         `;
         return {
@@ -789,13 +788,13 @@ export async function getSkillCategories(tenant: Tenant): Promise<SkillCategory[
   }
 }
 
-export async function createSkillCategory(tenant: Tenant, data: SkillCategory): Promise<SkillCategory | null> {
+export async function createSkillCategory(data: SkillCategory): Promise<SkillCategory | null> {
   try {
     const result = await sql<SkillCategory>`
       INSERT INTO skill_categories (
-        name, icon, display_order, tenant
+        name, icon, display_order
       ) VALUES (
-        ${data.name}, ${data.icon}, ${data.displayOrder || 0}, ${tenant}
+        ${data.name}, ${data.icon}, ${data.displayOrder || 0}
       )
       RETURNING *
     `;
@@ -806,14 +805,14 @@ export async function createSkillCategory(tenant: Tenant, data: SkillCategory): 
   }
 }
 
-export async function updateSkillCategory(tenant: Tenant, id: number, data: SkillCategory): Promise<SkillCategory | null> {
+export async function updateSkillCategory(id: number, data: SkillCategory): Promise<SkillCategory | null> {
   try {
     const result = await sql<SkillCategory>`
       UPDATE skill_categories SET
         name = ${data.name},
         icon = ${data.icon},
         display_order = ${data.displayOrder || 0}
-      WHERE id = ${id} AND tenant = ${tenant}
+      WHERE id = ${id}
       RETURNING *
     `;
     return result.rows[0];
@@ -823,9 +822,9 @@ export async function updateSkillCategory(tenant: Tenant, id: number, data: Skil
   }
 }
 
-export async function deleteSkillCategory(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteSkillCategory(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM skill_categories WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM skill_categories WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting skill category:', error);
@@ -833,13 +832,13 @@ export async function deleteSkillCategory(tenant: Tenant, id: number): Promise<b
   }
 }
 
-export async function createSkill(tenant: Tenant, categoryId: number, skillName: string): Promise<Skill | null> {
+export async function createSkill(categoryId: number, skillName: string): Promise<Skill | null> {
   try {
     const result = await sql<Skill>`
       INSERT INTO skills (
-        category_id, skill_name, display_order, tenant
+        category_id, skill_name, display_order
       ) VALUES (
-        ${categoryId}, ${skillName}, 0, ${tenant}
+        ${categoryId}, ${skillName}, 0
       )
       RETURNING *
     `;
@@ -850,12 +849,12 @@ export async function createSkill(tenant: Tenant, categoryId: number, skillName:
   }
 }
 
-export async function updateSkill(tenant: Tenant, id: number, skillName: string): Promise<Skill | null> {
+export async function updateSkill(id: number, skillName: string): Promise<Skill | null> {
   try {
     const result = await sql<Skill>`
       UPDATE skills SET
         skill_name = ${skillName}
-      WHERE id = ${id} AND tenant = ${tenant}
+      WHERE id = ${id}
       RETURNING *
     `;
     return result.rows[0];
@@ -865,9 +864,9 @@ export async function updateSkill(tenant: Tenant, id: number, skillName: string)
   }
 }
 
-export async function deleteSkill(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteSkill(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM skills WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM skills WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting skill:', error);
@@ -876,10 +875,10 @@ export async function deleteSkill(tenant: Tenant, id: number): Promise<boolean> 
 }
 
 // Process & Strategy
-export async function getProcessStrategies(tenant: Tenant): Promise<ProcessStrategy[]> {
+export async function getProcessStrategies(): Promise<ProcessStrategy[]> {
   try {
     const result = await sql<ProcessStrategy>`
-      SELECT * FROM process_strategy WHERE tenant = ${tenant} ORDER BY display_order
+      SELECT * FROM process_strategy ORDER BY display_order
     `;
     return result.rows;
   } catch (error) {
@@ -888,14 +887,14 @@ export async function getProcessStrategies(tenant: Tenant): Promise<ProcessStrat
   }
 }
 
-export async function createProcessStrategy(tenant: Tenant, data: ProcessStrategy): Promise<ProcessStrategy | null> {
+export async function createProcessStrategy(data: ProcessStrategy): Promise<ProcessStrategy | null> {
   try {
     const result = await sql<ProcessStrategy>`
       INSERT INTO process_strategy (
-        title, description, icon, display_order, tenant
+        title, description, icon, display_order
       ) VALUES (
         ${data.title}, ${data.description}, ${data.icon},
-        ${data.displayOrder || 0}, ${tenant}
+        ${data.displayOrder || 0}
       )
       RETURNING *
     `;
@@ -906,7 +905,7 @@ export async function createProcessStrategy(tenant: Tenant, data: ProcessStrateg
   }
 }
 
-export async function updateProcessStrategy(tenant: Tenant, id: number, data: ProcessStrategy): Promise<ProcessStrategy | null> {
+export async function updateProcessStrategy(id: number, data: ProcessStrategy): Promise<ProcessStrategy | null> {
   try {
     const result = await sql<ProcessStrategy>`
       UPDATE process_strategy SET
@@ -915,7 +914,7 @@ export async function updateProcessStrategy(tenant: Tenant, id: number, data: Pr
         icon = ${data.icon},
         display_order = ${data.displayOrder || 0},
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${id} AND tenant = ${tenant}
+      WHERE id = ${id}
       RETURNING *
     `;
     return result.rows[0];
@@ -925,9 +924,9 @@ export async function updateProcessStrategy(tenant: Tenant, id: number, data: Pr
   }
 }
 
-export async function deleteProcessStrategy(tenant: Tenant, id: number): Promise<boolean> {
+export async function deleteProcessStrategy(id: number): Promise<boolean> {
   try {
-    await sql`DELETE FROM process_strategy WHERE id = ${id} AND tenant = ${tenant}`;
+    await sql`DELETE FROM process_strategy WHERE id = ${id}`;
     return true;
   } catch (error) {
     console.error('Error deleting process strategy:', error);
@@ -992,73 +991,4 @@ export async function runMigration002(): Promise<boolean> {
     console.error('Error running migration 002:', error);
     return false;
   }
-}
-
-// Copy content between tenants
-export async function copyProjectToTenant(projectId: number, fromTenant: Tenant, toTenant: Tenant): Promise<Project | null> {
-  const project = await getProject(fromTenant, projectId);
-  if (!project) return null;
-  
-  // Remove the id to create a new project
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...projectData } = project;
-  return await createProject(toTenant, projectData as Project);
-}
-
-export async function copyWorkExperienceToTenant(expId: number, fromTenant: Tenant, toTenant: Tenant): Promise<WorkExperience | null> {
-  const experiences = await getWorkExperience(fromTenant);
-  const experience = experiences.find(exp => exp.id === expId);
-  if (!experience) return null;
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...expData } = experience;
-  return await createWorkExperience(toTenant, expData as WorkExperience);
-}
-
-export async function copyEducationToTenant(eduId: number, fromTenant: Tenant, toTenant: Tenant): Promise<Education | null> {
-  const educationList = await getEducation(fromTenant);
-  const education = educationList.find(edu => edu.id === eduId);
-  if (!education) return null;
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...eduData } = education;
-  return await createEducation(toTenant, eduData as Education);
-}
-
-export async function copyTechStackToTenant(techId: number, fromTenant: Tenant, toTenant: Tenant): Promise<TechStackItem | null> {
-  const techStack = await getTechStack(fromTenant);
-  const tech = techStack.find(t => t.id === techId);
-  if (!tech) return null;
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...techData } = tech;
-  return await createTechStack(toTenant, techData as TechStackItem);
-}
-
-export async function copySkillCategoryToTenant(catId: number, fromTenant: Tenant, toTenant: Tenant): Promise<SkillCategory | null> {
-  const categories = await getSkillCategories(fromTenant);
-  const category = categories.find(cat => cat.id === catId);
-  if (!category) return null;
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, skills, ...catData } = category;
-  const newCategory = await createSkillCategory(toTenant, catData as SkillCategory);
-  
-  if (newCategory && skills) {
-    for (const skill of skills) {
-      await createSkill(toTenant, newCategory.id, skill.skillName);
-    }
-  }
-  
-  return newCategory;
-}
-
-export async function copyProcessStrategyToTenant(strategyId: number, fromTenant: Tenant, toTenant: Tenant): Promise<ProcessStrategy | null> {
-  const strategies = await getProcessStrategies(fromTenant);
-  const strategy = strategies.find(s => s.id === strategyId);
-  if (!strategy) return null;
-  
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { id, ...strategyData } = strategy;
-  return await createProcessStrategy(toTenant, strategyData as ProcessStrategy);
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { updateTechStack, deleteTechStack } from '@/lib/database/db';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
 export async function PUT(
   request: Request,
@@ -8,10 +9,11 @@ export async function PUT(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
     const data = await request.json();
     
-    const tech = await updateTechStack(parseInt(id), data);
+    const tech = await updateTechStack(tenant, parseInt(id), data);
     
     if (!tech) {
       return NextResponse.json(
@@ -36,9 +38,10 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id } = await params;
     
-    const success = await deleteTechStack(parseInt(id));
+    const success = await deleteTechStack(tenant, parseInt(id));
     
     if (!success) {
       return NextResponse.json(

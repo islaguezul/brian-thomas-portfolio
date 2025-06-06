@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { RefreshCw, CheckCircle, AlertCircle, Upload, AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface MigrateButtonProps {
   disabled?: boolean;
@@ -31,7 +32,7 @@ export default function MigrateButton({ disabled }: MigrateButtonProps) {
     setMessage('Checking for existing data...');
 
     try {
-      const response = await fetch('/api/admin/database/migrate-hardcoded', {
+      const response = await adminFetch('/api/admin/database/migrate-hardcoded', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode: 'check' })
@@ -61,7 +62,7 @@ export default function MigrateButton({ disabled }: MigrateButtonProps) {
     setMessage(mode === 'replace' ? 'Clearing existing data and migrating...' : 'Migrating data...');
 
     try {
-      const response = await fetch('/api/admin/database/migrate-hardcoded', {
+      const response = await adminFetch('/api/admin/database/migrate-hardcoded', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode })

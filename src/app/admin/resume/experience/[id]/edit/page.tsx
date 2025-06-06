@@ -3,10 +3,12 @@ import { getWorkExperience } from '@/lib/database/db';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 
 export default async function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const experiences = await getWorkExperience();
+  const tenant = await getAdminSelectedTenant();
+  const experiences = await getWorkExperience(tenant);
   const experience = experiences.find(exp => exp.id === parseInt(id));
   
   if (!experience) {

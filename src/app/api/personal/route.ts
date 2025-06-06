@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getPersonalInfo } from '@/lib/database/db';
+import { getTenantFromHeaders } from '@/lib/tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const personalInfo = await getPersonalInfo();
+    const tenant = getTenantFromHeaders(request.headers);
+    const personalInfo = await getPersonalInfo(tenant);
     return NextResponse.json(personalInfo, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',

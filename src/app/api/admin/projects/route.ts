@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { getProjects, createProject } from '@/lib/database/db';
 import { notifyContentUpdate } from '@/lib/notify-updates';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     await requireAuth();
-    const projects = await getProjects();
+    const tenant = getAdminTenant(request.headers);
+    const projects = await getProjects(tenant);
     return NextResponse.json(projects);
   } catch (error) {
     console.error('Error fetching projects:', error);
@@ -20,8 +22,9 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const data = await request.json();
-    const project = await createProject(data);
+    const project = await createProject(tenant, data);
     
     if (!project) {
       return NextResponse.json(

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Plus, Trash2, Edit3, Save, X } from 'lucide-react';
 import type { SkillCategory } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
 export default function SkillsPage() {
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,7 @@ export default function SkillsPage() {
 
   async function loadSkillCategories() {
     try {
-      const response = await fetch('/api/admin/content/skills');
+      const response = await adminFetch('/api/admin/content/skills');
       if (response.ok) {
         const categories = await response.json();
         setSkillCategories(categories);
@@ -32,7 +33,7 @@ export default function SkillsPage() {
 
   async function saveCategory(category: SkillCategory) {
     try {
-      const response = await fetch('/api/admin/content/skills/categories', {
+      const response = await adminFetch('/api/admin/content/skills/categories', {
         method: category.id ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(category),
@@ -51,7 +52,7 @@ export default function SkillsPage() {
     if (!confirm('Are you sure you want to delete this category and all its skills?')) return;
     
     try {
-      const response = await fetch(`/api/admin/content/skills/categories/${id}`, {
+      const response = await adminFetch(`/api/admin/content/skills/categories/${id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -64,7 +65,7 @@ export default function SkillsPage() {
 
   async function addSkill(categoryId: number, skillName: string) {
     try {
-      const response = await fetch('/api/admin/content/skills', {
+      const response = await adminFetch('/api/admin/content/skills', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ categoryId, skillName }),
@@ -81,7 +82,7 @@ export default function SkillsPage() {
 
   async function updateSkill(skillId: number, skillName: string) {
     try {
-      const response = await fetch(`/api/admin/content/skills/${skillId}`, {
+      const response = await adminFetch(`/api/admin/content/skills/${skillId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ skillName }),
@@ -97,7 +98,7 @@ export default function SkillsPage() {
 
   async function deleteSkill(skillId: number) {
     try {
-      const response = await fetch(`/api/admin/content/skills/${skillId}`, {
+      const response = await adminFetch(`/api/admin/content/skills/${skillId}`, {
         method: 'DELETE',
       });
       if (response.ok) {

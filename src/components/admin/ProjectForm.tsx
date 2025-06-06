@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import type { Project, ProjectScreenshot } from '@/lib/database/types';
 import { getTechEmoji } from '@/lib/icons';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface ProjectFormProps {
   project?: Project;
@@ -63,7 +64,7 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
         ? '/api/admin/projects' 
         : `/api/admin/projects/${project?.id}`;
       
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method: isNew ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -249,7 +250,7 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
 
   const enhanceText = async (field: keyof Project) => {
     try {
-      const response = await fetch('/api/admin/ai/enhance', {
+      const response = await adminFetch('/api/admin/ai/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -273,7 +274,7 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
     if (!formData.description) return;
     
     try {
-      const response = await fetch('/api/admin/ai/enhance', {
+      const response = await adminFetch('/api/admin/ai/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -298,7 +299,7 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
     if (!formData.description) return;
     
     try {
-      const response = await fetch('/api/admin/ai/enhance', {
+      const response = await adminFetch('/api/admin/ai/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

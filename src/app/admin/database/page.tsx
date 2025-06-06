@@ -1,9 +1,6 @@
 import { sql } from '@vercel/postgres';
 import { Database, AlertCircle, CheckCircle } from 'lucide-react';
-import InitializeButton from '@/components/admin/InitializeButton';
-import SeedButton from '@/components/admin/SeedButton';
-import MigrateButton from '@/components/admin/MigrateButton';
-import TechStackResetButton from '@/components/admin/TechStackResetButton';
+import ProductMetricsMigrateButton from '@/components/admin/ProductMetricsMigrateButton';
 
 async function checkDatabaseStatus() {
   try {
@@ -131,38 +128,18 @@ export default async function DatabasePage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-3">1. Initialize Database</h3>
-          <p className="text-gray-400 text-sm mb-4">
-            Create all necessary tables and database structure. Run this first.
-          </p>
-          <InitializeButton />
-        </div>
-
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-3">2. Migrate Hardcoded Data</h3>
-          <p className="text-gray-400 text-sm mb-4">
-            Import all existing hardcoded content from your Resume and Portfolio.
-          </p>
-          <MigrateButton disabled={!status.tablesExist} />
-        </div>
-
-        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-3">3. Seed Database (Optional)</h3>
-          <p className="text-gray-400 text-sm mb-4">
-            Add sample data for testing. Skip if you ran migration.
-          </p>
-          <SeedButton disabled={!status.tablesExist} />
-        </div>
-      </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-3">Fix Tech Stack Years</h3>
-        <p className="text-gray-400 text-sm mb-4">
-          Reset all tech stack levels from old percentages (70s-90s) to realistic 0.5 years baseline.
-        </p>
-        <TechStackResetButton />
+        <h3 className="text-lg font-semibold text-white mb-4">Database Migrations</h3>
+        <div className="space-y-4">
+          <div className="pb-4 border-b border-gray-800">
+            <h4 className="text-white font-medium mb-2">Product Metrics Tables</h4>
+            <p className="text-gray-400 text-sm mb-4">
+              Add tables for tracking product management metrics, achievements, and impact.
+            </p>
+            <ProductMetricsMigrateButton />
+          </div>
+        </div>
       </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">

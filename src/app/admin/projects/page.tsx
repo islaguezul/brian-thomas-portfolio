@@ -1,9 +1,59 @@
-import Link from 'next/link';
-import { Plus, Edit, Trash2, ExternalLink, Github, Eye, EyeOff } from 'lucide-react';
-import { getProjects } from '@/lib/database/db';
+'use client';
 
-export default async function ProjectsPage() {
-  const projects = await getProjects();
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Plus, Edit, Trash2, ExternalLink, GitBranch, Eye, EyeOff } from 'lucide-react';
+import type { Project } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
+
+export default function ProjectsPage() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  async function loadProjects() {
+    try {
+      const response = await adminFetch('/api/admin/projects');
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(id);
+    
+    try {
+      const response = await adminFetch(`/api/admin/projects/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Remove from local state
+        setProjects(projects.filter(p => p.id !== id));
+      } else {
+        alert('Failed to delete project');
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Failed to delete project');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const getStageColor = (stage: string) => {
     const colors = {
@@ -16,6 +66,14 @@ export default async function ProjectsPage() {
     };
     return colors[stage as keyof typeof colors] || colors.concept;
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -84,7 +142,7 @@ export default async function ProjectsPage() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors"
                       >
-                        <Github className="w-4 h-4" />
+                        <GitBranch className="w-4 h-4" />
                         <span>GitHub</span>
                       </a>
                     ) : (
@@ -122,10 +180,12 @@ export default async function ProjectsPage() {
                     <Edit className="w-4 h-4 text-gray-300" />
                   </Link>
                   <button
-                    className="p-2 bg-gray-800 hover:bg-red-900/50 rounded-lg transition-colors"
+                    onClick={() => project.id && handleDelete(project.id, project.name)}
+                    disabled={deletingId === project.id}
+                    className="p-2 bg-gray-800 hover:bg-red-900/50 rounded-lg transition-colors disabled:opacity-50"
                     title="Delete project"
                   >
-                    <Trash2 className="w-4 h-4 text-gray-300 hover:text-red-400" />
+                    <Trash2 className={`w-4 h-4 ${deletingId === project.id ? 'text-gray-600' : 'text-gray-300 hover:text-red-400'}`} />
                   </button>
                 </div>
               </div>

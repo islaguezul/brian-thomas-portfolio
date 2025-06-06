@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
 import { deleteSkillCategory } from '@/lib/database/db';
+import { getAdminTenant } from '@/lib/admin-tenant';
 
 export async function DELETE(
   request: Request,
@@ -8,10 +9,11 @@ export async function DELETE(
 ) {
   try {
     await requireAuth();
+    const tenant = getAdminTenant(request.headers);
     const { id: idParam } = await params;
     const id = parseInt(idParam);
     
-    const success = await deleteSkillCategory(id);
+    const success = await deleteSkillCategory(tenant, id);
     if (success) {
       return NextResponse.json({ success: true });
     } else {

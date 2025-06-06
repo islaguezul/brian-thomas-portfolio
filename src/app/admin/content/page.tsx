@@ -5,12 +5,14 @@ import {
 import { getTechStack, getSkillCategories, getProcessStrategies } from '@/lib/database/db';
 import Link from 'next/link';
 import TechStackCards from '@/components/admin/TechStackCards';
+import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 
 export default async function ContentPage() {
+  const tenant = await getAdminSelectedTenant();
   const [techStack, skillCategories, processStrategies] = await Promise.all([
-    getTechStack(),
-    getSkillCategories(),
-    getProcessStrategies(),
+    getTechStack(tenant),
+    getSkillCategories(tenant),
+    getProcessStrategies(tenant),
   ]);
 
   return (

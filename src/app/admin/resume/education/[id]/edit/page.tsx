@@ -3,10 +3,12 @@ import { getEducation } from '@/lib/database/db';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 
 export default async function EditEducationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const educationList = await getEducation();
+  const tenant = await getAdminSelectedTenant();
+  const educationList = await getEducation(tenant);
   const education = educationList.find(edu => edu.id === parseInt(id));
   
   if (!education) {

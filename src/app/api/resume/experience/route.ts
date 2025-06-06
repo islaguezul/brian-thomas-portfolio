@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getWorkExperience } from '@/lib/database/db';
+import { getTenantFromHeaders } from '@/lib/tenant';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const experience = await getWorkExperience();
+    const tenant = getTenantFromHeaders(request.headers);
+    const experience = await getWorkExperience(tenant);
     console.log('Public API - Work experience fetched:', experience.length, 'items');
     return NextResponse.json(experience);
   } catch (error) {

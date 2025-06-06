@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Save, Sparkles, User, Mail, Phone, MapPin, Github, Linkedin, FileText, Link, CheckCircle, AlertCircle } from 'lucide-react';
 import type { PersonalInfo } from '@/lib/database/types';
+import { adminFetch } from '@/lib/admin-fetch';
 
 export default function PersonalInfoPage() {
   const [loading, setLoading] = useState(true);
@@ -29,7 +30,7 @@ export default function PersonalInfoPage() {
 
   async function loadPersonalInfo() {
     try {
-      const response = await fetch('/api/admin/personal');
+      const response = await adminFetch('/api/admin/personal');
       if (response.ok) {
         const info = await response.json();
         if (info) {
@@ -47,7 +48,7 @@ export default function PersonalInfoPage() {
     setSaving(true);
     setSaveStatus('idle');
     try {
-      const response = await fetch('/api/admin/personal', {
+      const response = await adminFetch('/api/admin/personal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(personalInfo),
@@ -69,7 +70,7 @@ export default function PersonalInfoPage() {
 
   async function enhanceText(field: keyof PersonalInfo) {
     try {
-      const response = await fetch('/api/admin/ai/enhance', {
+      const response = await adminFetch('/api/admin/ai/enhance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

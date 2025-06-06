@@ -3,10 +3,12 @@ import { getTechStack } from '@/lib/database/db';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 
 export default async function EditTechStackPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const techStack = await getTechStack();
+  const tenant = await getAdminSelectedTenant();
+  const techStack = await getTechStack(tenant);
   const tech = techStack.find(t => t.id === parseInt(id));
   
   if (!tech) {

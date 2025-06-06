@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Save } from 'lucide-react';
 import type { TechStackItem } from '@/lib/database/types';
 import { techCategories, getTechEmoji } from '@/lib/icons';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface TechStackFormProps {
   tech?: TechStackItem;
@@ -32,7 +33,7 @@ export default function TechStackForm({ tech, isNew = false }: TechStackFormProp
         ? '/api/admin/content/tech-stack' 
         : `/api/admin/content/tech-stack/${tech?.id}`;
       
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method: isNew ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

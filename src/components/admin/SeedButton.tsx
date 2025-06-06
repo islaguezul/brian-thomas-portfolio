@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { RefreshCw, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { adminFetch } from '@/lib/admin-fetch';
 
 interface SeedButtonProps {
   disabled?: boolean;
@@ -20,7 +21,7 @@ export default function SeedButton({ disabled }: SeedButtonProps) {
     setMessage('');
 
     try {
-      const response = await fetch('/api/admin/database/seed', {
+      const response = await adminFetch('/api/admin/database/seed', {
         method: 'POST',
       });
 

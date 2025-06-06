@@ -18,6 +18,8 @@ const MainPortfolio = () => {
   const [isClient, setIsClient] = useState(false);
   const [dbProjects, setDbProjects] = useState<DBProject[]>([]);
   const [personalInfo, setPersonalInfo] = useState<{ bio?: string } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_workExperience, setWorkExperience] = useState<{ company: string; role: string; startDate: string; endDate?: string; description?: string }[]>([]);
 
   useRealtimeUpdates((message) => {
     if (message.type === 'content-update') {
@@ -78,6 +80,18 @@ const MainPortfolio = () => {
     }
   };
 
+  const fetchWorkExperience = async () => {
+    try {
+      const response = await fetch('/api/resume/experience');
+      if (response.ok) {
+        const experience = await response.json();
+        setWorkExperience(experience);
+      }
+    } catch (error) {
+      console.error('Error fetching work experience:', error);
+    }
+  };
+
   const techSkills = [
     { subject: 'React/Next.js', A: 95, fullMark: 100 },
     { subject: 'Python/AI', A: 88, fullMark: 100 },
@@ -99,6 +113,7 @@ const MainPortfolio = () => {
   useEffect(() => {
     fetchProjects();
     fetchPersonalInfo();
+    fetchWorkExperience();
   }, []);
 
   // Initialize trading simulation with backtest data
@@ -445,25 +460,29 @@ const MainPortfolio = () => {
 
   const finalProjects = mergedProjects;
 
-  const deployDate = new Date('2024-12-01');
-  const currentDate = new Date();
-  const daysLive = Math.floor((currentDate.getTime() - deployDate.getTime()) / (1000 * 60 * 60 * 24));
+  // const deployDate = new Date('2024-12-01');
+  // const currentDate = new Date();
+  // const daysLive = Math.floor((currentDate.getTime() - deployDate.getTime()) / (1000 * 60 * 60 * 24));
   
-  const startYear = 2011;
-  const currentYear = new Date().getFullYear();
-  const yearsExperience = currentYear - startYear;
+  // const startYear = 2011;
+  // const currentYear = new Date().getFullYear();
+  // const yearsExperience = currentYear - startYear;
   
-  const uniqueTechs = new Set<string>();
-  finalProjects.forEach(project => {
-    project.tech.forEach(tech => uniqueTechs.add(tech));
-  });
-  const techStackSize = uniqueTechs.size;
+  // const uniqueTechs = new Set<string>();
+  // finalProjects.forEach(project => {
+  //   project.tech.forEach(tech => uniqueTechs.add(tech));
+  // });
+  // const techStackSize = uniqueTechs.size;
+  
+  // Calculate actual companies from work experience
+  // const uniqueCompanies = new Set(workExperience.map(exp => exp.company));
+  // const companiesCount = uniqueCompanies.size || 10; // Fallback if data not loaded
   
   const siteMetrics = {
-    performance: '98/100',
-    'relevant experience': `${yearsExperience}+ Years`,
-    'tech stack': `${techStackSize} Tools`,
-    uptime: `${daysLive} Days`
+    performance: 98,
+    accessibility: 96,
+    seo: 94,
+    uptime: 99.9
   };
 
   return (
@@ -528,16 +547,13 @@ const MainPortfolio = () => {
                     </div>
 
                     {/* Live Site Metrics */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-4 mb-6">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 pt-8">
                       {Object.entries(siteMetrics).map(([key, value]) => (
-                        <div key={key} className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-500 group overflow-hidden hover-lift">
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/10 group-hover:to-purple-500/10 transition-all duration-500"></div>
-                          <div className="relative">
-                            <div className="text-2xl font-bold text-transparent bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text group-hover:scale-110 transition-transform">
-                              {value}
-                            </div>
-                            <div className="text-sm text-slate-400 capitalize mt-1">{key}</div>
+                        <div key={key} className="bg-slate-800/50 backdrop-blur-sm rounded-lg p-4 border border-slate-700 hover:border-blue-500/50 transition-all duration-300 group">
+                          <div className="text-2xl font-bold text-green-400 group-hover:scale-110 transition-transform">
+                            {value}{key === 'uptime' ? '%' : '/100'}
                           </div>
+                          <div className="text-sm text-slate-400 capitalize">{key === 'seo' ? 'SEO' : key}</div>
                         </div>
                       ))}
                     </div>
@@ -552,26 +568,18 @@ const MainPortfolio = () => {
                       </h3>
                       <div className="grid grid-cols-3 gap-3">
                         {[
-                          { name: 'React', icon: '⚛️', level: 95 },
-                          { name: 'Node.js', icon: '🟢', level: 90 },
-                          { name: 'Python', icon: '🐍', level: 88 },
-                          { name: 'OpenAI', icon: '🤖', level: 85 },
-                          { name: 'PostgreSQL', icon: '🐘', level: 87 },
-                          { name: 'Docker', icon: '🐳', level: 82 }
+                          { name: 'React', icon: '⚛️' },
+                          { name: 'Node.js', icon: '🟢' },
+                          { name: 'Python', icon: '🐍' },
+                          { name: 'OpenAI', icon: '🤖' },
+                          { name: 'PostgreSQL', icon: '🐘' },
+                          { name: 'Docker', icon: '🐳' }
                         ].map((tech) => (
                           <div key={tech.name} className="relative bg-gradient-to-br from-slate-700/30 to-slate-800/30 rounded-xl p-4 text-center hover:from-slate-700/50 hover:to-slate-800/50 transition-all duration-300 cursor-pointer group border border-slate-700/30 hover:border-purple-500/30 backdrop-blur-sm overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-t from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/10 group-hover:to-transparent transition-all duration-500"></div>
                             <div className="relative">
-                              <div className="text-3xl mb-1 group-hover:scale-125 transition-transform duration-300">{tech.icon}</div>
-                              <div className="text-xs text-slate-300 font-semibold mb-2">{tech.name}</div>
-                              <div className="w-full bg-slate-600/50 rounded-full h-1.5 overflow-hidden">
-                                <div 
-                                  className="bg-gradient-to-r from-purple-400 to-pink-400 h-full rounded-full transition-all duration-1000 relative"
-                                  style={{ width: `${tech.level}%` }}
-                                >
-                                  <div className="absolute inset-0 bg-white/20 animate-shimmer"></div>
-                                </div>
-                              </div>
+                              <div className="text-3xl mb-2 group-hover:scale-125 transition-transform duration-300">{tech.icon}</div>
+                              <div className="text-sm text-slate-300 font-semibold">{tech.name}</div>
                             </div>
                           </div>
                         ))}

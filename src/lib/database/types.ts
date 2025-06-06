@@ -187,3 +187,94 @@ export interface AdminUser {
   createdAt?: Date;
   lastLogin?: Date;
 }
+
+// Product Management Metrics Types
+export interface ProductMetricsSummary {
+  id?: number;
+  tenantId?: string;
+  totalUsersImpacted?: number;
+  totalRevenueInfluenced?: number;
+  totalCostSavings?: number;
+  totalEfficiencyGains?: number;
+  totalNpsImprovement?: number;
+  totalTeamMembersLed?: number;
+  totalStakeholdersManaged?: number;
+  totalProductsLaunched?: number;
+  averageTimeToMarket?: number;
+  featureAdoptionRate?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface ProjectProductMetrics {
+  id?: number;
+  projectId: number;
+  tenantId?: string;
+  // User Impact
+  usersImpacted?: number;
+  userGrowthRate?: number;
+  dauMauRatio?: number;
+  retentionRate?: number;
+  // Business Impact
+  revenueImpact?: number;
+  costSavings?: number;
+  roiPercentage?: number;
+  paybackPeriodMonths?: number;
+  // Product Performance
+  launchDate?: Date | string;
+  timeToMarketDays?: number;
+  featureAdoptionRate?: number;
+  npsScore?: number;
+  npsImprovement?: number;
+  customerSatisfaction?: number;
+  // Technical Excellence
+  performanceImprovement?: number;
+  systemUptime?: number;
+  deploymentFrequency?: string;
+  leadTimeHours?: number;
+  mttrMinutes?: number;
+  // Team & Process
+  teamSize?: number;
+  stakeholdersCount?: number;
+  crossFunctionalTeams?: number;
+  sprintVelocityImprovement?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface KeyAchievement {
+  id?: number;
+  tenantId?: string;
+  title: string;
+  metricValue: string;
+  metricUnit?: string;
+  context?: string;
+  achievementDate?: Date | string;
+  category: 'user_impact' | 'revenue' | 'efficiency' | 'leadership' | 'innovation';
+  displayOrder?: number;
+  isFeatured?: boolean;
+  createdAt?: Date;
+}
+
+export interface ProductStrategy {
+  id?: number;
+  projectId: number;
+  tenantId?: string;
+  strategyType: 'vision' | 'goal' | 'initiative' | 'hypothesis' | 'experiment';
+  description: string;
+  successCriteria?: string;
+  actualOutcome?: string;
+  status: 'planned' | 'in_progress' | 'completed' | 'validated' | 'invalidated';
+  displayOrder?: number;
+  createdAt?: Date;
+}
+
+export interface StakeholderImpact {
+  id?: number;
+  projectId: number;
+  tenantId?: string;
+  stakeholderType: string;
+  impactDescription: string;
+  satisfactionScore?: number;
+  displayOrder?: number;
+}
