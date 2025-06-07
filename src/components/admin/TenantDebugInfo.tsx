@@ -21,8 +21,18 @@ interface TenantDebugData {
   };
 }
 
+interface DatabaseDebugData {
+  byTenant: { tenant: string; count: string; names: string[] }[];
+  tableStructure: { column_name: string; data_type: string; is_nullable: string }[];
+  totalCount: string;
+  recentRecords: { id: number; name: string; tenant: string; created_at: string; updated_at: string }[];
+  noTenantCount: string;
+  timestamp: string;
+}
+
 export default function TenantDebugInfo() {
   const [debugData, setDebugData] = useState<TenantDebugData | null>(null);
+  const [dbData, setDbData] = useState<DatabaseDebugData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,12 +40,23 @@ export default function TenantDebugInfo() {
     setLoading(true);
     setError(null);
     try {
-      const response = await adminFetch('/api/admin/debug/tech-stack-tenants');
-      if (response.ok) {
-        const data = await response.json();
+      const [tenantsResponse, dbResponse] = await Promise.all([
+        adminFetch('/api/admin/debug/tech-stack-tenants'),
+        adminFetch('/api/admin/debug/database-contents')
+      ]);
+      
+      if (tenantsResponse.ok) {
+        const data = await tenantsResponse.json();
         setDebugData(data);
       } else {
-        setError('Failed to fetch debug data');
+        setError('Failed to fetch tenant debug data');
+      }
+      
+      if (dbResponse.ok) {
+        const data = await dbResponse.json();
+        setDbData(data);
+      } else {
+        setError('Failed to fetch database debug data');
       }
     } catch (err) {
       setError('Error fetching debug data');
@@ -69,7 +90,7 @@ export default function TenantDebugInfo() {
       )}
       
       {debugData && (
-        <div className="space-y-3 text-sm">
+        <div className="space-y-4 text-sm">
           <div>
             <h4 className="text-yellow-300 font-medium mb-1">Tenant Values:</h4>
             <div className="grid grid-cols-3 gap-4 text-xs">
@@ -89,7 +110,7 @@ export default function TenantDebugInfo() {
           </div>
           
           <div>
-            <h4 className="text-yellow-300 font-medium mb-1">Tech Stack Counts:</h4>
+            <h4 className="text-yellow-300 font-medium mb-1">Tech Stack Counts by Query Method:</h4>
             <div className="grid grid-cols-3 gap-4 text-xs">
               <div>
                 <span className="text-gray-400">Admin:</span> 
@@ -105,20 +126,59 @@ export default function TenantDebugInfo() {
               </div>
             </div>
           </div>
-          
+        </div>
+      )}
+      
+      {dbData && (
+        <div className="space-y-4 text-sm border-t border-yellow-600/30 pt-4 mt-4">
           <div>
-            <h4 className="text-yellow-300 font-medium mb-1">Request Headers:</h4>
-            <div className="text-xs space-y-1">
+            <h4 className="text-yellow-300 font-medium mb-2">Database Analysis:</h4>
+            <div className="space-y-2 text-xs">
               <div>
-                <span className="text-gray-400">x-admin-tenant:</span> 
-                <span className="text-white ml-1">{debugData.headers['x-admin-tenant'] || 'null'}</span>
+                <span className="text-gray-400">Total records in tech_stack:</span> 
+                <span className="text-white ml-1">{dbData.totalCount}</span>
               </div>
               <div>
-                <span className="text-gray-400">x-tenant:</span> 
-                <span className="text-white ml-1">{debugData.headers['x-tenant'] || 'null'}</span>
+                <span className="text-gray-400">Records without tenant:</span> 
+                <span className="text-white ml-1">{dbData.noTenantCount}</span>
               </div>
             </div>
           </div>
+          
+          {dbData.byTenant.length > 0 && (
+            <div>
+              <h4 className="text-yellow-300 font-medium mb-1">Records by Tenant:</h4>
+              <div className="space-y-1 text-xs">
+                {dbData.byTenant.map((tenant, i) => (
+                  <div key={i}>
+                    <span className="text-gray-400">{tenant.tenant}:</span> 
+                    <span className="text-white ml-1">{tenant.count} items</span>
+                    {tenant.names && tenant.names.length > 0 && (
+                      <div className="ml-4 text-gray-500">
+                        {tenant.names.slice(0, 3).join(', ')}
+                        {tenant.names.length > 3 && ` +${tenant.names.length - 3} more`}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {dbData.recentRecords.length > 0 && (
+            <div>
+              <h4 className="text-yellow-300 font-medium mb-1">Recent Records:</h4>
+              <div className="space-y-1 text-xs">
+                {dbData.recentRecords.slice(0, 3).map((record, i) => (
+                  <div key={i} className="text-gray-400">
+                    <span className="text-white">{record.name}</span> 
+                    <span className="ml-2">({record.tenant})</span>
+                    <span className="ml-2">{new Date(record.updated_at).toLocaleDateString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
