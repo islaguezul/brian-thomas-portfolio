@@ -52,7 +52,7 @@ export async function GET(_request: NextRequest) {
   } catch (error) {
     console.error('Error in database contents debug:', error);
     return NextResponse.json(
-      { error: 'Failed to debug database contents', details: error.message },
+      { error: 'Failed to debug database contents', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
