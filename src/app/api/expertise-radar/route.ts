@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { sql } from '@vercel/postgres';
-import { getPublicTenant } from '@/lib/tenant-utils';
+import { getTenantFromHeaders } from '@/lib/tenant';
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const tenant = getPublicTenant();
+    const tenant = getTenantFromHeaders(request.headers);
 
     const result = await sql`
       SELECT skill_name, skill_level, category, description, color, display_order, is_active
