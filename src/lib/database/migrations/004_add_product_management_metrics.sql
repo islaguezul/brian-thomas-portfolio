@@ -100,18 +100,66 @@ CREATE TABLE IF NOT EXISTS stakeholder_impacts (
     display_order INTEGER DEFAULT 0
 );
 
--- Create indexes for performance
-CREATE INDEX idx_product_metrics_tenant ON product_metrics_summary(tenant_id);
-CREATE INDEX idx_project_metrics_tenant ON project_product_metrics(tenant_id);
-CREATE INDEX idx_project_metrics_project ON project_product_metrics(project_id);
-CREATE INDEX idx_achievements_tenant ON key_achievements(tenant_id);
-CREATE INDEX idx_achievements_featured ON key_achievements(is_featured);
-CREATE INDEX idx_strategies_project ON product_strategies(project_id);
-CREATE INDEX idx_stakeholder_project ON stakeholder_impacts(project_id);
+-- Create indexes for performance (safely)
+DO $$
+BEGIN
+    BEGIN
+        CREATE INDEX idx_product_metrics_tenant ON product_metrics_summary(tenant_id);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE INDEX idx_project_metrics_tenant ON project_product_metrics(tenant_id);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE INDEX idx_project_metrics_project ON project_product_metrics(project_id);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE INDEX idx_achievements_tenant ON key_achievements(tenant_id);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE INDEX idx_achievements_featured ON key_achievements(is_featured);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE INDEX idx_strategies_project ON product_strategies(project_id);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE INDEX idx_stakeholder_project ON stakeholder_impacts(project_id);
+    EXCEPTION WHEN duplicate_table THEN
+        NULL;
+    END;
+END $$;
 
--- Add triggers for updated_at
-CREATE TRIGGER update_product_metrics_summary_updated_at BEFORE UPDATE ON product_metrics_summary
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_project_product_metrics_updated_at BEFORE UPDATE ON project_product_metrics
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Add triggers for updated_at (safely)
+DO $$
+BEGIN
+    BEGIN
+        CREATE TRIGGER update_product_metrics_summary_updated_at BEFORE UPDATE ON product_metrics_summary
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    EXCEPTION WHEN duplicate_object THEN
+        NULL;
+    END;
+    
+    BEGIN
+        CREATE TRIGGER update_project_product_metrics_updated_at BEFORE UPDATE ON project_product_metrics
+            FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+    EXCEPTION WHEN duplicate_object THEN
+        NULL;
+    END;
+END $$;

@@ -12,7 +12,7 @@ export async function POST() {
     const migrationFiles = [
       '001_increase_screenshot_file_path_size.sql',
       '002_change_tech_stack_level_to_decimal.sql', 
-      '003_add_tenant_support.sql',
+      '003_add_tenant_support_safe.sql',
       '004_add_product_management_metrics.sql',
       '005_add_expertise_radar.sql'
     ];
