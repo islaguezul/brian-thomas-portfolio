@@ -3,6 +3,7 @@ import { Database, AlertCircle, CheckCircle } from 'lucide-react';
 import InitializeButton from '@/components/admin/InitializeButton';
 import RunMigrationsButton from '@/components/admin/RunMigrationsButton';
 import SeedButton from '@/components/admin/SeedButton';
+import MigrateExpertiseRadarButton from '@/components/admin/MigrateExpertiseRadarButton';
 
 async function checkDatabaseStatus() {
   try {
@@ -132,7 +133,7 @@ export default async function DatabasePage() {
 
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-white mb-4">Database Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <h4 className="text-sm font-medium text-gray-300 mb-2">Setup</h4>
             <InitializeButton />
@@ -140,6 +141,10 @@ export default async function DatabasePage() {
           <div>
             <h4 className="text-sm font-medium text-gray-300 mb-2">Migration</h4>
             <RunMigrationsButton />
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">Expertise Data</h4>
+            <MigrateExpertiseRadarButton />
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-300 mb-2">Sample Data</h4>
