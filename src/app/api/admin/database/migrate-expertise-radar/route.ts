@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { getCurrentTenant } from '@/lib/admin-tenant-server';
+import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 import { sql } from '@vercel/postgres';
 
 export async function POST() {
   try {
     await requireAuth();
-    const tenant = getCurrentTenant();
+    const tenant = await getAdminSelectedTenant();
 
     // Check if expertise radar already has data
     const existing = await sql`
