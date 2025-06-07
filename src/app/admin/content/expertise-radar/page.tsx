@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { ExpertiseRadarItem } from '@/lib/database/types';
 import { adminFetch } from '@/lib/admin-fetch';
 
@@ -239,6 +240,138 @@ export default function ExpertiseRadarAdmin() {
     );
   };
 
+  const MobileEditForm = ({ item, onSave, onCancel }: {
+    item: ExpertiseRadarItem;
+    onSave: (item: ExpertiseRadarItem) => void;
+    onCancel: () => void;
+  }) => {
+    const [formData, setFormData] = useState(item);
+
+    return (
+      <div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Skill Name *
+            </label>
+            <input
+              type="text"
+              value={formData.skillName}
+              onChange={(e) => setFormData({...formData, skillName: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Skill Level (0-10)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="10"
+              step="0.1"
+              value={formData.skillLevel}
+              onChange={(e) => setFormData({...formData, skillLevel: Number(e.target.value)})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <input
+              type="text"
+              value={formData.category || ''}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              placeholder="e.g., Technical, Leadership, Domain Knowledge"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Color
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="color"
+                value={formData.color || '#8884d8'}
+                onChange={(e) => setFormData({...formData, color: e.target.value})}
+                className="w-16 h-10 border border-gray-300 rounded cursor-pointer"
+              />
+              <div className="flex space-x-1">
+                {predefinedColors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setFormData({...formData, color})}
+                    className="w-6 h-6 rounded border border-gray-300 hover:scale-110 transition-transform"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              value={formData.description || ''}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Optional description or context for this skill"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Display Order
+            </label>
+            <input
+              type="number"
+              value={formData.displayOrder || 0}
+              onChange={(e) => setFormData({...formData, displayOrder: Number(e.target.value)})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div className="flex items-center">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={formData.isActive !== false}
+                onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-sm text-gray-700">Active</span>
+            </label>
+          </div>
+        </div>
+        
+        <div className="flex justify-end space-x-3 mt-4">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSave(formData)}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -403,15 +536,17 @@ export default function ExpertiseRadarAdmin() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => setEditingItem(item)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        className="text-indigo-600 hover:text-indigo-900 mr-3 p-1 hover:bg-indigo-50 rounded"
+                        title="Edit"
                       >
-                        Edit
+                        <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => item.id && handleDelete(item.id)}
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                        title="Delete"
                       >
-                        Delete
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>
@@ -493,15 +628,17 @@ export default function ExpertiseRadarAdmin() {
                       <div className="flex flex-col gap-2 ml-4">
                         <button
                           onClick={() => setEditingItem(item)}
-                          className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          className="p-2 text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          title="Edit"
                         >
-                          Edit
+                          <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => item.id && handleDelete(item.id)}
-                          className="px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          className="p-2 text-red-600 bg-red-50 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          title="Delete"
                         >
-                          Delete
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -510,7 +647,7 @@ export default function ExpertiseRadarAdmin() {
                   {editingItem?.id === item.id && editingItem && (
                     <div className="px-6 pb-6">
                       <div className="bg-gray-50 rounded-lg p-4">
-                        <EditForm
+                        <MobileEditForm
                           item={editingItem}
                           onSave={handleUpdate}
                           onCancel={() => setEditingItem(null)}
