@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { ExpertiseRadarItem } from '@/lib/database/types';
 import { adminFetch } from '@/lib/admin-fetch';
+import CleanupExpertiseRadarButton from '@/components/admin/CleanupExpertiseRadarButton';
 
 export default function ExpertiseRadarAdmin() {
   const [radarItems, setRadarItems] = useState<ExpertiseRadarItem[]>([]);
@@ -395,6 +396,8 @@ export default function ExpertiseRadarAdmin() {
           Manage your expertise radar visualization. These skills will appear on your portfolio&apos;s radar chart.
         </p>
       </div>
+
+      <CleanupExpertiseRadarButton />
 
       {/* Create New Item */}
       <div className="bg-white shadow rounded-lg mb-6">
