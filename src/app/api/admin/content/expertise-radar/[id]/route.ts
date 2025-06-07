@@ -5,16 +5,17 @@ import { sql } from '@vercel/postgres';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
     const tenant = getAdminTenant(request.headers);
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const idNum = parseInt(id);
 
     const result = await sql`
       SELECT * FROM expertise_radar 
-      WHERE id = ${id} AND tenant_id = ${tenant}
+      WHERE id = ${idNum} AND tenant_id = ${tenant}
     `;
 
     if (result.rows.length === 0) {
@@ -36,12 +37,13 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
     const tenant = getAdminTenant(request.headers);
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const idNum = parseInt(id);
     const body = await request.json();
 
     const { skillName, skillLevel, category, description, color, displayOrder, isActive } = body;
@@ -64,7 +66,7 @@ export async function PUT(
         display_order = ${displayOrder || 0},
         is_active = ${isActive !== false},
         updated_at = NOW()
-      WHERE id = ${id} AND tenant_id = ${tenant}
+      WHERE id = ${idNum} AND tenant_id = ${tenant}
       RETURNING *
     `;
 
@@ -87,16 +89,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
     const tenant = getAdminTenant(request.headers);
-    const id = parseInt(params.id);
+    const { id } = await params;
+    const idNum = parseInt(id);
 
     const result = await sql`
       DELETE FROM expertise_radar 
-      WHERE id = ${id} AND tenant_id = ${tenant}
+      WHERE id = ${idNum} AND tenant_id = ${tenant}
       RETURNING *
     `;
 
