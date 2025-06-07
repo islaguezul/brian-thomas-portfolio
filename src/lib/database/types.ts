@@ -278,3 +278,17 @@ export interface StakeholderImpact {
   satisfactionScore?: number;
   displayOrder?: number;
 }
+
+export interface ExpertiseRadarItem {
+  id?: number;
+  tenantId?: string;
+  skillName: string;
+  skillLevel: number; // 0-10 scale
+  category?: string;
+  description?: string;
+  color?: string; // hex color for visualization
+  displayOrder?: number;
+  isActive?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}

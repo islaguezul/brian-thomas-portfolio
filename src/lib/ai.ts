@@ -26,7 +26,7 @@ export async function enhanceText({
 }: EnhanceOptions): Promise<string> {
   try {
     // Get personal context for better prompting
-    const personalInfo = await getPersonalInfo();
+    const personalInfo = await getPersonalInfo('internal');
     const personalContext = personalInfo ? {
       name: personalInfo.name || 'Brian Thomas',
       yearsExperience: personalInfo.yearsExperience || 13,

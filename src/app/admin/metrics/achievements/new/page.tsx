@@ -4,17 +4,27 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Award, Loader2 } from 'lucide-react';
 import { adminFetch } from '@/lib/admin-fetch';
+import type { KeyAchievement } from '@/lib/database/types';
 
 export default function NewAchievementPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    metricValue: string;
+    metricUnit: string;
+    context: string;
+    achievementDate: string;
+    category: KeyAchievement['category'];
+    isFeatured: boolean;
+    displayOrder: number;
+  }>({
     title: '',
     metricValue: '',
     metricUnit: '',
     context: '',
     achievementDate: new Date().toISOString().split('T')[0],
-    category: 'user_impact' as const,
+    category: 'user_impact',
     isFeatured: false,
     displayOrder: 0,
   });
@@ -115,7 +125,7 @@ export default function NewAchievementPage() {
               </label>
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'user_impact' | 'revenue' | 'efficiency' | 'leadership' | 'innovation' })}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as KeyAchievement['category'] })}
                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-blue-500 focus:outline-none"
               >
                 <option value="user_impact">User Impact</option>

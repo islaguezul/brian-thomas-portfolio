@@ -1,6 +1,8 @@
 import { sql } from '@vercel/postgres';
 import { Database, AlertCircle, CheckCircle } from 'lucide-react';
-import ProductMetricsMigrateButton from '@/components/admin/ProductMetricsMigrateButton';
+import InitializeButton from '@/components/admin/InitializeButton';
+import MigrateButton from '@/components/admin/MigrateButton';
+import SeedButton from '@/components/admin/SeedButton';
 
 async function checkDatabaseStatus() {
   try {
@@ -128,16 +130,20 @@ export default async function DatabasePage() {
         )}
       </div>
 
-
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Database Migrations</h3>
-        <div className="space-y-4">
-          <div className="pb-4 border-b border-gray-800">
-            <h4 className="text-white font-medium mb-2">Product Metrics Tables</h4>
-            <p className="text-gray-400 text-sm mb-4">
-              Add tables for tracking product management metrics, achievements, and impact.
-            </p>
-            <ProductMetricsMigrateButton />
+        <h3 className="text-lg font-semibold text-white mb-4">Database Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">Setup</h4>
+            <InitializeButton />
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">Migration</h4>
+            <MigrateButton />
+          </div>
+          <div>
+            <h4 className="text-sm font-medium text-gray-300 mb-2">Sample Data</h4>
+            <SeedButton />
           </div>
         </div>
       </div>

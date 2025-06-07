@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Mail, Phone, FileText, Layers, Zap, Database, Rocket, Shield } from 'lucide-react';
+import { ChevronRight, Mail, Phone, FileText, Layers, Zap, Database, Rocket, Shield, Users } from 'lucide-react';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import Resume from './Resume';
 import ParticleBackground from './ParticleBackground';
@@ -44,6 +44,11 @@ const MainPortfolio = () => {
     price: number;
   }>>([]);
   const [showDocumentation, setShowDocumentation] = useState(false);
+  const [expertiseRadar, setExpertiseRadar] = useState<Array<{
+    subject: string;
+    A: number;
+    fullMark: number;
+  }>>([]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const lastTradeCheck = useRef<Date>(new Date());
@@ -92,14 +97,31 @@ const MainPortfolio = () => {
     }
   };
 
-  const techSkills = [
-    { subject: 'React/Next.js', A: 95, fullMark: 100 },
-    { subject: 'Python/AI', A: 88, fullMark: 100 },
-    { subject: 'Product Strategy', A: 92, fullMark: 100 },
-    { subject: 'Process Design', A: 96, fullMark: 100 },
-    { subject: 'Data Analysis', A: 85, fullMark: 100 },
-    { subject: 'Cloud/AWS', A: 82, fullMark: 100 }
-  ];
+  const fetchExpertiseRadar = async () => {
+    try {
+      const response = await fetch('/api/expertise-radar');
+      if (response.ok) {
+        const radarData = await response.json();
+        const formattedData = radarData.map((item: { skillName: string; skillLevel: number }) => ({
+          subject: item.skillName,
+          A: item.skillLevel * 10, // Convert 0-10 scale to 0-100 scale
+          fullMark: 100
+        }));
+        setExpertiseRadar(formattedData);
+      }
+    } catch (error) {
+      console.error('Error fetching expertise radar:', error);
+      // Fallback to default data
+      setExpertiseRadar([
+        { subject: 'React/Next.js', A: 95, fullMark: 100 },
+        { subject: 'Python/AI', A: 88, fullMark: 100 },
+        { subject: 'Product Strategy', A: 92, fullMark: 100 },
+        { subject: 'Process Design', A: 96, fullMark: 100 },
+        { subject: 'Data Analysis', A: 85, fullMark: 100 },
+        { subject: 'Cloud/AWS', A: 82, fullMark: 100 }
+      ]);
+    }
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -114,6 +136,7 @@ const MainPortfolio = () => {
     fetchProjects();
     fetchPersonalInfo();
     fetchWorkExperience();
+    fetchExpertiseRadar();
   }, []);
 
   // Initialize trading simulation with backtest data
@@ -431,7 +454,10 @@ const MainPortfolio = () => {
       stage: project.stage,
       progress: project.progress || 0,
       impact: project.impacts?.reduce((acc, impact) => {
-        acc[impact.metricKey] = impact.metricValue;
+        if (impact.metricKey && impact.metricValue && 
+            impact.metricValue !== 'undefined' && impact.metricValue !== 'null') {
+          acc[impact.metricKey] = impact.metricValue;
+        }
         return acc;
       }, {} as Record<string, string>) || {},
       features: project.features?.map(f => f.feature) || [],
@@ -651,18 +677,63 @@ const MainPortfolio = () => {
                   </h2>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-                  <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl hover:border-purple-500/30 transition-all duration-500 hover-lift">
+                <div className="grid lg:grid-cols-2 gap-12 items-stretch">
+                  <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl hover:border-purple-500/30 transition-all duration-500 hover-lift min-h-[600px] flex flex-col">
                     <h3 className="text-2xl font-bold mb-6 text-center">
                       <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                         Expertise Radar
                       </span>
                     </h3>
-                    <div className="h-80">
+                    <div className="flex-1 min-h-[500px]">
                       <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart data={techSkills}>
+                        <RadarChart data={expertiseRadar} margin={{ top: 60, right: 90, bottom: 60, left: 90 }}>
                           <PolarGrid stroke="#475569" />
-                          <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fill: '#94a3b8' }} />
+                          <PolarAngleAxis 
+                            dataKey="subject"
+                            axisLineType="polygon"
+                            tick={(props) => {
+                              const { x, y, payload, cx, cy } = props;
+                              const value = payload.value;
+                              
+                              // Calculate distance from center to push labels further out
+                              const dx = x - cx;
+                              const dy = y - cy;
+                              const distance = Math.sqrt(dx * dx + dy * dy);
+                              const pushOutFactor = 1.35; // Push labels 35% further from center
+                              const newX = cx + (dx / distance) * (distance * pushOutFactor);
+                              const newY = cy + (dy / distance) * (distance * pushOutFactor);
+                              
+                              // Smart line breaking for long labels
+                              let lines = [value];
+                              if (value.length > 15) {
+                                const words = value.split(' ');
+                                if (words.length >= 2) {
+                                  const breakPoint = Math.ceil(words.length / 2);
+                                  const firstLine = words.slice(0, breakPoint).join(' ');
+                                  const secondLine = words.slice(breakPoint).join(' ');
+                                  lines = [firstLine, secondLine];
+                                }
+                              }
+                              
+                              return (
+                                <g>
+                                  {lines.map((line, index) => (
+                                    <text
+                                      key={index}
+                                      x={newX}
+                                      y={newY + (index * 14) - ((lines.length - 1) * 7)}
+                                      fill="#94a3b8"
+                                      fontSize="12"
+                                      textAnchor="middle"
+                                      dominantBaseline="central"
+                                    >
+                                      {line}
+                                    </text>
+                                  ))}
+                                </g>
+                              );
+                            }}
+                          />
                           <PolarRadiusAxis 
                             angle={90}
                             domain={[0, 100]}
@@ -690,13 +761,13 @@ const MainPortfolio = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl hover:border-green-500/30 transition-all duration-500 hover-lift">
+                  <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl hover:border-green-500/30 transition-all duration-500 hover-lift min-h-[600px] flex flex-col">
                     <h3 className="text-2xl font-bold mb-6 text-center">
                       <span className="bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">
                         Process & Strategy
                       </span>
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-4 flex-1">
                       <div className="flex items-center group/item">
                         <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 mr-4 group-hover/item:scale-110 transition-all duration-300 border border-blue-500/30">
                           <Zap className="w-6 h-6 text-blue-400" />
@@ -741,6 +812,18 @@ const MainPortfolio = () => {
                           <h4 className="text-lg font-semibold text-white group-hover/item:text-blue-400 transition-colors">Innovation & Ideation</h4>
                           <p className="text-sm text-slate-400 leading-relaxed">
                             Fostering a culture of innovation to generate and implement creative solutions.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center group/item">
+                        <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 mr-4 group-hover/item:scale-110 transition-all duration-300 border border-blue-500/30">
+                          <Users className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-lg font-semibold text-white group-hover/item:text-blue-400 transition-colors">Stakeholder Communication</h4>
+                          <p className="text-sm text-slate-400 leading-relaxed">
+                            Translating technical concepts into business value for diverse stakeholder groups.
                           </p>
                         </div>
                       </div>

@@ -186,10 +186,30 @@ export async function getProjects(tenant: Tenant): Promise<Project[]> {
         return {
           ...project,
           technologies: technologies.rows.map(t => t.technology as string),
-          features: features.rows as ProjectFeature[],
-          impacts: impacts.rows as ProjectImpact[],
-          challenges: challenges.rows as ProjectChallenge[],
-          outcomes: outcomes.rows as ProjectOutcome[],
+          features: features.rows.map((feature) => ({
+            id: feature.id,
+            projectId: feature.project_id,
+            feature: feature.feature,
+            displayOrder: feature.display_order
+          })) as ProjectFeature[],
+          impacts: impacts.rows.map((impact) => ({
+            id: impact.id,
+            projectId: impact.project_id,
+            metricKey: impact.metric_key,
+            metricValue: impact.metric_value
+          })) as ProjectImpact[],
+          challenges: challenges.rows.map((challenge) => ({
+            id: challenge.id,
+            projectId: challenge.project_id,
+            challenge: challenge.challenge,
+            displayOrder: challenge.display_order
+          })) as ProjectChallenge[],
+          outcomes: outcomes.rows.map((outcome) => ({
+            id: outcome.id,
+            projectId: outcome.project_id,
+            outcome: outcome.outcome,
+            displayOrder: outcome.display_order
+          })) as ProjectOutcome[],
           screenshots: screenshots.rows.map((s) => ({
             id: s.id,
             projectId: s.project_id,
@@ -228,10 +248,30 @@ export async function getProject(tenant: Tenant, id: number): Promise<Project | 
     return {
       ...project.rows[0],
       technologies: technologies.rows.map(t => t.technology as string),
-      features: features.rows as ProjectFeature[],
-      impacts: impacts.rows as ProjectImpact[],
-      challenges: challenges.rows as ProjectChallenge[],
-      outcomes: outcomes.rows as ProjectOutcome[],
+      features: features.rows.map((feature) => ({
+        id: feature.id,
+        projectId: feature.project_id,
+        feature: feature.feature,
+        displayOrder: feature.display_order
+      })) as ProjectFeature[],
+      impacts: impacts.rows.map((impact) => ({
+        id: impact.id,
+        projectId: impact.project_id,
+        metricKey: impact.metric_key,
+        metricValue: impact.metric_value
+      })) as ProjectImpact[],
+      challenges: challenges.rows.map((challenge) => ({
+        id: challenge.id,
+        projectId: challenge.project_id,
+        challenge: challenge.challenge,
+        displayOrder: challenge.display_order
+      })) as ProjectChallenge[],
+      outcomes: outcomes.rows.map((outcome) => ({
+        id: outcome.id,
+        projectId: outcome.project_id,
+        outcome: outcome.outcome,
+        displayOrder: outcome.display_order
+      })) as ProjectOutcome[],
       screenshots: screenshots.rows.map((s) => ({
         id: s.id,
         projectId: s.project_id,
@@ -1044,7 +1084,7 @@ export async function copySkillCategoryToTenant(catId: number, fromTenant: Tenan
   const { id, skills, ...catData } = category;
   const newCategory = await createSkillCategory(toTenant, catData as SkillCategory);
   
-  if (newCategory && skills) {
+  if (newCategory && newCategory.id && skills) {
     for (const skill of skills) {
       await createSkill(toTenant, newCategory.id, skill.skillName);
     }

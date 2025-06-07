@@ -117,7 +117,9 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onSelect }) => {
         <div className="grid grid-cols-3 gap-4 mb-6">
           {Object.entries(project.impact).map(([key, value]) => (
             <div key={key} className="text-center bg-slate-700/20 rounded-lg p-4 hover:bg-slate-700/30 transition-colors">
-              <div className="text-xl font-bold text-blue-400">{value}</div>
+              <div className="text-xl font-bold text-blue-400">
+                {value && value !== 'undefined' && value !== 'null' ? value : 'N/A'}
+              </div>
               <div className="text-xs text-slate-400 capitalize">{key.replace('-', ' ')}</div>
             </div>
           ))}

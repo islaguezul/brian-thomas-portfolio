@@ -1,5 +1,5 @@
 import { 
-  Code2, Users, Zap, Plus, Trash2,
+  Code2, Users, Zap, Plus, Trash2, Target,
   Settings as SettingsIcon
 } from 'lucide-react';
 import { getTechStack, getSkillCategories, getProcessStrategies } from '@/lib/database/db';
@@ -39,6 +39,29 @@ export default async function ContentPage() {
         </div>
 
         <TechStackCards techStack={techStack} />
+      </div>
+
+      {/* Expertise Radar Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
+            <Target className="w-6 h-6 text-purple-400" />
+            Expertise Radar
+          </h2>
+          <Link
+            href="/admin/content/expertise-radar"
+            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+          >
+            <SettingsIcon className="w-4 h-4" />
+            Manage Radar
+          </Link>
+        </div>
+        
+        <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+          <p className="text-gray-400 text-center">
+            Customize your expertise radar visualization - perfect for tailoring your profile to specific job opportunities.
+          </p>
+        </div>
       </div>
 
       {/* Skills Section */}

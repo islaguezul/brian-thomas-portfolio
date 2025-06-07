@@ -1044,7 +1044,7 @@ export async function copySkillCategoryToTenant(catId: number, fromTenant: Tenan
   const { id, skills, ...catData } = category;
   const newCategory = await createSkillCategory(toTenant, catData as SkillCategory);
   
-  if (newCategory && skills) {
+  if (newCategory && newCategory.id && skills) {
     for (const skill of skills) {
       await createSkill(toTenant, newCategory.id, skill.skillName);
     }

@@ -123,6 +123,26 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
     });
   };
 
+  const addImpact = () => {
+    setFormData({
+      ...formData,
+      impacts: [...(formData.impacts || []), { metricKey: '', metricValue: '' }],
+    });
+  };
+
+  const updateImpact = (index: number, field: 'metricKey' | 'metricValue', value: string) => {
+    const newImpacts = [...(formData.impacts || [])];
+    newImpacts[index] = { ...newImpacts[index], [field]: value };
+    setFormData({ ...formData, impacts: newImpacts });
+  };
+
+  const removeImpact = (index: number) => {
+    setFormData({
+      ...formData,
+      impacts: formData.impacts?.filter((_, i) => i !== index) || [],
+    });
+  };
+
   const [isDragging, setIsDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
 
@@ -620,6 +640,63 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
                 Generate Features
               </button>
             </div>
+          </div>
+        )}
+      </div>
+
+      {/* Project Impacts Section */}
+      <div className="bg-gray-900 border border-gray-800 rounded-lg">
+        <button
+          type="button"
+          onClick={() => toggleSection('impacts')}
+          className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-gray-800/50 transition-colors"
+        >
+          <h2 className="text-xl font-semibold text-white">Project Metrics & Impacts</h2>
+          {expandedSections.impacts ? (
+            <ChevronUp className="w-5 h-5 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-gray-400" />
+          )}
+        </button>
+        
+        {expandedSections.impacts && (
+          <div className="p-6 pt-0 space-y-4">
+            {formData.impacts?.map((impact, idx) => (
+              <div key={idx} className="flex gap-3 items-start">
+                <div className="grid grid-cols-2 gap-3 flex-1">
+                  <input
+                    type="text"
+                    value={impact.metricKey || ''}
+                    onChange={(e) => updateImpact(idx, 'metricKey', e.target.value)}
+                    placeholder="Metric (e.g., Users Impacted, Revenue Growth)"
+                    className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  />
+                  <input
+                    type="text"
+                    value={impact.metricValue || ''}
+                    onChange={(e) => updateImpact(idx, 'metricValue', e.target.value)}
+                    placeholder="Value (e.g., 10,000+, 25% increase)"
+                    className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeImpact(idx)}
+                  className="p-2 text-gray-400 hover:text-red-400 transition-colors flex-shrink-0"
+                  title="Remove impact"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={addImpact}
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Add Impact Metric
+            </button>
           </div>
         )}
       </div>

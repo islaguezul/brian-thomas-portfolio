@@ -1,12 +1,14 @@
 import ProjectForm from '@/components/admin/ProjectForm';
 import { getProject } from '@/lib/database/db';
+import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 export default async function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const project = await getProject(parseInt(id));
+  const tenant = await getAdminSelectedTenant();
+  const project = await getProject(tenant, parseInt(id));
   
   if (!project) {
     notFound();
