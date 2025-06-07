@@ -7,7 +7,9 @@ export async function GET(request: Request) {
   try {
     await requireAuth();
     const tenant = getAdminTenant(request.headers);
+    console.log('Admin tech stack GET - tenant:', tenant); // Debug log
     const techStack = await getTechStack(tenant);
+    console.log('Admin tech stack GET - results:', techStack.length, 'items'); // Debug log
     return NextResponse.json(techStack);
   } catch (error) {
     console.error('Error fetching tech stack:', error);

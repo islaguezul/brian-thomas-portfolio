@@ -5,15 +5,22 @@ import {
 import { getTechStack, getSkillCategories, getProcessStrategies } from '@/lib/database/db';
 import Link from 'next/link';
 import TechStackCards from '@/components/admin/TechStackCards';
+import TenantDebugInfo from '@/components/admin/TenantDebugInfo';
 import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 
 export default async function ContentPage() {
   const tenant = await getAdminSelectedTenant();
+  console.log('Content page server-side tenant:', tenant); // Debug log
   const [techStack, skillCategories, processStrategies] = await Promise.all([
     getTechStack(tenant),
     getSkillCategories(tenant),
     getProcessStrategies(tenant),
   ]);
+  console.log('Content page server-side results:', { 
+    techStack: techStack.length, 
+    skillCategories: skillCategories.length, 
+    processStrategies: processStrategies.length 
+  }); // Debug log
 
   return (
     <div className="space-y-8">
@@ -21,6 +28,8 @@ export default async function ContentPage() {
         <h1 className="text-3xl font-bold text-white mb-2">Content Management</h1>
         <p className="text-gray-400">Manage tech stack, skills, and process strategies</p>
       </div>
+      
+      <TenantDebugInfo />
 
       {/* Tech Stack Section */}
       <div className="space-y-4">
