@@ -8,7 +8,18 @@ export default function RunMigrationsButton() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
-  const [details, setDetails] = useState<any>(null);
+  const [details, setDetails] = useState<{
+    results?: Array<{
+      filename: string;
+      success: boolean;
+      error?: string;
+    }>;
+    failedMigrations?: Array<{
+      filename: string;
+      success: boolean;
+      error?: string;
+    }>;
+  } | null>(null);
   const router = useRouter();
 
   const handleRunMigrations = async () => {
@@ -80,7 +91,7 @@ export default function RunMigrationsButton() {
           
           {details && details.results && (
             <div className="mt-2 space-y-1 text-xs">
-              {details.results.map((result: any, index: number) => (
+              {details.results.map((result, index: number) => (
                 <div key={index} className="flex items-center gap-2">
                   {result.success ? (
                     <CheckCircle className="w-3 h-3 text-green-400" />
