@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { Database, AlertCircle, CheckCircle } from 'lucide-react';
 import InitializeButton from '@/components/admin/InitializeButton';
-import MigrateButton from '@/components/admin/MigrateButton';
+import RunMigrationsButton from '@/components/admin/RunMigrationsButton';
 import SeedButton from '@/components/admin/SeedButton';
 
 async function checkDatabaseStatus() {
@@ -139,7 +139,7 @@ export default async function DatabasePage() {
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-300 mb-2">Migration</h4>
-            <MigrateButton />
+            <RunMigrationsButton />
           </div>
           <div>
             <h4 className="text-sm font-medium text-gray-300 mb-2">Sample Data</h4>
