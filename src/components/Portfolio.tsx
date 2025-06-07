@@ -102,9 +102,9 @@ const MainPortfolio = () => {
       const response = await fetch('/api/expertise-radar');
       if (response.ok) {
         const radarData = await response.json();
-        const formattedData = radarData.map((item: { skillName: string; skillLevel: number }) => ({
-          subject: item.skillName,
-          A: item.skillLevel * 10, // Convert 0-10 scale to 0-100 scale
+        const formattedData = radarData.map((item: { skill_name: string; skill_level: number }) => ({
+          subject: item.skill_name,
+          A: item.skill_level * 10, // Convert 0-10 scale to 0-100 scale
           fullMark: 100
         }));
         setExpertiseRadar(formattedData);

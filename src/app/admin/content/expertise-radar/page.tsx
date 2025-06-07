@@ -5,16 +5,16 @@ import { getAdminSelectedTenant } from '@/lib/admin-tenant-server';
 
 interface ExpertiseRadarItem {
   id: number;
-  tenantId: string;
-  skillName: string;
-  skillLevel: number;
+  tenant_id: string;
+  skill_name: string;
+  skill_level: number;
   category?: string;
   description?: string;
   color?: string;
-  displayOrder?: number;
-  isActive?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  display_order?: number;
+  is_active?: boolean;
+  created_at?: Date;
+  updated_at?: Date;
 }
 
 async function getExpertiseRadarItems(tenant: string): Promise<ExpertiseRadarItem[]> {
@@ -80,16 +80,16 @@ export default async function ExpertiseRadarPage() {
               <div key={item.id} className="bg-gray-900 border border-gray-800 rounded-lg p-4">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h3 className="font-medium text-white mb-1">{item.skillName}</h3>
+                    <h3 className="font-medium text-white mb-1">{item.skill_name}</h3>
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-full bg-gray-700 rounded-full h-2">
                         <div 
                           className="bg-purple-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(item.skillLevel / 10) * 100}%` }}
+                          style={{ width: `${(item.skill_level / 10) * 100}%` }}
                         />
                       </div>
                       <span className="text-sm text-gray-400 min-w-[3rem]">
-                        {item.skillLevel}/10
+                        {item.skill_level}/10
                       </span>
                     </div>
                     {item.category && (
