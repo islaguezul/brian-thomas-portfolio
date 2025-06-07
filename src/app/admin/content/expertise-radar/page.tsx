@@ -269,7 +269,7 @@ export default function ExpertiseRadarAdmin() {
           <h2 className="text-lg font-medium text-gray-900">Add New Skill</h2>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Skill Name *
@@ -329,7 +329,8 @@ export default function ExpertiseRadarAdmin() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">Current Skills</h2>
         </div>
-        <div className="overflow-x-auto">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -432,6 +433,95 @@ export default function ExpertiseRadarAdmin() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden">
+          {radarItems.length === 0 ? (
+            <div className="px-6 py-12 text-center text-gray-500">
+              No radar skills found. Add your first skill above.
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {radarItems.map((item) => (
+                <React.Fragment key={`mobile-${item.id}`}>
+                  <div className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-medium text-gray-900 truncate">
+                            {item.skillName}
+                          </h3>
+                          <div
+                            className="w-6 h-6 rounded border border-gray-300 flex-shrink-0"
+                            style={{ backgroundColor: item.color }}
+                          />
+                        </div>
+                        
+                        {item.description && (
+                          <p className="text-sm text-gray-500 mb-3">
+                            {item.description}
+                          </p>
+                        )}
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-gray-700">Level:</span>
+                            <span className="ml-1 text-gray-900">{item.skillLevel}/10</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Category:</span>
+                            <span className="ml-1 text-gray-500">{item.category || '-'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Order:</span>
+                            <span className="ml-1 text-gray-500">{item.displayOrder}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-700">Status:</span>
+                            <span className={`ml-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              item.isActive 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {item.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-2 ml-4">
+                        <button
+                          onClick={() => setEditingItem(item)}
+                          className="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => item.id && handleDelete(item.id)}
+                          className="px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {editingItem?.id === item.id && editingItem && (
+                    <div className="px-6 pb-6">
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <EditForm
+                          item={editingItem}
+                          onSave={handleUpdate}
+                          onCancel={() => setEditingItem(null)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
