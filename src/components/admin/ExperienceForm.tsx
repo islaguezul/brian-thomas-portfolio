@@ -30,9 +30,19 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
 
     try {
       // Convert YYYY-MM format to YYYY-MM-01 (first day of month) for database
-      const formatDate = (dateStr: string | undefined | null): string | null => {
-        if (!dateStr?.trim()) return null;
+      const formatDate = (dateInput: string | Date | undefined | null): string | null => {
+        if (!dateInput) return null;
+        
+        // Convert Date object to string
+        let dateStr: string;
+        if (dateInput instanceof Date) {
+          dateStr = dateInput.toISOString().split('T')[0]; // YYYY-MM-DD format
+        } else {
+          dateStr = dateInput.toString();
+        }
+        
         const trimmed = dateStr.trim();
+        if (!trimmed) return null;
         
         // If it's YYYY-MM format, convert to YYYY-MM-01
         if (/^\d{4}-\d{2}$/.test(trimmed)) {
