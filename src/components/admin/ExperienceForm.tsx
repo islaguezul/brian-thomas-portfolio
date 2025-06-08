@@ -29,6 +29,34 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
     setSaving(true);
 
     try {
+      // Convert YYYY-MM format to YYYY-MM-01 (first day of month) for database
+      const formatDate = (dateStr: string | undefined | null): string | null => {
+        if (!dateStr?.trim()) return null;
+        const trimmed = dateStr.trim();
+        
+        // If it's YYYY-MM format, convert to YYYY-MM-01
+        if (/^\d{4}-\d{2}$/.test(trimmed)) {
+          return `${trimmed}-01`;
+        }
+        
+        // If it's already YYYY-MM-DD format, keep as is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+          return trimmed;
+        }
+        
+        return null;
+      };
+
+      // Ensure proper date formatting and handle empty dates
+      const dataToSend = {
+        ...formData,
+        startDate: formatDate(formData.startDate),
+        endDate: formData.isCurrent ? null : formatDate(formData.endDate),
+        responsibilities: formData.responsibilities?.filter(r => r.responsibility.trim()) || []
+      };
+
+      console.log('Sending data:', dataToSend); // Debug log
+
       const url = isNew 
         ? '/api/admin/resume/experience' 
         : `/api/admin/resume/experience/${experience?.id}`;
@@ -36,15 +64,20 @@ export default function ExperienceForm({ experience, isNew = false }: Experience
       const response = await adminFetch(url, {
         method: isNew ? 'POST' : 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {
         router.push('/admin/resume');
         router.refresh();
+      } else {
+        const errorData = await response.text();
+        console.error('Failed to save experience:', response.status, errorData);
+        alert(`Failed to save experience: ${response.status} - ${errorData}`);
       }
     } catch (error) {
       console.error('Error saving experience:', error);
+      alert(`Error saving experience: ${error}`);
     } finally {
       setSaving(false);
     }

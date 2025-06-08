@@ -529,8 +529,13 @@ export async function createWorkExperience(tenant: Tenant, data: WorkExperience)
       ) VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
     `, [
-      data.title, data.company, data.startDate, data.endDate,
-      data.isCurrent, data.displayOrder || 0, tenant
+      data.title, 
+      data.company, 
+      data.startDate || null, 
+      data.endDate || null,
+      data.isCurrent, 
+      data.displayOrder || 0, 
+      tenant
     ]);
     
     const expId = experience.rows[0].id;
@@ -568,8 +573,14 @@ export async function updateWorkExperience(tenant: Tenant, id: number, data: Wor
         is_current = $5, display_order = $6, updated_at = CURRENT_TIMESTAMP
       WHERE id = $7 AND tenant = $8
     `, [
-      data.title, data.company, data.startDate, data.endDate,
-      data.isCurrent, data.displayOrder || 0, id, tenant
+      data.title, 
+      data.company, 
+      data.startDate || null, 
+      data.endDate || null,
+      data.isCurrent, 
+      data.displayOrder || 0, 
+      id, 
+      tenant
     ]);
     
     // Update responsibilities
