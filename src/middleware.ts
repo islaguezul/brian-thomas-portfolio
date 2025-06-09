@@ -25,6 +25,13 @@ function getTenantFromHostname(hostname: string): Tenant {
 export default withAuth(
   function middleware(req: NextRequest) {
     const hostname = req.headers.get('host') || '';
+    const { pathname } = req.nextUrl;
+    
+    // Redirect external domain admin to internal domain admin
+    if (hostname.includes('brianthomastpm.com') && pathname.startsWith('/admin')) {
+      return NextResponse.redirect('https://briantpm.com' + pathname, 301);
+    }
+    
     const tenant = getTenantFromHostname(hostname);
     
     // Allow query param override for local testing
