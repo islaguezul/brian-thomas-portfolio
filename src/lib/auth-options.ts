@@ -2,14 +2,53 @@ import GithubProvider from 'next-auth/providers/github';
 import { sql } from '@vercel/postgres';
 import type { NextAuthOptions } from 'next-auth';
 
+// Function to get GitHub credentials based on the current domain
+function getGitHubCredentials() {
+  const host = process.env.VERCEL_URL || process.env.NEXTAUTH_URL;
+  
+  // Check if we're on the second tenant domain
+  if (host?.includes('brianthomastpm.com')) {
+    return {
+      clientId: process.env.GITHUB_ID_TENANT2!,
+      clientSecret: process.env.GITHUB_SECRET_TENANT2!,
+    };
+  }
+  
+  // Default to first tenant (briantpm.com)
+  return {
+    clientId: process.env.GITHUB_ID!,
+    clientSecret: process.env.GITHUB_SECRET!,
+  };
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
-    }),
+    GithubProvider(getGitHubCredentials()),
   ],
+  // Force all auth operations to use internal domain
+  ...(process.env.NODE_ENV === 'production' && {
+    url: 'https://briantpm.com',
+  }),
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // For production, always redirect auth operations to internal domain
+      if (process.env.NODE_ENV === 'production') {
+        const internalDomain = 'https://briantpm.com';
+        
+        // If it's an admin-related redirect, use internal domain
+        if (url.includes('/admin')) {
+          return url.replace(baseUrl, internalDomain);
+        }
+        
+        // For auth callbacks, use internal domain
+        if (url.startsWith('/')) {
+          return `${internalDomain}${url}`;
+        }
+      }
+      
+      // Default behavior for development
+      return url.startsWith('/') ? `${baseUrl}${url}` : url;
+    },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async signIn({ user, account, profile }: any) {
       if (account?.provider === 'github') {
