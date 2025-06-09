@@ -2,7 +2,7 @@ import GithubProvider from 'next-auth/providers/github';
 import { sql } from '@vercel/postgres';
 import type { NextAuthOptions } from 'next-auth';
 
-// Function to get GitHub credentials based on the current domain
+// Function to get GitHub credentials and base URL based on the current domain
 function getGitHubCredentials() {
   const host = process.env.VERCEL_URL || process.env.NEXTAUTH_URL;
   
@@ -21,28 +21,42 @@ function getGitHubCredentials() {
   };
 }
 
+// Function to get the appropriate base URL for the current domain
+function getBaseUrl() {
+  if (process.env.NODE_ENV === 'development') {
+    return process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  }
+  
+  const host = process.env.VERCEL_URL;
+  if (host?.includes('brianthomastpm.com')) {
+    return 'https://brianthomastpm.com';
+  }
+  
+  return 'https://briantpm.com';
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GithubProvider(getGitHubCredentials()),
   ],
-  // Force all auth operations to use internal domain
+  // Use appropriate URL based on domain
   ...(process.env.NODE_ENV === 'production' && {
-    url: 'https://briantpm.com',
+    url: getBaseUrl(),
   }),
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // For production, always redirect auth operations to internal domain
+      // For production, use the correct domain based on the current host
       if (process.env.NODE_ENV === 'production') {
-        const internalDomain = 'https://briantpm.com';
+        const correctDomain = getBaseUrl();
         
-        // If it's an admin-related redirect, use internal domain
-        if (url.includes('/admin')) {
-          return url.replace(baseUrl, internalDomain);
+        // If it's a relative URL, use the correct domain
+        if (url.startsWith('/')) {
+          return `${correctDomain}${url}`;
         }
         
-        // For auth callbacks, use internal domain
-        if (url.startsWith('/')) {
-          return `${internalDomain}${url}`;
+        // If it's an absolute URL but wrong domain, fix it
+        if (url.includes('/admin') || url.includes('auth')) {
+          return url.replace(baseUrl, correctDomain);
         }
       }
       
