@@ -2,33 +2,39 @@ import GithubProvider from 'next-auth/providers/github';
 import { sql } from '@vercel/postgres';
 import type { NextAuthOptions } from 'next-auth';
 
-// Function to get GitHub credentials and base URL based on the current domain
+// Determine which GitHub credentials to use based on Vercel deployment
 function getGitHubCredentials() {
-  const host = process.env.VERCEL_URL || process.env.NEXTAUTH_URL;
+  // In production, use VERCEL_URL to determine which tenant we're on
+  const deploymentUrl = process.env.VERCEL_URL || process.env.NEXTAUTH_URL || '';
   
-  // Check if we're on the second tenant domain
-  if (host?.includes('brianthomastpm.com')) {
+  console.log('Deployment URL for auth:', deploymentUrl);
+  
+  // Check if this deployment is for the external tenant
+  if (deploymentUrl.includes('brianthomastpm.com')) {
+    console.log('Using TENANT2 credentials for brianthomastpm.com deployment');
     return {
       clientId: process.env.GITHUB_ID_TENANT2!,
       clientSecret: process.env.GITHUB_SECRET_TENANT2!,
     };
   }
   
-  // Default to first tenant (briantpm.com)
+  // Default to internal tenant
+  console.log('Using default credentials for briantpm.com deployment');
   return {
     clientId: process.env.GITHUB_ID!,
     clientSecret: process.env.GITHUB_SECRET!,
   };
 }
 
-// Function to get the appropriate base URL for the current domain
+// Function to get the appropriate base URL
 function getBaseUrl() {
   if (process.env.NODE_ENV === 'development') {
     return process.env.NEXTAUTH_URL || 'http://localhost:3000';
   }
   
-  const host = process.env.VERCEL_URL;
-  if (host?.includes('brianthomastpm.com')) {
+  const deploymentUrl = process.env.VERCEL_URL || '';
+  
+  if (deploymentUrl.includes('brianthomastpm.com')) {
     return 'https://brianthomastpm.com';
   }
   
@@ -39,13 +45,13 @@ export const authOptions: NextAuthOptions = {
   providers: [
     GithubProvider(getGitHubCredentials()),
   ],
-  // Use appropriate URL based on domain
+  // Use appropriate URL based on deployment
   ...(process.env.NODE_ENV === 'production' && {
     url: getBaseUrl(),
   }),
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // For production, use the correct domain based on the current host
+      // For production, use the correct domain based on deployment
       if (process.env.NODE_ENV === 'production') {
         const correctDomain = getBaseUrl();
         
