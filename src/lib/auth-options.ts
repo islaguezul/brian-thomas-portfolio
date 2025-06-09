@@ -16,9 +16,10 @@ function getGitHubCredentials() {
   console.log('GITHUB_SECRET_TENANT2 exists:', !!process.env.GITHUB_SECRET_TENANT2);
   console.log('GITHUB_ID exists:', !!process.env.GITHUB_ID);
   console.log('GITHUB_SECRET exists:', !!process.env.GITHUB_SECRET);
+  console.log('Testing brianthomastpm detection:', deploymentUrl.includes('brianthomastpm.com'));
   
-  // Check if this deployment is for the external tenant
-  if (deploymentUrl.includes('brianthomastpm.com')) {
+  // Check if this deployment is for the external tenant (handle both www and non-www)
+  if (deploymentUrl.includes('brianthomastpm.com') || deploymentUrl.includes('www.brianthomastpm.com')) {
     console.log('✅ Using TENANT2 credentials for brianthomastpm.com deployment');
     console.log('TENANT2 Client ID:', process.env.GITHUB_ID_TENANT2?.substring(0, 8) + '...');
     return {
@@ -45,7 +46,7 @@ function getBaseUrl() {
   const deploymentUrl = process.env.VERCEL_URL || '';
   
   if (deploymentUrl.includes('brianthomastpm.com')) {
-    return 'https://brianthomastpm.com';
+    return 'https://www.brianthomastpm.com';
   }
   
   return 'https://briantpm.com';
