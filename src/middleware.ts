@@ -21,24 +21,17 @@ function getTenantFromHostname(hostname: string): Tenant {
   return 'internal';
 }
 
-// First check for admin redirects before auth
-function middleware(req: NextRequest) {
-  const hostname = req.headers.get('host') || '';
-  const { pathname } = req.nextUrl;
-  
-  // Redirect external domain admin to internal domain admin BEFORE auth check
-  if (hostname.includes('brianthomastpm.com') && pathname.startsWith('/admin')) {
-    return NextResponse.redirect('https://briantpm.com' + pathname, 301);
-  }
-  
-  // Continue with auth middleware for other requests
-  return withAuthMiddleware(req);
-}
-
-// Auth middleware as a separate function
-const withAuthMiddleware = withAuth(
-  function authMiddleware(req: NextRequest) {
+// Custom middleware that handles redirects and auth
+export default withAuth(
+  function middleware(req: NextRequest) {
     const hostname = req.headers.get('host') || '';
+    const { pathname } = req.nextUrl;
+    
+    // Redirect external domain admin to internal domain admin BEFORE auth check
+    if (hostname.includes('brianthomastpm.com') && pathname.startsWith('/admin')) {
+      return NextResponse.redirect('https://briantpm.com' + pathname, 301);
+    }
+    
     const tenant = getTenantFromHostname(hostname);
     
     // Allow query param override for local testing
@@ -68,6 +61,12 @@ const withAuthMiddleware = withAuth(
     callbacks: {
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl;
+        const hostname = req.headers.get('host') || '';
+        
+        // Skip auth check for external domain admin paths (they will be redirected)
+        if (hostname.includes('brianthomastpm.com') && pathname.startsWith('/admin')) {
+          return true;
+        }
         
         // Admin routes require authentication
         if (pathname.startsWith('/admin')) {
@@ -80,8 +79,6 @@ const withAuthMiddleware = withAuth(
     },
   }
 );
-
-export default middleware;
 
 export const config = {
   // Apply middleware to all routes except static files and api routes
