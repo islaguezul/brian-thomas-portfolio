@@ -7,11 +7,20 @@ function getGitHubCredentials() {
   // In production, use VERCEL_URL to determine which tenant we're on
   const deploymentUrl = process.env.VERCEL_URL || process.env.NEXTAUTH_URL || '';
   
+  console.log('=== AUTH DEBUG ===');
+  console.log('VERCEL_URL:', process.env.VERCEL_URL);
+  console.log('NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
   console.log('Deployment URL for auth:', deploymentUrl);
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('GITHUB_ID_TENANT2 exists:', !!process.env.GITHUB_ID_TENANT2);
+  console.log('GITHUB_SECRET_TENANT2 exists:', !!process.env.GITHUB_SECRET_TENANT2);
+  console.log('GITHUB_ID exists:', !!process.env.GITHUB_ID);
+  console.log('GITHUB_SECRET exists:', !!process.env.GITHUB_SECRET);
   
   // Check if this deployment is for the external tenant
   if (deploymentUrl.includes('brianthomastpm.com')) {
-    console.log('Using TENANT2 credentials for brianthomastpm.com deployment');
+    console.log('✅ Using TENANT2 credentials for brianthomastpm.com deployment');
+    console.log('TENANT2 Client ID:', process.env.GITHUB_ID_TENANT2?.substring(0, 8) + '...');
     return {
       clientId: process.env.GITHUB_ID_TENANT2!,
       clientSecret: process.env.GITHUB_SECRET_TENANT2!,
@@ -19,7 +28,8 @@ function getGitHubCredentials() {
   }
   
   // Default to internal tenant
-  console.log('Using default credentials for briantpm.com deployment');
+  console.log('✅ Using default credentials for briantpm.com deployment');
+  console.log('Default Client ID:', process.env.GITHUB_ID?.substring(0, 8) + '...');
   return {
     clientId: process.env.GITHUB_ID!,
     clientSecret: process.env.GITHUB_SECRET!,
