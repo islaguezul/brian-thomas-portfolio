@@ -21,17 +21,24 @@ function getTenantFromHostname(hostname: string): Tenant {
   return 'internal';
 }
 
-// Custom middleware that combines auth and tenant detection
-export default withAuth(
-  function middleware(req: NextRequest) {
+// First check for admin redirects before auth
+function middleware(req: NextRequest) {
+  const hostname = req.headers.get('host') || '';
+  const { pathname } = req.nextUrl;
+  
+  // Redirect external domain admin to internal domain admin BEFORE auth check
+  if (hostname.includes('brianthomastpm.com') && pathname.startsWith('/admin')) {
+    return NextResponse.redirect('https://briantpm.com' + pathname, 301);
+  }
+  
+  // Continue with auth middleware for other requests
+  return withAuthMiddleware(req);
+}
+
+// Auth middleware as a separate function
+const withAuthMiddleware = withAuth(
+  function authMiddleware(req: NextRequest) {
     const hostname = req.headers.get('host') || '';
-    const { pathname } = req.nextUrl;
-    
-    // Redirect external domain admin to internal domain admin
-    if (hostname.includes('brianthomastpm.com') && pathname.startsWith('/admin')) {
-      return NextResponse.redirect('https://briantpm.com' + pathname, 301);
-    }
-    
     const tenant = getTenantFromHostname(hostname);
     
     // Allow query param override for local testing
@@ -73,6 +80,8 @@ export default withAuth(
     },
   }
 );
+
+export default middleware;
 
 export const config = {
   // Apply middleware to all routes except static files and api routes
