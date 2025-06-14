@@ -81,7 +81,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
           {project.screenshots && project.screenshots.length > 0 && (
             <div>
               <h3 className="text-xl font-bold mb-4 text-slate-200">Screenshots</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {project.screenshots.map((screenshot, index) => {
                   // Handle both string paths and ProjectScreenshot objects
                   const imageSrc = typeof screenshot === 'string' ? screenshot : screenshot.filePath;
@@ -95,15 +95,18 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                       className="relative group cursor-pointer"
                       onClick={() => setExpandedScreenshot({ src: imageSrc, alt: imageAlt })}
                     >
-                      <Image 
-                        src={imageSrc} 
-                        alt={imageAlt}
-                        width={400}
-                        height={256}
-                        className="w-full h-64 object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-all duration-300"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-lg flex items-center justify-center">
-                        <Expand className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative aspect-video w-full">
+                        <Image 
+                          src={imageSrc} 
+                          alt={imageAlt}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
+                          quality={90}
+                          className="object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-all duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-lg flex items-center justify-center">
+                          <Expand className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
                       </div>
                     </div>
                   );
@@ -255,27 +258,31 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
       {/* Full-screen image overlay */}
       {expandedScreenshot && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-black/95 backdrop-blur-sm"
           onClick={() => setExpandedScreenshot(null)}
         >
-          <div className="relative max-w-[90vw] max-h-[90vh]">
+          <div className="relative w-full h-full flex items-center justify-center">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setExpandedScreenshot(null);
               }}
-              className="absolute -top-12 right-0 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-lg transition-colors"
+              className="absolute top-4 right-4 sm:top-8 sm:right-8 p-3 bg-slate-800/80 hover:bg-slate-700 rounded-lg transition-colors z-10"
             >
               <X className="w-6 h-6 text-white" />
             </button>
-            <Image 
-              src={expandedScreenshot.src} 
-              alt={expandedScreenshot.alt}
-              width={1920}
-              height={1080}
-              className="w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
+            <div className="relative w-full h-full max-w-[1920px] max-h-[1080px]">
+              <Image 
+                src={expandedScreenshot.src} 
+                alt={expandedScreenshot.alt}
+                fill
+                sizes="100vw"
+                quality={100}
+                className="object-contain"
+                onClick={(e) => e.stopPropagation()}
+                priority
+              />
+            </div>
           </div>
         </div>
       )}

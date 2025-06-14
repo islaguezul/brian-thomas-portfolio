@@ -102,13 +102,15 @@ const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose
                         alt: screenshots[currentScreenshot].alt 
                       })}
                     >
-                      <img
-                        src={screenshots[currentScreenshot].src}
-                        alt={screenshots[currentScreenshot].alt}
-                        className="w-full h-full object-contain"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
-                        <Expand className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="relative w-full h-full">
+                        <img
+                          src={screenshots[currentScreenshot].src}
+                          alt={screenshots[currentScreenshot].alt}
+                          className="w-full h-full object-contain"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                          <Expand className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
                       </div>
                     </div>
                     <div className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
@@ -256,23 +258,23 @@ const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose
       {/* Full-screen image overlay */}
       {expandedScreenshot && (
         <div 
-          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-8 md:p-12 lg:p-16 bg-black/95 backdrop-blur-sm"
           onClick={() => setExpandedScreenshot(null)}
         >
-          <div className="relative max-w-[90vw] max-h-[90vh]">
+          <div className="relative w-full h-full flex items-center justify-center">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setExpandedScreenshot(null);
               }}
-              className="absolute -top-12 right-0 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-lg transition-colors"
+              className="absolute top-4 right-4 sm:top-8 sm:right-8 p-3 bg-slate-800/80 hover:bg-slate-700 rounded-lg transition-colors z-10"
             >
               <X className="w-6 h-6 text-white" />
             </button>
             <img
               src={expandedScreenshot.src} 
               alt={expandedScreenshot.alt}
-              className="w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-lg"
+              className="w-full h-full object-contain max-w-none"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
