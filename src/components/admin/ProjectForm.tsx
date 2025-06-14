@@ -147,7 +147,8 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
   const [dragCounter, setDragCounter] = useState(0);
 
   // Image compression function to reduce data URL size
-  const compressImage = (file: File, maxWidth = 800, quality = 0.8): Promise<string> => {
+  // For screenshots, we want to preserve quality for Retina displays
+  const compressImage = (file: File, maxWidth = 2880, quality = 0.95): Promise<string> => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -164,7 +165,10 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
 
         // Draw and compress
         ctx?.drawImage(img, 0, 0, newWidth, newHeight);
-        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        
+        // Preserve PNG format for screenshots to maintain quality
+        const fileType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        const compressedDataUrl = canvas.toDataURL(fileType, quality);
         resolve(compressedDataUrl);
       };
 

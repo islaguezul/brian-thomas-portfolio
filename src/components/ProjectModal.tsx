@@ -101,7 +101,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                           alt={imageAlt}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
-                          quality={90}
+                          quality={100}
+                          unoptimized
                           className="object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-all duration-300"
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-lg flex items-center justify-center">
@@ -278,6 +279,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                 fill
                 sizes="100vw"
                 quality={100}
+                unoptimized
                 className="object-contain"
                 onClick={(e) => e.stopPropagation()}
                 priority
