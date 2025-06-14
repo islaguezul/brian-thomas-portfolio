@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Layers, Target, BarChart3, Award } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Layers, Target, BarChart3, Award, Expand } from 'lucide-react';
 
 interface LegacyProjectModalProps {
   isOpen: boolean;
@@ -18,6 +18,7 @@ interface LegacyProjectModalProps {
 
 const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose, project }) => {
   const [currentScreenshot, setCurrentScreenshot] = useState(0);
+  const [expandedScreenshot, setExpandedScreenshot] = useState<{ src: string; alt: string } | null>(null);
 
   if (!isOpen) return null;
 
@@ -94,23 +95,32 @@ const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose
                 <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
                   <h3 className="text-xl font-semibold text-white mb-4">Project Screenshots</h3>
                   <div className="relative">
-                    <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
+                    <div 
+                      className="aspect-video bg-slate-900 rounded-lg overflow-hidden cursor-pointer group"
+                      onClick={() => setExpandedScreenshot({ 
+                        src: screenshots[currentScreenshot].src, 
+                        alt: screenshots[currentScreenshot].alt 
+                      })}
+                    >
                       <img
                         src={screenshots[currentScreenshot].src}
                         alt={screenshots[currentScreenshot].alt}
                         className="w-full h-full object-contain"
                       />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                        <Expand className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-between px-4">
+                    <div className="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
                       <button
                         onClick={handlePrevious}
-                        className="p-2 bg-black/50 hover:bg-black/70 rounded-full backdrop-blur-sm transition-all"
+                        className="p-2 bg-black/50 hover:bg-black/70 rounded-full backdrop-blur-sm transition-all pointer-events-auto"
                       >
                         <ChevronLeft className="w-6 h-6 text-white" />
                       </button>
                       <button
                         onClick={handleNext}
-                        className="p-2 bg-black/50 hover:bg-black/70 rounded-full backdrop-blur-sm transition-all"
+                        className="p-2 bg-black/50 hover:bg-black/70 rounded-full backdrop-blur-sm transition-all pointer-events-auto"
                       >
                         <ChevronRight className="w-6 h-6 text-white" />
                       </button>
@@ -242,6 +252,32 @@ const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose
           </div>
         </div>
       </div>
+      
+      {/* Full-screen image overlay */}
+      {expandedScreenshot && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          onClick={() => setExpandedScreenshot(null)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpandedScreenshot(null);
+              }}
+              className="absolute -top-12 right-0 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            <img
+              src={expandedScreenshot.src} 
+              alt={expandedScreenshot.alt}
+              className="w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { X, GithubIcon, ExternalLink, Play } from 'lucide-react';
+import { X, GithubIcon, ExternalLink, Play, Expand } from 'lucide-react';
 import type { ProjectScreenshot } from '@/lib/database/types';
 
 interface Project {
@@ -34,6 +34,8 @@ interface ProjectModalProps {
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose }) => {
+  const [expandedScreenshot, setExpandedScreenshot] = useState<{ src: string; alt: string } | null>(null);
+  
   if (!isOpen || !project) return null;
 
   const getStageColor = (stage: string): string => {
@@ -88,15 +90,21 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                     : screenshot.altText || `${project.name} screenshot ${index + 1}`;
                   
                   return (
-                    <div key={index} className="relative group">
+                    <div 
+                      key={index} 
+                      className="relative group cursor-pointer"
+                      onClick={() => setExpandedScreenshot({ src: imageSrc, alt: imageAlt })}
+                    >
                       <Image 
                         src={imageSrc} 
                         alt={imageAlt}
                         width={400}
                         height={256}
-                        className="w-full h-64 object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-colors"
+                        className="w-full h-64 object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-all duration-300"
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded-lg"></div>
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-lg flex items-center justify-center">
+                        <Expand className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
                     </div>
                   );
                 })}
@@ -243,6 +251,34 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
           </div>
         </div>
       </div>
+      
+      {/* Full-screen image overlay */}
+      {expandedScreenshot && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          onClick={() => setExpandedScreenshot(null)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh]">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setExpandedScreenshot(null);
+              }}
+              className="absolute -top-12 right-0 p-2 bg-slate-800/80 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
+            <Image 
+              src={expandedScreenshot.src} 
+              alt={expandedScreenshot.alt}
+              width={1920}
+              height={1080}
+              className="w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

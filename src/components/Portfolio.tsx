@@ -413,7 +413,11 @@ const MainPortfolio = () => {
       progress: 95,
       impact: { performance: '98/100', accessibility: '96/100', innovation: 'High' },
       features: ['Live data integration', 'Responsive design', 'Performance optimization', 'AI personalization'],
-      experimental: false
+      experimental: false,
+      screenshots: [
+        { filePath: '/api/placeholder/800/600', altText: 'Portfolio homepage showing hero section' },
+        { filePath: '/api/placeholder/800/600', altText: 'Live trading bot demo visualization' }
+      ]
     },
     {
       id: 'knowledge-management',
