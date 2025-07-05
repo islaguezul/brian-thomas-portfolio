@@ -3,6 +3,7 @@
 import React, { memo } from 'react';
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Link } from '@react-pdf/renderer';
 import type { WorkExperience, Education, PersonalInfo } from '@/lib/database/types';
+import type { Tenant } from '@/middleware';
 
 // Define modern styles for the PDF
 const styles = StyleSheet.create({
@@ -160,10 +161,14 @@ interface PDFDocumentProps {
   personalInfo?: PersonalInfo | null;
   experience: WorkExperience[];
   education: Education[];
+  tenant: Tenant;
 }
 
 // PDF Document Component with correct information
-const PDFDocument = ({ personalInfo, experience, education }: PDFDocumentProps) => (
+const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumentProps) => {
+  const websiteUrl = tenant === 'external' ? 'https://brianthomastpm.com' : 'https://briantpm.com';
+  
+  return (
   <Document>
     <Page size="A4" style={styles.page}>
       {/* Header */}
@@ -172,8 +177,8 @@ const PDFDocument = ({ personalInfo, experience, education }: PDFDocumentProps) 
         <Text style={styles.title}>{personalInfo?.title || 'Technical Product Manager'}</Text>
         <View style={styles.contactRow}>
           <View style={styles.contactItem}>
-            <Link style={styles.link} src="https://briantpm.com">
-              briantpm.com
+            <Link style={styles.link} src={websiteUrl}>
+              {websiteUrl.replace('https://', '')}
             </Link>
           </View>
           {personalInfo?.email && (
@@ -334,7 +339,8 @@ const PDFDocument = ({ personalInfo, experience, education }: PDFDocumentProps) 
       </View>
     </Page>
   </Document>
-);
+  );
+};
 
 // Memoize the PDF document to prevent re-generation
 const MemoizedPDFDocument = memo(PDFDocument);
@@ -343,12 +349,13 @@ interface PDFResumeDownloadProps {
   personalInfo?: PersonalInfo | null;
   experience: WorkExperience[];
   education: Education[];
+  tenant: Tenant;
 }
 
 // Export component that can be used in the Resume component
-const PDFResumeDownload = memo(({ personalInfo, experience, education }: PDFResumeDownloadProps) => {
+const PDFResumeDownload = memo(({ personalInfo, experience, education, tenant }: PDFResumeDownloadProps) => {
   // Create document instance once
-  const documentInstance = <MemoizedPDFDocument personalInfo={personalInfo} experience={experience} education={education} />;
+  const documentInstance = <MemoizedPDFDocument personalInfo={personalInfo} experience={experience} education={education} tenant={tenant} />;
   
   return (
     <PDFDownloadLink

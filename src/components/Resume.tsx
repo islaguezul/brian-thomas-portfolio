@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { Download, Mail, Phone, MapPin, Globe, Database, Users, BarChart3 } from 'lucide-react';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 import type { WorkExperience, Education, PersonalInfo } from '@/lib/database/types';
+import type { Tenant } from '@/middleware';
 
 // Dynamically import PDF component to avoid SSR issues
 const PDFResumeDownload = dynamic(
@@ -25,6 +26,7 @@ const Resume: React.FC = () => {
   const [education, setEducation] = useState<Education[]>([]);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tenant, setTenant] = useState<Tenant>('internal');
 
   // Fetch experience data
   const fetchExperience = async () => {
@@ -91,6 +93,15 @@ const Resume: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      
+      // Detect tenant from hostname
+      const hostname = window.location.hostname;
+      if (hostname.includes('brianthomastpm.com')) {
+        setTenant('external');
+      } else {
+        setTenant('internal');
+      }
+      
       await Promise.all([fetchExperience(), fetchEducation(), fetchPersonalInfo()]);
       setLoading(false);
     };
@@ -110,7 +121,7 @@ const Resume: React.FC = () => {
       <div className="max-w-5xl mx-auto px-6">
         {/* PDF Download Button */}
         <div className="mb-8 text-center print:hidden">
-          <PDFResumeDownload personalInfo={personalInfo} experience={experience} education={education} />
+          <PDFResumeDownload personalInfo={personalInfo} experience={experience} education={education} tenant={tenant} />
         </div>
 
         <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-8 print:bg-white print:text-black">
