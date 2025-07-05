@@ -94,12 +94,30 @@ const Resume: React.FC = () => {
     const loadData = async () => {
       setLoading(true);
       
-      // Detect tenant from hostname
-      const hostname = window.location.hostname;
-      if (hostname.includes('brianthomastpm.com')) {
-        setTenant('external');
-      } else {
-        setTenant('internal');
+      // Detect tenant from hostname and query params
+      if (typeof window !== 'undefined') {
+        const hostname = window.location.hostname;
+        const searchParams = new URLSearchParams(window.location.search);
+        const tenantOverride = searchParams.get('tenant');
+        
+        console.log('Resume: Detecting tenant from hostname:', hostname, 'Query param:', tenantOverride);
+        
+        // Check query parameter first (for local testing)
+        if (tenantOverride === 'external') {
+          console.log('Resume: Using external tenant from query param');
+          setTenant('external');
+        } else if (tenantOverride === 'internal') {
+          console.log('Resume: Using internal tenant from query param');
+          setTenant('internal');
+        }
+        // Then check hostname
+        else if (hostname.includes('brianthomastpm')) {
+          console.log('Resume: Detected external tenant from hostname');
+          setTenant('external');
+        } else {
+          console.log('Resume: Defaulting to internal tenant');
+          setTenant('internal');
+        }
       }
       
       await Promise.all([fetchExperience(), fetchEducation(), fetchPersonalInfo()]);

@@ -167,6 +167,7 @@ interface PDFDocumentProps {
 // PDF Document Component with correct information
 const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumentProps) => {
   const websiteUrl = tenant === 'external' ? 'https://brianthomastpm.com' : 'https://briantpm.com';
+  console.log('PDFDocument: Rendering with tenant:', tenant, 'URL:', websiteUrl);
   
   return (
   <Document>
@@ -354,6 +355,8 @@ interface PDFResumeDownloadProps {
 
 // Export component that can be used in the Resume component
 const PDFResumeDownload = memo(({ personalInfo, experience, education, tenant }: PDFResumeDownloadProps) => {
+  console.log('PDFResumeDownload: Received tenant prop:', tenant);
+  
   // Create document instance once
   const documentInstance = <MemoizedPDFDocument personalInfo={personalInfo} experience={experience} education={education} tenant={tenant} />;
   
