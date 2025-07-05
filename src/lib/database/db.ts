@@ -633,7 +633,12 @@ export async function getEducation(tenant: Tenant): Promise<Education[]> {
         `;
         return {
           ...edu,
-          courses: courses.rows as EducationCourse[],
+          courses: courses.rows.map(course => ({
+            id: course.id,
+            educationId: course.education_id,
+            courseName: course.course_name,
+            displayOrder: course.display_order
+          })) as EducationCourse[],
         };
       })
     );
@@ -666,10 +671,16 @@ export async function createEducation(tenant: Tenant, data: Education): Promise<
     // Insert courses
     if (data.courses?.length) {
       for (let i = 0; i < data.courses.length; i++) {
-        await client.query(
-          'INSERT INTO education_courses (education_id, course_name, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [eduId, data.courses[i].courseName, i, tenant]
-        );
+        const course = data.courses[i];
+        // Handle both camelCase and snake_case field names
+        const courseName = course.courseName || course.course_name || course.name || '';
+        
+        if (courseName) {
+          await client.query(
+            'INSERT INTO education_courses (education_id, course_name, display_order, tenant) VALUES ($1, $2, $3, $4)',
+            [eduId, courseName, i, tenant]
+          );
+        }
       }
     }
     
@@ -704,10 +715,16 @@ export async function updateEducation(tenant: Tenant, id: number, data: Educatio
     await client.query('DELETE FROM education_courses WHERE education_id = $1 AND tenant = $2', [id, tenant]);
     if (data.courses?.length) {
       for (let i = 0; i < data.courses.length; i++) {
-        await client.query(
-          'INSERT INTO education_courses (education_id, course_name, display_order, tenant) VALUES ($1, $2, $3, $4)',
-          [id, data.courses[i].courseName, i, tenant]
-        );
+        const course = data.courses[i];
+        // Handle both camelCase and snake_case field names
+        const courseName = course.courseName || course.course_name || course.name || '';
+        
+        if (courseName) {
+          await client.query(
+            'INSERT INTO education_courses (education_id, course_name, display_order, tenant) VALUES ($1, $2, $3, $4)',
+            [id, courseName, i, tenant]
+          );
+        }
       }
     }
     
