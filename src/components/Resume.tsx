@@ -191,8 +191,8 @@ const Resume: React.FC = () => {
                     <p className="text-lg text-blue-300 print:text-gray-700">{job.company}</p>
                   </div>
                   <span className="text-slate-400 print:text-gray-600">
-                    {formatMonthYear(job.start_date) || 'N/A'} - {
-                      job.is_current ? 'Present' : (formatMonthYear(job.end_date) || 'Present')
+                    {formatMonthYear(job.start_date || null) || 'N/A'} - {
+                      job.is_current ? 'Present' : (formatMonthYear(job.end_date || null) || 'Present')
                     }
                   </span>
                 </div>
