@@ -156,6 +156,47 @@ const styles = StyleSheet.create({
     color: '#2563eb',
     textDecoration: 'none',
   },
+  fullWidthSection: {
+    marginBottom: 12,
+  },
+  skillColumns: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+  educationRow: {
+    flexDirection: 'row',
+    gap: 15,
+  },
+  educationGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  educationColumn: {
+    flex: 1,
+  },
+  educationGridItem2x2: {
+    width: '48%',
+    marginBottom: 10,
+  },
+  educationGridItem2x3: {
+    width: '31%',
+    marginBottom: 10,
+  },
+  compactEducationItem: {
+    marginBottom: 0,
+  },
+  compactDegree: {
+    fontSize: 9,
+    fontWeight: 'bold',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  compactSchool: {
+    fontSize: 8,
+    color: '#4b5563',
+    lineHeight: 1.2,
+  },
 });
 
 interface PDFDocumentProps {
@@ -256,11 +297,11 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
                       </Text>
                     </View>
                   </View>
-                  {/* "Roles Include:" without bullet */}
-                  <Text style={[styles.bulletText, { paddingLeft: 0, marginBottom: 4 }]}>
-                    Roles Include:
-                  </Text>
                 </View>
+                {/* "Roles Include:" without bullet - moved outside wrap={false} */}
+                <Text style={[styles.bulletText, { paddingLeft: 0, marginBottom: 4, marginTop: 2 }]}>
+                  Roles Include:
+                </Text>
                 {/* Sub-roles as bullets */}
                 <View style={styles.bulletPoint}>
                   <Text style={styles.bullet}>•</Text>
@@ -315,68 +356,81 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
         })}
       </View>
 
-      {/* Skills & Education in two columns */}
-      <View style={styles.twoColumn}>
-        {/* Skills Column */}
-        <View style={styles.column}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Core Skills</Text>
-            <View style={styles.skillCategory}>
-              <Text style={styles.skillTitle}>Technical</Text>
-              <Text style={styles.skillList}>
-                • React/Next.js, Python, SQL{'\n'}
-                • BPMN 2.0, Process Modeling{'\n'}
-                • Tableau, Power BI{'\n'}
-                • SAP, ERP Systems{'\n'}
-                • API Integration
-              </Text>
-            </View>
-            <View style={styles.skillCategory}>
-              <Text style={styles.skillTitle}>Product & Process</Text>
-              <Text style={styles.skillList}>
-                • Product Lifecycle Management{'\n'}
-                • Requirements Gathering{'\n'}
-                • Stakeholder Alignment{'\n'}
-                • Process Optimization{'\n'}
-                • Change Management
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Education Column */}
-        <View style={styles.column}>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Education</Text>
-            {education.map((edu) => (
-              <View key={edu.id} style={styles.educationItem}>
-                <Text style={styles.degree}>{edu.degree}</Text>
-                <Text style={styles.school}>
-                  {edu.school}{edu.graduation_year ? ` • ${edu.graduation_year}` : ''}
-                </Text>
-                {edu.concentration && (
-                  <Text style={styles.school}>
-                    Concentration: {edu.concentration}
-                  </Text>
-                )}
-                {edu.courses && edu.courses.length > 0 && (
-                  <Text style={[styles.school, { marginTop: 2 }]}>
-                    Relevant coursework: {edu.courses.map(course => course.course_name).join(', ')}
-                  </Text>
-                )}
-              </View>
-            ))}
-          </View>
-          
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Certifications</Text>
+      {/* Core Skills - Full Width */}
+      <View style={styles.fullWidthSection}>
+        <Text style={styles.sectionTitle}>Core Skills</Text>
+        <View style={styles.skillColumns}>
+          <View style={styles.column}>
+            <Text style={styles.skillTitle}>Technical</Text>
             <Text style={styles.skillList}>
-              • BPMN 2.0 Practitioner{'\n'}
-              • Agile/Scrum Certified{'\n'}
-              • Change Management{'\n'}
-              • Data Visualization
+              • React/Next.js, Python, SQL{'\n'}
+              • BPMN 2.0, Process Modeling{'\n'}
+              • Tableau, Power BI{'\n'}
+              • SAP, ERP Systems{'\n'}
+              • API Integration
             </Text>
           </View>
+          <View style={styles.column}>
+            <Text style={styles.skillTitle}>Product & Process</Text>
+            <Text style={styles.skillList}>
+              • Product Lifecycle Management{'\n'}
+              • Requirements Gathering{'\n'}
+              • Stakeholder Alignment{'\n'}
+              • Process Optimization{'\n'}
+              • Change Management
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Education - Dynamic Layout */}
+      <View style={styles.fullWidthSection}>
+        <Text style={styles.sectionTitle}>Education</Text>
+        <View style={
+          education.length <= 3 
+            ? styles.educationRow 
+            : styles.educationGrid
+        }>
+          {education.sort((a, b) => {
+            // Sort by graduation year descending (most recent first)
+            const yearA = parseInt(a.graduation_year || '0');
+            const yearB = parseInt(b.graduation_year || '0');
+            return yearB - yearA;
+          }).map((edu) => {
+            // Determine which style to use based on total count
+            let columnStyle;
+            if (education.length <= 3) {
+              columnStyle = styles.educationColumn;
+            } else if (education.length === 4) {
+              columnStyle = styles.educationGridItem2x2;
+            } else {
+              columnStyle = styles.educationGridItem2x3;
+            }
+            
+            return (
+              <View key={edu.id} style={columnStyle}>
+                <View style={styles.compactEducationItem}>
+                  <Text style={styles.compactDegree}>{edu.degree}</Text>
+                  <Text style={styles.compactSchool}>
+                    {edu.school}
+                  </Text>
+                  {edu.graduation_year && (
+                    <Text style={styles.compactSchool}>{edu.graduation_year}</Text>
+                  )}
+                  {edu.concentration && (
+                    <Text style={styles.compactSchool}>
+                      {edu.concentration}
+                    </Text>
+                  )}
+                  {edu.courses && edu.courses.length > 0 && (
+                    <Text style={[styles.compactSchool, { marginTop: 2 }]}>
+                      {edu.courses.map(course => course.course_name).join(', ')}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            );
+          })}
         </View>
       </View>
     </Page>
