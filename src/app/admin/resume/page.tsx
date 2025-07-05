@@ -230,8 +230,8 @@ export default function ResumePage() {
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-white mb-1">{edu.degree}</h3>
                     <p className="text-purple-400 font-medium mb-2">{edu.school}</p>
-                    {(edu.graduationYear || edu.graduation_year) && (
-                      <p className="text-gray-400 text-sm mb-2">Graduated {edu.graduationYear || edu.graduation_year}</p>
+                    {edu.graduationYear && (
+                      <p className="text-gray-400 text-sm mb-2">Graduated {edu.graduationYear}</p>
                     )}
                     {edu.concentration && (
                       <p className="text-gray-400 text-sm mb-4">
@@ -245,7 +245,7 @@ export default function ResumePage() {
                         <div className="flex flex-wrap gap-2">
                           {edu.courses.slice(0, 4).map((course, idx) => (
                             <span key={idx} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">
-                              {course.courseName || course.course_name}
+                              {course.courseName}
                             </span>
                           ))}
                           {edu.courses.length > 4 && (

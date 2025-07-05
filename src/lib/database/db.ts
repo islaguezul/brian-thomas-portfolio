@@ -632,7 +632,14 @@ export async function getEducation(tenant: Tenant): Promise<Education[]> {
           ORDER BY display_order
         `;
         return {
-          ...edu,
+          id: edu.id,
+          degree: edu.degree,
+          school: edu.school,
+          graduationYear: edu.graduation_year,
+          concentration: edu.concentration,
+          displayOrder: edu.display_order,
+          createdAt: edu.created_at,
+          updatedAt: edu.updated_at,
           courses: courses.rows.map(course => ({
             id: course.id,
             educationId: course.education_id,
@@ -685,7 +692,30 @@ export async function createEducation(tenant: Tenant, data: Education): Promise<
     }
     
     await client.query('COMMIT');
-    return education.rows[0];
+    
+    // Fetch courses for the new education entry
+    const courses = await sql`
+      SELECT * FROM education_courses 
+      WHERE education_id = ${eduId} AND tenant = ${tenant}
+      ORDER BY display_order
+    `;
+    
+    return {
+      id: education.rows[0].id,
+      degree: education.rows[0].degree,
+      school: education.rows[0].school,
+      graduationYear: education.rows[0].graduation_year,
+      concentration: education.rows[0].concentration,
+      displayOrder: education.rows[0].display_order,
+      createdAt: education.rows[0].created_at,
+      updatedAt: education.rows[0].updated_at,
+      courses: courses.rows.map(course => ({
+        id: course.id,
+        educationId: course.education_id,
+        courseName: course.course_name,
+        displayOrder: course.display_order
+      })) as EducationCourse[],
+    };
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error creating education:', error);
@@ -731,7 +761,30 @@ export async function updateEducation(tenant: Tenant, id: number, data: Educatio
     await client.query('COMMIT');
     
     const updated = await sql<Education>`SELECT * FROM education WHERE id = ${id} AND tenant = ${tenant}`;
-    return updated.rows[0] || null;
+    if (!updated.rows[0]) return null;
+    
+    const courses = await sql`
+      SELECT * FROM education_courses 
+      WHERE education_id = ${id} AND tenant = ${tenant}
+      ORDER BY display_order
+    `;
+    
+    return {
+      id: updated.rows[0].id,
+      degree: updated.rows[0].degree,
+      school: updated.rows[0].school,
+      graduationYear: updated.rows[0].graduation_year,
+      concentration: updated.rows[0].concentration,
+      displayOrder: updated.rows[0].display_order,
+      createdAt: updated.rows[0].created_at,
+      updatedAt: updated.rows[0].updated_at,
+      courses: courses.rows.map(course => ({
+        id: course.id,
+        educationId: course.education_id,
+        courseName: course.course_name,
+        displayOrder: course.display_order
+      })) as EducationCourse[],
+    };
   } catch (error) {
     await client.query('ROLLBACK');
     console.error('Error updating education:', error);

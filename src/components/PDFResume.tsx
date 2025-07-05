@@ -393,8 +393,8 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
         }>
           {education.sort((a, b) => {
             // Sort by graduation year descending (most recent first)
-            const yearA = parseInt(a.graduation_year || '0');
-            const yearB = parseInt(b.graduation_year || '0');
+            const yearA = parseInt(a.graduationYear || '0');
+            const yearB = parseInt(b.graduationYear || '0');
             return yearB - yearA;
           }).map((edu) => {
             // Determine which style to use based on total count
@@ -414,8 +414,8 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
                   <Text style={styles.compactSchool}>
                     {edu.school}
                   </Text>
-                  {edu.graduation_year && (
-                    <Text style={styles.compactSchool}>{edu.graduation_year}</Text>
+                  {edu.graduationYear && (
+                    <Text style={styles.compactSchool}>{edu.graduationYear}</Text>
                   )}
                   {edu.concentration && (
                     <Text style={styles.compactSchool}>
@@ -424,7 +424,7 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
                   )}
                   {edu.courses && edu.courses.length > 0 && (
                     <Text style={[styles.compactSchool, { marginTop: 2 }]}>
-                      {edu.courses.map(course => course.course_name).join(', ')}
+                      {edu.courses.map(course => course.courseName).join(', ')}
                     </Text>
                   )}
                 </View>

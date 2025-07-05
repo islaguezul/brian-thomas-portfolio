@@ -216,7 +216,7 @@ const Resume: React.FC = () => {
                 <div key={edu.id} className="bg-slate-800/30 backdrop-blur-sm rounded-lg p-6 border border-slate-700 print:bg-white print:border-gray-300">
                   <h4 className="text-lg font-bold mb-3 text-green-400 print:text-gray-800">{edu.degree}</h4>
                   <p className="text-blue-300 print:text-gray-700 mb-2">{edu.school}</p>
-                  <p className="text-slate-400 print:text-gray-600 mb-4">{edu.graduation_year || edu.graduationYear}</p>
+                  <p className="text-slate-400 print:text-gray-600 mb-4">{edu.graduationYear}</p>
                   {edu.concentration && (
                     <p className="text-slate-300 text-sm mb-2 print:text-gray-700">Concentration: {edu.concentration}</p>
                   )}
@@ -225,7 +225,7 @@ const Resume: React.FC = () => {
                       <p className="text-slate-300 text-sm mb-2 print:text-gray-700">Relevant coursework includes:</p>
                       <ul className="list-disc pl-5 text-slate-300 text-sm space-y-1 print:text-gray-700">
                         {edu.courses.map((course) => (
-                          <li key={course.id}>{course.course_name || course.courseName}</li>
+                          <li key={course.id}>{course.courseName}</li>
                         ))}
                       </ul>
                     </>
