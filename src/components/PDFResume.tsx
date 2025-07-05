@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 15,
     borderBottom: '2pt solid #2563eb',
-    paddingBottom: 15,
+    paddingBottom: 12,
   },
   name: {
     fontSize: 26,
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   section: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 13,
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
   },
   experienceItem: {
-    marginBottom: 14,
+    marginBottom: 12,
     breakInside: 'avoid',
     breakBefore: 'auto',
     breakAfter: 'auto',
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   skillCategory: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   skillTitle: {
     fontSize: 10,
@@ -135,10 +135,10 @@ const styles = StyleSheet.create({
   skillList: {
     fontSize: 9,
     color: '#4b5563',
-    lineHeight: 1.5,
+    lineHeight: 1.3,
   },
   educationItem: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   jobHeaderWithFirstBullet: {
     breakInside: 'avoid',
@@ -236,6 +236,49 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
             return formatted.toUpperCase();
           };
 
+          // Check if this is the Operations Specialist role with sub-roles
+          const isOperationsSpecialist = exp.title === 'Operations Specialist, First Class' && 
+            exp.responsibilities?.[0]?.responsibility?.startsWith('Roles Include:');
+
+          if (isOperationsSpecialist && exp.responsibilities) {
+            // Special handling for Operations Specialist with multiple roles
+            return (
+              <View key={exp.id} style={styles.experienceItem}>
+                <View wrap={false}>
+                  <View style={styles.jobHeader}>
+                    <View style={styles.jobTitleRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.jobTitle}>{exp.title}</Text>
+                        <Text style={styles.company}>{exp.company}</Text>
+                      </View>
+                      <Text style={styles.date}>
+                        {formatDate(exp.start_date, false)} - {formatDate(exp.end_date, exp.is_current)}
+                      </Text>
+                    </View>
+                  </View>
+                  {/* "Roles Include:" without bullet */}
+                  <Text style={[styles.bulletText, { paddingLeft: 0, marginBottom: 4 }]}>
+                    Roles Include:
+                  </Text>
+                </View>
+                {/* Sub-roles as bullets */}
+                <View style={styles.bulletPoint}>
+                  <Text style={styles.bullet}>•</Text>
+                  <Text style={styles.bulletText}>
+                    Program Manager{'\n'}2005 – 2011
+                  </Text>
+                </View>
+                <View style={styles.bulletPoint}>
+                  <Text style={styles.bullet}>•</Text>
+                  <Text style={styles.bulletText}>
+                    Telecommunications Center Supervisor{'\n'}2002-2005
+                  </Text>
+                </View>
+              </View>
+            );
+          }
+
+          // Standard experience item rendering
           return (
             <View key={exp.id} style={styles.experienceItem}>
               <View wrap={false}>
@@ -317,12 +360,9 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
                   </Text>
                 )}
                 {edu.courses && edu.courses.length > 0 && (
-                  <View>
-                    <Text style={[styles.school, { marginTop: 4 }]}>Relevant coursework:</Text>
-                    {edu.courses.map((course) => (
-                      <Text key={course.id} style={styles.school}>• {course.course_name}</Text>
-                    ))}
-                  </View>
+                  <Text style={[styles.school, { marginTop: 2 }]}>
+                    Relevant coursework: {edu.courses.map(course => course.course_name).join(', ')}
+                  </Text>
                 )}
               </View>
             ))}
