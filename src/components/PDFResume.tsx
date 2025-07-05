@@ -197,6 +197,12 @@ const styles = StyleSheet.create({
     color: '#4b5563',
     lineHeight: 1.2,
   },
+  rolesIncludeText: {
+    fontSize: 9,
+    color: '#4b5563',
+    marginTop: 4,
+    marginBottom: 2,
+  },
 });
 
 interface PDFDocumentProps {
@@ -299,7 +305,7 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
                   </View>
                 </View>
                 {/* "Roles Include:" without bullet - moved outside wrap={false} */}
-                <Text style={[styles.bulletText, { paddingLeft: 0, marginBottom: 4, marginTop: 2 }]}>
+                <Text style={styles.rolesIncludeText}>
                   Roles Include:
                 </Text>
                 {/* Sub-roles as bullets */}
