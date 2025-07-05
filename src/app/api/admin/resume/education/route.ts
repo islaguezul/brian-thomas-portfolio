@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     
     await notifyContentUpdate('Education', {
       action: 'created',
-      institution: data.institution,
+      institution: data.school,
       degree: data.degree
     });
     

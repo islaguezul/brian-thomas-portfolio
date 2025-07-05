@@ -24,7 +24,7 @@ export async function PUT(
     
     await notifyContentUpdate('Education', {
       action: 'updated',
-      institution: data.institution,
+      institution: data.school,
       degree: data.degree
     });
     
