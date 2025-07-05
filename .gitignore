@@ -32,6 +32,7 @@ yarn-error.log*
 
 # AI Configuration (keep private)
 AI_PROMPT_SETUP.md
+CLAUDE.md
 
 # vercel
 .vercel

@@ -6,6 +6,7 @@ import { Download, Mail, Phone, MapPin, Globe, Database, Users, BarChart3 } from
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 import type { WorkExperience, Education, PersonalInfo } from '@/lib/database/types';
 import type { Tenant } from '@/middleware';
+import { formatMonthYear } from '@/lib/utils/dateFormatter';
 
 // Dynamically import PDF component to avoid SSR issues
 const PDFResumeDownload = dynamic(
@@ -190,8 +191,8 @@ const Resume: React.FC = () => {
                     <p className="text-lg text-blue-300 print:text-gray-700">{job.company}</p>
                   </div>
                   <span className="text-slate-400 print:text-gray-600">
-                    {job.start_date ? new Date(job.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'N/A'} - {
-                      job.is_current ? 'Present' : (job.end_date ? new Date(job.end_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Present')
+                    {formatMonthYear(job.start_date) || 'N/A'} - {
+                      job.is_current ? 'Present' : (formatMonthYear(job.end_date) || 'Present')
                     }
                   </span>
                 </div>

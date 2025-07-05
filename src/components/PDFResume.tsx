@@ -4,6 +4,7 @@ import React, { memo } from 'react';
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Link } from '@react-pdf/renderer';
 import type { WorkExperience, Education, PersonalInfo } from '@/lib/database/types';
 import type { Tenant } from '@/middleware';
+import { formatMonthYearShort } from '@/lib/utils/dateFormatter';
 
 // Define modern styles for the PDF
 const styles = StyleSheet.create({
@@ -231,8 +232,8 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
           const formatDate = (date: string | Date | undefined | null, isCurrent: boolean | undefined) => {
             if (isCurrent) return 'Present';
             if (!date) return '';
-            const d = date instanceof Date ? date : new Date(date);
-            return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+            const formatted = formatMonthYearShort(date instanceof Date ? date.toISOString() : date);
+            return formatted.toUpperCase();
           };
 
           return (
