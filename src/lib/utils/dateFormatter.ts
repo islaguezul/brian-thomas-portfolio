@@ -1,10 +1,13 @@
 /**
  * Formats a date string to display only month and year, avoiding timezone issues
- * @param dateString - ISO date string from database
+ * @param dateValue - ISO date string or Date object from database
  * @returns Formatted date string (e.g., "November 2023")
  */
-export function formatMonthYear(dateString: string | null | undefined): string {
-  if (!dateString) return '';
+export function formatMonthYear(dateValue: string | Date | null | undefined): string {
+  if (!dateValue) return '';
+  
+  // Convert Date object to ISO string if needed
+  const dateString = dateValue instanceof Date ? dateValue.toISOString() : dateValue;
   
   // Parse the date string and extract year and month
   // This avoids timezone conversion issues
@@ -23,11 +26,14 @@ export function formatMonthYear(dateString: string | null | undefined): string {
 
 /**
  * Formats a date string to display abbreviated month and year, avoiding timezone issues
- * @param dateString - ISO date string from database
+ * @param dateValue - ISO date string or Date object from database
  * @returns Formatted date string (e.g., "Nov 2023")
  */
-export function formatMonthYearShort(dateString: string | null | undefined): string {
-  if (!dateString) return '';
+export function formatMonthYearShort(dateValue: string | Date | null | undefined): string {
+  if (!dateValue) return '';
+  
+  // Convert Date object to ISO string if needed
+  const dateString = dateValue instanceof Date ? dateValue.toISOString() : dateValue;
   
   // Parse the date string and extract year and month
   // This avoids timezone conversion issues
