@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/auth';
-import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
+import { put } from '@vercel/blob';
 
 export async function POST(request: Request) {
   try {
@@ -15,31 +15,34 @@ export async function POST(request: Request) {
       );
     }
     
-    const body = (await request.json()) as HandleUploadBody;
+    const formData = await request.formData();
+    const file = formData.get('file') as File;
     
-    // Handle the upload request from the Vercel Blob client
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
-        // Return token configuration
-        // The path validation was causing issues - let's simplify
-        return {
-          allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-          maximumSizeInBytes: 50 * 1024 * 1024, // 50MB max per file
-        };
-      },
-      onUploadCompleted: async ({ blob }) => {
-        // Log successful upload
-        console.log('Screenshot uploaded successfully:', blob.url);
-      },
+    if (!file) {
+      return NextResponse.json(
+        { error: 'No file provided' },
+        { status: 400 }
+      );
+    }
+    
+    // Generate unique filename
+    const timestamp = Date.now();
+    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filename = `screenshots/${timestamp}-${sanitizedFilename}`;
+    
+    // Upload directly using put (server-side upload)
+    const blob = await put(filename, file, {
+      access: 'public',
+      addRandomSuffix: false,
     });
-
-    return NextResponse.json(jsonResponse);
+    
+    console.log('Screenshot uploaded successfully:', blob.url);
+    
+    return NextResponse.json({ url: blob.url });
   } catch (error) {
     console.error('Error handling upload:', error);
     return NextResponse.json(
-      { error: 'Failed to handle upload' },
+      { error: error instanceof Error ? error.message : 'Failed to upload' },
       { status: 500 }
     );
   }

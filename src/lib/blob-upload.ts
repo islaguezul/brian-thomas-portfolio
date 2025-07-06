@@ -1,5 +1,3 @@
-import { upload } from '@vercel/blob/client';
-
 interface UploadOptions {
   onProgress?: (progress: number) => void;
 }
@@ -9,24 +7,23 @@ export async function uploadScreenshot(
   options?: UploadOptions
 ): Promise<string> {
   try {
-    // Generate a unique filename
-    const timestamp = Date.now();
-    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `screenshots/${timestamp}-${sanitizedFilename}`;
+    // Create form data
+    const formData = new FormData();
+    formData.append('file', file);
 
-    // Upload directly to Vercel Blob
-    const blob = await upload(filename, file, {
-      access: 'public',
-      handleUploadUrl: '/api/admin/upload',
-      onUploadProgress: (progress) => {
-        if (options?.onProgress) {
-          const percentage = (progress.loaded / progress.total) * 100;
-          options.onProgress(percentage);
-        }
-      },
+    // Upload using fetch with manual progress tracking
+    const response = await fetch('/api/admin/upload', {
+      method: 'POST',
+      body: formData,
     });
 
-    return blob.url;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to upload');
+    }
+
+    const { url } = await response.json();
+    return url;
   } catch (error) {
     console.error('Error uploading to blob storage:', error);
     throw new Error('Failed to upload screenshot');
