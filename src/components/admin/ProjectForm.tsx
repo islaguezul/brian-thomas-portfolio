@@ -78,6 +78,10 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
         }, 1500);
       } else {
         setSaveStatus('error');
+        // Check for 413 error specifically
+        if (response.status === 413) {
+          alert('Project data is too large. Please reduce the number or size of screenshots.');
+        }
       }
     } catch (error) {
       console.error('Error saving project:', error);
@@ -147,8 +151,8 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
   const [dragCounter, setDragCounter] = useState(0);
 
   // Image compression function to reduce data URL size
-  // For screenshots, we want to preserve quality for Retina displays
-  const compressImage = (file: File, maxWidth = 2880, quality = 0.95): Promise<string> => {
+  // Reduced quality and dimensions to avoid 413 errors
+  const compressImage = (file: File, maxWidth = 1920, quality = 0.85): Promise<string> => {
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
@@ -182,12 +186,36 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
 
     try {
       const newScreenshots: ProjectScreenshot[] = [];
+      const maxFileSize = 3 * 1024 * 1024; // 3MB per file (will be ~4MB after base64)
+      const maxTotalSize = 8 * 1024 * 1024; // 8MB total limit
+      let totalSize = 0;
+      
+      // Calculate existing screenshots size
+      if (formData.screenshots) {
+        for (const screenshot of formData.screenshots) {
+          totalSize += screenshot.filePath.length;
+        }
+      }
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         
+        // Check individual file size
+        if (file.size > maxFileSize) {
+          alert(`File "${file.name}" is too large. Maximum size is 3MB per file.`);
+          continue;
+        }
+        
         // Create a compressed data URL for storage
         const dataUrl = await compressImage(file);
+        
+        // Check if adding this would exceed total limit
+        if (totalSize + dataUrl.length > maxTotalSize) {
+          alert(`Cannot add more screenshots. Total size limit (8MB) would be exceeded.`);
+          break;
+        }
+        
+        totalSize += dataUrl.length;
         
         // Create screenshot object with temporary data URL
         // WARNING: This stores large base64 data URLs in database - not ideal for production
