@@ -149,7 +149,15 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState(false);
 
-  // Removed image compression - now uploading directly to blob storage
+  // Convert file to data URL as fallback when Blob storage isn't configured
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target?.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const handleScreenshotUpload = async (files: FileList) => {
     if (!files) return;
@@ -163,16 +171,24 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
         const fileId = `${file.name}-${Date.now()}`;
         
         try {
-          // Upload to Vercel Blob with progress tracking
-          const blobUrl = await uploadScreenshot(file, {
-            onProgress: (progress) => {
-              setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
-            },
-          });
+          let filePath: string;
           
-          // Create screenshot object with blob URL
+          try {
+            // Try to upload to Vercel Blob first
+            filePath = await uploadScreenshot(file, {
+              onProgress: (progress) => {
+                setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
+              },
+            });
+          } catch (blobError) {
+            // Fallback to data URL if Blob storage isn't configured
+            console.warn('Vercel Blob not configured, using data URL fallback');
+            filePath = await fileToDataUrl(file);
+          }
+          
+          // Create screenshot object
           const screenshot: ProjectScreenshot = {
-            filePath: blobUrl, // Using blob URL for storage
+            filePath,
             altText: file.name.replace(/\.[^/.]+$/, ''), // Remove file extension
             displayOrder: (formData.screenshots?.length || 0) + newScreenshots.length
           };

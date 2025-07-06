@@ -1,6 +1,12 @@
 # Vercel Blob Storage Setup
 
-This project now uses Vercel Blob Storage for screenshot uploads, removing all file size limitations.
+This project now supports Vercel Blob Storage for screenshot uploads, removing all file size limitations. Until Blob Storage is configured, it will automatically fall back to data URLs.
+
+## Current Status
+
+**⚠️ IMPORTANT: Vercel Blob Storage is not yet configured in production.**
+
+The code is ready, but you need to enable Blob Storage in your Vercel dashboard first. Until then, the system will automatically use data URLs as a fallback.
 
 ## What Changed
 
