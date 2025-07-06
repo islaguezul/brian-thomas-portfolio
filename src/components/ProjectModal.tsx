@@ -54,7 +54,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 bg-slate-900/95 backdrop-blur-sm border-b border-slate-700 p-6">
+        <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-700 p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <h2 className="text-3xl font-bold text-blue-400">{project.name}</h2>
@@ -78,46 +78,6 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
 
         {/* Content */}
         <div className="p-6 space-y-8">
-          {/* Screenshots Section */}
-          {project.screenshots && project.screenshots.length > 0 && (
-            <div>
-              <h3 className="text-xl font-bold mb-4 text-slate-200">Screenshots</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {project.screenshots.map((screenshot, index) => {
-                  // Handle both string paths and ProjectScreenshot objects
-                  const rawSrc = typeof screenshot === 'string' ? screenshot : screenshot.filePath;
-                  const imageSrc = getImageUrl(rawSrc);
-                  const imageAlt = typeof screenshot === 'string' 
-                    ? `${project.name} screenshot ${index + 1}` 
-                    : screenshot.altText || `${project.name} screenshot ${index + 1}`;
-                  
-                  return (
-                    <div 
-                      key={index} 
-                      className="relative group cursor-pointer"
-                      onClick={() => setExpandedScreenshot({ src: imageSrc, alt: imageAlt })}
-                    >
-                      <div className="relative aspect-video w-full">
-                        <Image 
-                          src={imageSrc} 
-                          alt={imageAlt}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 800px"
-                          quality={100}
-                          unoptimized
-                          className="object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-all duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-lg flex items-center justify-center">
-                          <Expand className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Description */}
           <div>
             <h3 className="text-xl font-bold mb-4 text-slate-200">Project Overview</h3>
@@ -215,6 +175,46 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                     <span className="text-slate-300">{outcome}</span>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Screenshots Section */}
+          {project.screenshots && project.screenshots.length > 0 && (
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-slate-200">Screenshots</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-4 md:gap-6">
+                {project.screenshots.map((screenshot, index) => {
+                  // Handle both string paths and ProjectScreenshot objects
+                  const rawSrc = typeof screenshot === 'string' ? screenshot : screenshot.filePath;
+                  const imageSrc = getImageUrl(rawSrc);
+                  const imageAlt = typeof screenshot === 'string' 
+                    ? `${project.name} screenshot ${index + 1}` 
+                    : screenshot.altText || `${project.name} screenshot ${index + 1}`;
+                  
+                  return (
+                    <div 
+                      key={index} 
+                      className="relative group cursor-pointer"
+                      onClick={() => setExpandedScreenshot({ src: imageSrc, alt: imageAlt })}
+                    >
+                      <div className="relative aspect-video w-full">
+                        <Image 
+                          src={imageSrc} 
+                          alt={imageAlt}
+                          fill
+                          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px"
+                          quality={100}
+                          unoptimized
+                          className="object-cover rounded-lg border border-slate-700 hover:border-blue-500 transition-all duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 rounded-lg flex items-center justify-center">
+                          <Expand className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
