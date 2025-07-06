@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { X, GithubIcon, ExternalLink, Play, Expand } from 'lucide-react';
+import { getImageUrl } from '@/lib/blob-upload';
 import type { ProjectScreenshot } from '@/lib/database/types';
 
 interface Project {
@@ -84,7 +85,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {project.screenshots.map((screenshot, index) => {
                   // Handle both string paths and ProjectScreenshot objects
-                  const imageSrc = typeof screenshot === 'string' ? screenshot : screenshot.filePath;
+                  const rawSrc = typeof screenshot === 'string' ? screenshot : screenshot.filePath;
+                  const imageSrc = getImageUrl(rawSrc);
                   const imageAlt = typeof screenshot === 'string' 
                     ? `${project.name} screenshot ${index + 1}` 
                     : screenshot.altText || `${project.name} screenshot ${index + 1}`;

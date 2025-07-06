@@ -9,6 +9,7 @@ import {
 import type { Project, ProjectScreenshot } from '@/lib/database/types';
 import { getTechEmoji } from '@/lib/icons';
 import { adminFetch } from '@/lib/admin-fetch';
+import { uploadScreenshot, getImageUrl } from '@/lib/blob-upload';
 
 interface ProjectFormProps {
   project?: Project;
@@ -78,10 +79,6 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
         }, 1500);
       } else {
         setSaveStatus('error');
-        // Check for 413 error specifically
-        if (response.status === 413) {
-          alert('Project data is too large. Please reduce the number or size of screenshots.');
-        }
       }
     } catch (error) {
       console.error('Error saving project:', error);
@@ -149,84 +146,49 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
+  const [uploading, setUploading] = useState(false);
 
-  // Image compression function to reduce data URL size
-  // Reduced quality and dimensions to avoid 413 errors
-  const compressImage = (file: File, maxWidth = 1920, quality = 0.85): Promise<string> => {
-    return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-
-      img.onload = () => {
-        // Calculate new dimensions while maintaining aspect ratio
-        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-        const newWidth = img.width * ratio;
-        const newHeight = img.height * ratio;
-
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-
-        // Draw and compress
-        ctx?.drawImage(img, 0, 0, newWidth, newHeight);
-        
-        // Preserve PNG format for screenshots to maintain quality
-        const fileType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-        const compressedDataUrl = canvas.toDataURL(fileType, quality);
-        resolve(compressedDataUrl);
-      };
-
-      // Create object URL for the image
-      img.src = URL.createObjectURL(file);
-    });
-  };
+  // Removed image compression - now uploading directly to blob storage
 
   const handleScreenshotUpload = async (files: FileList) => {
     if (!files) return;
 
+    setUploading(true);
     try {
       const newScreenshots: ProjectScreenshot[] = [];
-      const maxFileSize = 3 * 1024 * 1024; // 3MB per file (will be ~4MB after base64)
-      const maxTotalSize = 8 * 1024 * 1024; // 8MB total limit
-      let totalSize = 0;
-      
-      // Calculate existing screenshots size
-      if (formData.screenshots) {
-        for (const screenshot of formData.screenshots) {
-          totalSize += screenshot.filePath.length;
-        }
-      }
       
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        const fileId = `${file.name}-${Date.now()}`;
         
-        // Check individual file size
-        if (file.size > maxFileSize) {
-          alert(`File "${file.name}" is too large. Maximum size is 3MB per file.`);
-          continue;
+        try {
+          // Upload to Vercel Blob with progress tracking
+          const blobUrl = await uploadScreenshot(file, {
+            onProgress: (progress) => {
+              setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
+            },
+          });
+          
+          // Create screenshot object with blob URL
+          const screenshot: ProjectScreenshot = {
+            filePath: blobUrl, // Using blob URL for storage
+            altText: file.name.replace(/\.[^/.]+$/, ''), // Remove file extension
+            displayOrder: (formData.screenshots?.length || 0) + newScreenshots.length
+          };
+          
+          newScreenshots.push(screenshot);
+          
+          // Clear progress for this file
+          setUploadProgress(prev => {
+            const updated = { ...prev };
+            delete updated[fileId];
+            return updated;
+          });
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          alert(`Failed to upload ${file.name}. Please try again.`);
         }
-        
-        // Create a compressed data URL for storage
-        const dataUrl = await compressImage(file);
-        
-        // Check if adding this would exceed total limit
-        if (totalSize + dataUrl.length > maxTotalSize) {
-          alert(`Cannot add more screenshots. Total size limit (8MB) would be exceeded.`);
-          break;
-        }
-        
-        totalSize += dataUrl.length;
-        
-        // Create screenshot object with temporary data URL
-        // WARNING: This stores large base64 data URLs in database - not ideal for production
-        // TODO: Implement proper file upload to storage service (AWS S3, Cloudinary, etc.)
-        const screenshot: ProjectScreenshot = {
-          filePath: dataUrl, // Using data URL for database storage (temporary solution)
-          altText: file.name.replace(/\.[^/.]+$/, ''), // Remove file extension
-          displayOrder: (formData.screenshots?.length || 0) + newScreenshots.length
-        };
-        
-        newScreenshots.push(screenshot);
       }
       
       // Add new screenshots to form data
@@ -235,9 +197,12 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
         screenshots: [...(formData.screenshots || []), ...newScreenshots]
       });
       
-      console.log(`Successfully added ${newScreenshots.length} screenshot(s)`);
+      console.log(`Successfully uploaded ${newScreenshots.length} screenshot(s)`);
     } catch (error) {
       console.error('Error uploading screenshots:', error);
+    } finally {
+      setUploading(false);
+      setUploadProgress({});
     }
   };
 
@@ -787,7 +752,7 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
                     {formData.screenshots.map((screenshot, idx) => (
                       <div key={idx} className="relative group">
                         <img
-                          src={screenshot.filePath}
+                          src={getImageUrl(screenshot.filePath)}
                           alt={screenshot.altText || `Screenshot ${idx + 1}`}
                           className="w-full h-32 object-cover rounded-lg"
                         />
@@ -814,11 +779,32 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors mx-auto"
+                  disabled={uploading}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-gray-300 rounded-lg transition-colors mx-auto"
                 >
                   <Upload className="w-4 h-4" />
-                  {formData.screenshots && formData.screenshots.length > 0 ? 'Add More Screenshots' : 'Upload Screenshots'}
+                  {uploading ? 'Uploading...' : (formData.screenshots && formData.screenshots.length > 0 ? 'Add More Screenshots' : 'Upload Screenshots')}
                 </button>
+                
+                {/* Upload Progress */}
+                {Object.entries(uploadProgress).length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    {Object.entries(uploadProgress).map(([fileId, progress]) => (
+                      <div key={fileId} className="bg-gray-800 rounded-lg p-3">
+                        <div className="flex justify-between text-sm text-gray-300 mb-1">
+                          <span>{fileId.split('-')[0]}</span>
+                          <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                          <div
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
