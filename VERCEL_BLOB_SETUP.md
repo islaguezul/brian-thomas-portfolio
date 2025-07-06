@@ -31,10 +31,17 @@ Vercel automatically adds the required environment variable:
 
 **Important**: If you're still seeing "Failed to retrieve client token" errors after enabling Blob:
 1. Go to your Vercel project settings
-2. Navigate to "Environment Variables"
+2. Navigate to "Environment Variables" 
 3. Check that `BLOB_READ_WRITE_TOKEN` is listed
-4. If not, disconnect and reconnect the Blob store
-5. Redeploy the project
+4. Make sure it's enabled for all environments (Production, Preview, Development)
+5. If the token is missing:
+   - Go to Storage → Your Blob Store
+   - Click "Manage" → "Environment Variables"
+   - Copy the `BLOB_READ_WRITE_TOKEN` value
+   - Add it manually to your project's environment variables
+6. Redeploy the project
+
+**Note**: The token in `.env.local` is only for local development. Vercel needs the token in the project's environment variables for production.
 
 ### 3. Local Development
 

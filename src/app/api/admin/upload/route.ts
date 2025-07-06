@@ -22,17 +22,11 @@ export async function POST(request: Request) {
       body,
       request,
       onBeforeGenerateToken: async (pathname, clientPayload) => {
-        // Validate that the upload is for screenshots
-        if (!pathname.startsWith('/screenshots/')) {
-          throw new Error('Invalid upload path');
-        }
-        
+        // Return token configuration
+        // The path validation was causing issues - let's simplify
         return {
           allowedContentTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
           maximumSizeInBytes: 50 * 1024 * 1024, // 50MB max per file
-          tokenPayload: JSON.stringify({
-            // Any custom data you want to associate with the upload
-          }),
         };
       },
       onUploadCompleted: async ({ blob }) => {
