@@ -4,7 +4,7 @@ interface UploadOptions {
 
 export async function uploadScreenshot(
   file: File,
-  options?: UploadOptions
+  _options?: UploadOptions
 ): Promise<string> {
   try {
     // Create form data
