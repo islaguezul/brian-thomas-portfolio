@@ -180,7 +180,7 @@ export default function ProjectForm({ project, isNew = false }: ProjectFormProps
                 setUploadProgress(prev => ({ ...prev, [fileId]: progress }));
               },
             });
-          } catch (blobError) {
+          } catch {
             // Fallback to data URL if Blob storage isn't configured
             console.warn('Vercel Blob not configured, using data URL fallback');
             filePath = await fileToDataUrl(file);
