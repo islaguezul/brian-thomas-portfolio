@@ -29,7 +29,12 @@ The code is ready, but you need to enable Blob Storage in your Vercel dashboard 
 Vercel automatically adds the required environment variable:
 - `BLOB_READ_WRITE_TOKEN` - Automatically injected by Vercel
 
-No manual configuration needed!
+**Important**: If you're still seeing "Failed to retrieve client token" errors after enabling Blob:
+1. Go to your Vercel project settings
+2. Navigate to "Environment Variables"
+3. Check that `BLOB_READ_WRITE_TOKEN` is listed
+4. If not, disconnect and reconnect the Blob store
+5. Redeploy the project
 
 ### 3. Local Development
 
