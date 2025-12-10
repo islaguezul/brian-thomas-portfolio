@@ -11,15 +11,14 @@ import { fetchRealCryptoSentiment, generateBacktestData } from '../lib/cryptoSen
 import { createTradingSimulator, type TradingState } from '../lib/tradingSimulation';
 import TradingBotDocumentation from './TradingBotDocumentation';
 import TradingBotDemo from './TradingBotDemo';
-import type { Project as DBProject } from '@/lib/database/types';
+import type { Project as DBProject, WorkExperience } from '@/lib/database/types';
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates';
 
 const MainPortfolio = () => {
   const [isClient, setIsClient] = useState(false);
   const [dbProjects, setDbProjects] = useState<DBProject[]>([]);
   const [personalInfo, setPersonalInfo] = useState<{ bio?: string } | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_workExperience, setWorkExperience] = useState<{ company: string; role: string; startDate: string; endDate?: string; description?: string }[]>([]);
+  const [workExperience, setWorkExperience] = useState<WorkExperience[]>([]);
 
   useRealtimeUpdates((message) => {
     if (message.type === 'content-update') {
@@ -545,7 +544,7 @@ const MainPortfolio = () => {
                           Brian Thomas
                         </span>
                         <br />
-                        <span className="text-white">Technical Product Manager</span>
+                        <span className="text-white">Senior Technical Product Manager</span>
                       </h1>
                       <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
                         {personalInfo?.bio || 
@@ -636,17 +635,75 @@ const MainPortfolio = () => {
               </div>
             </section>
 
+            {/* Enterprise Impact Section */}
+            <section id="enterprise-impact" className="relative py-20 overflow-hidden">
+              <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-16">
+                  <h2 className="text-4xl lg:text-5xl font-bold mb-6">
+                    <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+                      Enterprise Impact
+                    </span>
+                  </h2>
+                  <p className="text-xl text-slate-300 max-w-3xl mx-auto">
+                    Bridging the gap between Engineering, Strategy, and Operations.
+                  </p>
+                </div>
+                <div className="space-y-6">
+                  {workExperience.map((exp) => {
+                    const startDate = exp.startDate || exp.start_date;
+                    const endDate = exp.endDate || exp.end_date;
+                    const isCurrent = exp.isCurrent || exp.is_current;
+
+                    const formatDate = (date: Date | string | undefined) => {
+                      if (!date) return '';
+                      const d = new Date(date);
+                      return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+                    };
+
+                    const dateRange = isCurrent
+                      ? `${formatDate(startDate)} – Present`
+                      : `${formatDate(startDate)} – ${formatDate(endDate)}`;
+
+                    return (
+                      <div
+                        key={exp.id}
+                        className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-8 border border-slate-700/50 shadow-2xl hover:border-amber-500/30 transition-all duration-500"
+                      >
+                        <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-white">{exp.company}</h3>
+                            <p className="text-amber-400 font-medium">{exp.title}</p>
+                          </div>
+                          <p className="text-slate-400 text-sm mt-1 md:mt-0">{dateRange}</p>
+                        </div>
+                        {exp.responsibilities && exp.responsibilities.length > 0 && (
+                          <ul className="space-y-2">
+                            {exp.responsibilities.map((resp) => (
+                              <li key={resp.id} className="text-slate-300 leading-relaxed flex items-start">
+                                <span className="text-amber-400 mr-2">•</span>
+                                <span>{resp.responsibility}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+
             {/* Projects Section */}
             <section id="projects" className="relative py-20 overflow-hidden">
               <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl lg:text-5xl font-bold mb-6">
                     <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                      Current Projects
+                      Technical Prototyping & Architecture
                     </span>
                   </h2>
                   <p className="text-xl text-slate-300 max-w-3xl mx-auto">
-                    A showcase of innovative solutions I&apos;m building, from AI-powered trading systems to social platforms that connect people meaningfully.
+                    I believe the best Technical PMs stay hands-on. These projects represent my continuous experimentation with modern stacks (React, GraphQL, AI).
                   </p>
                 </div>
 

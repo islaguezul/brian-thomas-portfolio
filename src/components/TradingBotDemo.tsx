@@ -120,7 +120,7 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-xl font-semibold text-white">
-              AI Trading Bot Integration Demo
+              Autonomous Financial Decision Agent
             </h3>
           </div>
           <div className="flex items-center gap-2 text-green-400 text-sm">
@@ -140,8 +140,7 @@ const TradingBotDemo: React.FC<TradingBotDemoProps> = ({
         </div>
         
         <p className="text-sm text-slate-300 mb-6">
-          Real-time demonstration of AI integration from my crypto trading bot. 
-          Uses ChatGPT-4.1-mini to analyze news headlines for sentiment, combined with market data for counter-sentiment trading.
+          Real-time demonstration of Agentic AI. This system uses LLMs (GPT-4) to parse unstructured sentiment data and execute autonomous logic based on risk parameters. It illustrates the same Self-Correcting Logic I build for enterprise supply chains.
         </p>
 
         <div className="grid grid-cols-2 gap-6 mb-6">
