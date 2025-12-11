@@ -1183,3 +1183,126 @@ export async function copyProcessStrategyToTenant(strategyId: number, fromTenant
   const { id, ...strategyData } = strategy;
   return await createProcessStrategy(toTenant, strategyData as ProcessStrategy);
 }
+
+// Find matching entities on another tenant (for conflict detection)
+export async function findMatchingProject(name: string, tenant: Tenant): Promise<Project | null> {
+  try {
+    const result = await sql`
+      SELECT * FROM projects
+      WHERE tenant = ${tenant} AND LOWER(name) = LOWER(${name})
+      LIMIT 1
+    `;
+    return (result.rows[0] as Project) || null;
+  } catch (error) {
+    console.error('Error finding matching project:', error);
+    return null;
+  }
+}
+
+export async function findMatchingWorkExperience(company: string, title: string, tenant: Tenant): Promise<WorkExperience | null> {
+  try {
+    const result = await sql`
+      SELECT * FROM work_experience
+      WHERE tenant = ${tenant}
+        AND LOWER(company) = LOWER(${company})
+        AND LOWER(title) = LOWER(${title})
+      LIMIT 1
+    `;
+    if (!result.rows[0]) return null;
+
+    // Fetch responsibilities
+    const respResult = await sql`
+      SELECT * FROM work_responsibilities
+      WHERE experience_id = ${result.rows[0].id} AND tenant = ${tenant}
+      ORDER BY display_order ASC
+    `;
+
+    return {
+      ...result.rows[0],
+      responsibilities: respResult.rows.map(r => ({
+        id: r.id,
+        responsibility: r.responsibility,
+        displayOrder: r.display_order
+      }))
+    } as WorkExperience;
+  } catch (error) {
+    console.error('Error finding matching work experience:', error);
+    return null;
+  }
+}
+
+export async function findMatchingEducation(school: string, degree: string, tenant: Tenant): Promise<Education | null> {
+  try {
+    const result = await sql`
+      SELECT * FROM education
+      WHERE tenant = ${tenant}
+        AND LOWER(school) = LOWER(${school})
+        AND LOWER(degree) = LOWER(${degree})
+      LIMIT 1
+    `;
+    if (!result.rows[0]) return null;
+
+    // Fetch courses
+    const coursesResult = await sql`
+      SELECT * FROM education_courses
+      WHERE education_id = ${result.rows[0].id} AND tenant = ${tenant}
+      ORDER BY display_order ASC
+    `;
+
+    return {
+      ...result.rows[0],
+      courses: coursesResult.rows.map(c => ({
+        id: c.id,
+        courseName: c.course_name,
+        displayOrder: c.display_order
+      }))
+    } as Education;
+  } catch (error) {
+    console.error('Error finding matching education:', error);
+    return null;
+  }
+}
+
+export async function findMatchingTechStack(name: string, tenant: Tenant): Promise<TechStackItem | null> {
+  try {
+    const result = await sql`
+      SELECT * FROM tech_stack
+      WHERE tenant = ${tenant} AND LOWER(name) = LOWER(${name})
+      LIMIT 1
+    `;
+    return (result.rows[0] as TechStackItem) || null;
+  } catch (error) {
+    console.error('Error finding matching tech stack:', error);
+    return null;
+  }
+}
+
+export async function findMatchingSkillCategory(name: string, tenant: Tenant): Promise<SkillCategory | null> {
+  try {
+    const result = await sql`
+      SELECT * FROM skill_categories
+      WHERE tenant = ${tenant} AND LOWER(name) = LOWER(${name})
+      LIMIT 1
+    `;
+    if (!result.rows[0]) return null;
+
+    // Fetch skills
+    const skillsResult = await sql`
+      SELECT * FROM skills
+      WHERE category_id = ${result.rows[0].id} AND tenant = ${tenant}
+      ORDER BY display_order ASC
+    `;
+
+    return {
+      ...result.rows[0],
+      skills: skillsResult.rows.map(s => ({
+        id: s.id,
+        skillName: s.skill_name,
+        displayOrder: s.display_order
+      }))
+    } as SkillCategory;
+  } catch (error) {
+    console.error('Error finding matching skill category:', error);
+    return null;
+  }
+}

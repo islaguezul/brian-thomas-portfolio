@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Plus, Edit, Trash2, Calendar, Briefcase, GraduationCap, ChevronRight } from 'lucide-react';
 import type { WorkExperience, Education } from '@/lib/database/types';
 import { adminFetch } from '@/lib/admin-fetch';
+import OtherTenantPanel from '@/components/admin/OtherTenantPanel';
+import CopyToTenantButton from '@/components/admin/CopyToTenantButton';
 
 export default function ResumePage() {
   const [experience, setExperience] = useState<WorkExperience[]>([]);
@@ -46,7 +48,7 @@ export default function ResumePage() {
     }
 
     setDeletingExpId(id);
-    
+
     try {
       const response = await adminFetch(`/api/admin/resume/experience/${id}`, {
         method: 'DELETE',
@@ -71,7 +73,7 @@ export default function ResumePage() {
     }
 
     setDeletingEduId(id);
-    
+
     try {
       const response = await adminFetch(`/api/admin/resume/education/${id}`, {
         method: 'DELETE',
@@ -128,6 +130,37 @@ export default function ResumePage() {
           </Link>
         </div>
 
+        {/* Other Tenant Panel for Work Experience */}
+        <OtherTenantPanel<WorkExperience>
+          entityType="experience"
+          title="Work Experience on the other site"
+          emptyMessage="No work experience on the other site"
+          onItemCopied={loadData}
+          getItemName={(exp) => `${exp.title} at ${exp.company}`}
+          checkConflict={(name) => {
+            const parts = name.split(' at ');
+            if (parts.length !== 2) return false;
+            return experience.some(
+              e => e.title.toLowerCase() === parts[0].toLowerCase() &&
+                   e.company.toLowerCase() === parts[1].toLowerCase()
+            );
+          }}
+          renderItem={(exp) => (
+            <div>
+              <h4 className="text-white font-medium">{exp.title}</h4>
+              <p className="text-blue-400 text-sm">{exp.company}</p>
+              <p className="text-gray-500 text-xs mt-1">
+                {formatDate(exp.startDate || exp.start_date)} - {formatDate(exp.endDate || exp.end_date, exp.isCurrent || exp.is_current)}
+              </p>
+              {exp.responsibilities && exp.responsibilities.length > 0 && (
+                <p className="text-gray-500 text-xs mt-1">
+                  {exp.responsibilities.length} responsibilities
+                </p>
+              )}
+            </div>
+          )}
+        />
+
         {experience.length === 0 ? (
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
             <p className="text-gray-400 mb-4">No work experience added yet</p>
@@ -153,7 +186,7 @@ export default function ResumePage() {
                         {formatDate(exp.startDate || exp.start_date)} - {formatDate(exp.endDate || exp.end_date, exp.isCurrent || exp.is_current)}
                       </span>
                     </div>
-                    
+
                     {exp.responsibilities && exp.responsibilities.length > 0 && (
                       <ul className="space-y-2">
                         {exp.responsibilities.slice(0, 2).map((resp, idx) => (
@@ -172,6 +205,14 @@ export default function ResumePage() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
+                    {exp.id && (
+                      <CopyToTenantButton
+                        entityType="experience"
+                        entityId={exp.id}
+                        entityName={`${exp.title} at ${exp.company}`}
+                        entityDescription={exp.responsibilities?.[0]?.responsibility}
+                      />
+                    )}
                     <Link
                       href={`/admin/resume/experience/${exp.id}/edit`}
                       className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
@@ -211,6 +252,37 @@ export default function ResumePage() {
           </Link>
         </div>
 
+        {/* Other Tenant Panel for Education */}
+        <OtherTenantPanel<Education>
+          entityType="education"
+          title="Education on the other site"
+          emptyMessage="No education on the other site"
+          onItemCopied={loadData}
+          getItemName={(edu) => `${edu.degree} at ${edu.school}`}
+          checkConflict={(name) => {
+            const parts = name.split(' at ');
+            if (parts.length !== 2) return false;
+            return education.some(
+              e => e.degree.toLowerCase() === parts[0].toLowerCase() &&
+                   e.school.toLowerCase() === parts[1].toLowerCase()
+            );
+          }}
+          renderItem={(edu) => (
+            <div>
+              <h4 className="text-white font-medium">{edu.degree}</h4>
+              <p className="text-purple-400 text-sm">{edu.school}</p>
+              {edu.graduationYear && (
+                <p className="text-gray-500 text-xs mt-1">Graduated {edu.graduationYear}</p>
+              )}
+              {edu.courses && edu.courses.length > 0 && (
+                <p className="text-gray-500 text-xs">
+                  {edu.courses.length} courses
+                </p>
+              )}
+            </div>
+          )}
+        />
+
         {education.length === 0 ? (
           <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
             <p className="text-gray-400 mb-4">No education added yet</p>
@@ -238,7 +310,7 @@ export default function ResumePage() {
                         Concentration: {edu.concentration}
                       </p>
                     )}
-                    
+
                     {edu.courses && edu.courses.length > 0 && (
                       <div>
                         <p className="text-gray-500 text-sm mb-2">Key Courses:</p>
@@ -259,6 +331,14 @@ export default function ResumePage() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-4">
+                    {edu.id && (
+                      <CopyToTenantButton
+                        entityType="education"
+                        entityId={edu.id}
+                        entityName={`${edu.degree} from ${edu.school}`}
+                        entityDescription={edu.concentration || undefined}
+                      />
+                    )}
                     <Link
                       href={`/admin/resume/education/${edu.id}/edit`}
                       className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"

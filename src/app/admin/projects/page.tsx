@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Plus, Edit, Trash2, ExternalLink, GitBranch, Eye, EyeOff } from 'lucide-react';
 import type { Project } from '@/lib/database/types';
 import { adminFetch } from '@/lib/admin-fetch';
+import OtherTenantPanel from '@/components/admin/OtherTenantPanel';
+import CopyToTenantButton from '@/components/admin/CopyToTenantButton';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -35,7 +37,7 @@ export default function ProjectsPage() {
     }
 
     setDeletingId(id);
-    
+
     try {
       const response = await adminFetch(`/api/admin/projects/${id}`, {
         method: 'DELETE',
@@ -67,6 +69,11 @@ export default function ProjectsPage() {
     return colors[stage as keyof typeof colors] || colors.concept;
   };
 
+  // Check if a project with this name already exists locally
+  const checkProjectConflict = (projectName: string): boolean => {
+    return projects.some(p => p.name.toLowerCase() === projectName.toLowerCase());
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -90,6 +97,39 @@ export default function ProjectsPage() {
           Add Project
         </Link>
       </div>
+
+      {/* Other Tenant Panel - Copy projects from the other site */}
+      <OtherTenantPanel<Project>
+        entityType="projects"
+        title="Projects on the other site"
+        emptyMessage="No projects on the other site"
+        onItemCopied={loadProjects}
+        getItemName={(project) => project.name}
+        checkConflict={checkProjectConflict}
+        renderItem={(project) => (
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="text-white font-medium">{project.name}</h4>
+              <span className={`px-2 py-0.5 text-xs font-medium rounded-full border ${getStageColor(project.stage)}`}>
+                {project.stage}
+              </span>
+            </div>
+            <p className="text-gray-400 text-sm line-clamp-1">{project.description}</p>
+            {project.technologies && project.technologies.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {project.technologies.slice(0, 4).map((tech, idx) => (
+                  <span key={idx} className="px-1.5 py-0.5 bg-gray-800 text-gray-400 text-xs rounded">
+                    {tech}
+                  </span>
+                ))}
+                {project.technologies.length > 4 && (
+                  <span className="text-gray-500 text-xs">+{project.technologies.length - 4}</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      />
 
       <div className="grid gap-6">
         {projects.length === 0 ? (
@@ -125,7 +165,7 @@ export default function ProjectsPage() {
                     )}
                   </div>
                   <p className="text-gray-400 text-sm mb-3">{project.description}</p>
-                  
+
                   <div className="flex flex-wrap gap-2 mb-3">
                     {project.technologies?.map((tech, idx) => (
                       <span key={idx} className="px-2 py-1 bg-gray-800 text-gray-300 text-xs rounded">
@@ -151,7 +191,7 @@ export default function ProjectsPage() {
                         <span>No GitHub Link</span>
                       </span>
                     )}
-                    
+
                     {project.liveUrl && (
                       <a
                         href={project.liveUrl}
@@ -172,6 +212,14 @@ export default function ProjectsPage() {
                 </div>
 
                 <div className="flex items-center gap-2 ml-4">
+                  {project.id && (
+                    <CopyToTenantButton
+                      entityType="projects"
+                      entityId={project.id}
+                      entityName={project.name}
+                      entityDescription={project.description}
+                    />
+                  )}
                   <Link
                     href={`/admin/projects/${project.id}/edit`}
                     className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
