@@ -16,6 +16,23 @@ interface LegacyProjectModalProps {
   };
 }
 
+// Helper to format metric keys while preserving acronyms
+const ACRONYMS = ['roi', 'api', 'apis', 'seo', 'kpi', 'sql', 'css', 'html', 'aws', 'gcp', 'sdk', 'ui', 'ux'];
+
+function formatMetricKey(key: string): string {
+  return key
+    .replace(/-/g, ' ')
+    .split(' ')
+    .map(word => {
+      const lower = word.toLowerCase();
+      if (ACRONYMS.includes(lower)) {
+        return lower.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
+
 const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose, project }) => {
   const [currentScreenshot, setCurrentScreenshot] = useState(0);
   const [expandedScreenshot, setExpandedScreenshot] = useState<{ src: string; alt: string } | null>(null);
@@ -180,7 +197,7 @@ const LegacyProjectModal: React.FC<LegacyProjectModalProps> = ({ isOpen, onClose
                   <div className="space-y-4">
                     {Object.entries(project.impact).map(([key, value]) => (
                       <div key={key} className="flex justify-between items-center">
-                        <span className="text-slate-400 capitalize">{key.replace('-', ' ')}</span>
+                        <span className="text-slate-400">{formatMetricKey(key)}</span>
                         <span className="text-xl font-semibold text-green-400">{value}</span>
                       </div>
                     ))}

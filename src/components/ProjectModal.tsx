@@ -28,6 +28,23 @@ interface Project {
   };
 }
 
+// Helper to format metric keys while preserving acronyms
+const ACRONYMS = ['roi', 'api', 'apis', 'seo', 'kpi', 'sql', 'css', 'html', 'aws', 'gcp', 'sdk', 'ui', 'ux'];
+
+function formatMetricKey(key: string): string {
+  return key
+    .replace(/-/g, ' ')
+    .split(' ')
+    .map(word => {
+      const lower = word.toLowerCase();
+      if (ACRONYMS.includes(lower)) {
+        return lower.toUpperCase();
+      }
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(' ');
+}
+
 interface ProjectModalProps {
   project: Project | null;
   isOpen: boolean;
@@ -115,7 +132,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                 {Object.entries(project.impact).map(([key, value]) => (
                   <div key={key} className="bg-slate-800/30 rounded-lg p-4 text-center">
                     <div className="text-2xl font-bold text-blue-400">{value}</div>
-                    <div className="text-sm text-slate-400 capitalize">{key.replace('-', ' ')}</div>
+                    <div className="text-sm text-slate-400">{formatMetricKey(key)}</div>
                   </div>
                 ))}
               </div>

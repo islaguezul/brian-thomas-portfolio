@@ -50,7 +50,7 @@ const ParticleBackground: React.FC<ParticleBackgroundProps> = ({ mousePosition: 
         <div 
           className="fixed inset-0 pointer-events-none"
           style={{
-            transform: `translate(${(mousePosition.x - window.innerWidth / 2) * 5}px, ${(mousePosition.y - window.innerHeight / 2) * 5}px)`
+            transform: `translate(${(mousePosition.x - window.innerWidth / 2) * 0.15}px, ${(mousePosition.y - window.innerHeight / 2) * 0.15}px)`
           }}
         >
           {particleData.map((particle) => (
