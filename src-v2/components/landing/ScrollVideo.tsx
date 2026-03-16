@@ -1,0 +1,134 @@
+'use client'
+
+import { useRef, useCallback, useEffect, useState } from 'react'
+import { useScrollVideo } from '@v2/hooks/useScrollVideo'
+
+interface ScrollVideoProps {
+  frames: HTMLImageElement[]
+  totalFrames: number
+  children?: React.ReactNode  // Glass cards are passed as children so they scroll naturally inside the wrapper
+}
+
+export default function ScrollVideo({ frames, totalFrames, children }: ScrollVideoProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const isMobileRef = useRef(false)
+
+  // Detect mobile (using ref to avoid re-render / draw accumulation on resize)
+  useEffect(() => {
+    isMobileRef.current = window.innerWidth < 768
+    const handleResize = () => { isMobileRef.current = window.innerWidth < 768 }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Draw a frame to the canvas with cover-fit
+  const drawFrame = useCallback((frameIndex: number) => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    const img = frames[frameIndex]
+    if (!canvas || !ctx || !img) return
+
+    const dpr = window.devicePixelRatio || 1
+    const displayWidth = canvas.clientWidth
+    const displayHeight = canvas.clientHeight
+
+    // Set canvas resolution for retina (only when dimensions change)
+    const targetW = displayWidth * dpr
+    const targetH = displayHeight * dpr
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW
+      canvas.height = targetH
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+
+    // Cover-fit: scale image to fill canvas, crop overflow
+    const imgRatio = img.naturalWidth / img.naturalHeight
+    const canvasRatio = displayWidth / displayHeight
+    const isMobile = isMobileRef.current
+
+    let drawWidth: number, drawHeight: number
+
+    if (isMobile) {
+      // Zoomed contain-fit on mobile
+      const scale = 1.2
+      if (imgRatio > canvasRatio) {
+        drawHeight = displayHeight * scale
+        drawWidth = drawHeight * imgRatio
+      } else {
+        drawWidth = displayWidth * scale
+        drawHeight = drawWidth / imgRatio
+      }
+    } else {
+      // Cover-fit on desktop
+      if (imgRatio > canvasRatio) {
+        drawHeight = displayHeight
+        drawWidth = drawHeight * imgRatio
+      } else {
+        drawWidth = displayWidth
+        drawHeight = drawWidth / imgRatio
+      }
+    }
+
+    const drawX = (displayWidth - drawWidth) / 2
+    const drawY = (displayHeight - drawHeight) / 2
+
+    ctx.clearRect(0, 0, displayWidth, displayHeight)
+    ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)
+  }, [frames])
+
+  // Draw initial frame
+  useEffect(() => {
+    if (frames.length > 0) {
+      drawFrame(0)
+    }
+  }, [frames, drawFrame])
+
+  // Connect scroll to frame rendering (wrap in useCallback-stable ref)
+  const drawFrameRef = useRef(drawFrame)
+  drawFrameRef.current = drawFrame
+
+  const stableOnFrameChange = useCallback((index: number) => {
+    drawFrameRef.current(index)
+  }, [])
+
+  useScrollVideo({
+    totalFrames,
+    wrapperRef,
+    onFrameChange: stableOnFrameChange,
+  })
+
+  const scrollHeight = typeof window !== 'undefined' && window.innerWidth < 768 ? '250vh' : '350vh'
+
+  return (
+    <div
+      ref={wrapperRef}
+      style={{ height: scrollHeight, position: 'relative' }}
+    >
+      {/* Sticky canvas — stays fixed while wrapper scrolls */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'sticky',
+          top: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'block',
+        }}
+      />
+
+      {/* Children (glass cards) are placed inside the wrapper in normal flow.
+          They start after the 100vh canvas, so they naturally scroll up
+          and overlap the sticky canvas as the user scrolls through the wrapper.
+          backdrop-filter on the glass cards picks up the canvas below them. */}
+      {children && (
+        <div
+          className="relative z-10"
+          style={{ marginTop: '-100vh', paddingTop: '20vh' }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
