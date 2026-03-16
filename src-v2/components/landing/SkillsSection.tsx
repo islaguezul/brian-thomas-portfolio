@@ -1,5 +1,3 @@
-'use client'
-
 import type { TechStackItem } from '@/lib/database/types'
 
 interface SkillsSectionProps {

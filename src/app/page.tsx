@@ -1,4 +1,5 @@
 import HomePage from '@v2/pages/HomePage'
+import SkillsSection from '@v2/components/landing/SkillsSection'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { getPersonalInfo, getProjects, getWorkExperience, getTechStack } from '@/lib/database/db'
@@ -32,7 +33,7 @@ export default async function Home() {
       personalInfo={personalInfo ?? fallbackInfo}
       projectCount={projects.length}
       experiences={experiences}
-      techStack={techStack}
+      skillsSection={<SkillsSection items={techStack} />}
     />
   )
 }

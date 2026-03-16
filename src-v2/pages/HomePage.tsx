@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import type { FrameLoadResult } from '@v2/lib/frame-loader'
-import type { PersonalInfo, WorkExperience, TechStackItem } from '@/lib/database/types'
+import type { PersonalInfo, WorkExperience } from '@/lib/database/types'
 import FrameLoader from '@v2/components/landing/FrameLoader'
 import ScrollVideo from '@v2/components/landing/ScrollVideo'
 import HeroOverlay from '@v2/components/landing/HeroOverlay'
@@ -10,17 +10,16 @@ import AboutCard from '@v2/components/landing/AboutCard'
 import HighlightsCard from '@v2/components/landing/HighlightsCard'
 import Navbar from '@v2/components/layout/Navbar'
 import ExperienceSection from '@v2/components/landing/ExperienceSection'
-import SkillsSection from '@v2/components/landing/SkillsSection'
 import Footer from '@v2/components/layout/Footer'
 
 interface HomePageProps {
   personalInfo: PersonalInfo
   projectCount: number
   experiences: WorkExperience[]
-  techStack: TechStackItem[]
+  skillsSection?: React.ReactNode
 }
 
-export default function HomePage({ personalInfo, projectCount, experiences, techStack }: HomePageProps) {
+export default function HomePage({ personalInfo, projectCount, experiences, skillsSection }: HomePageProps) {
   const [frameData, setFrameData] = useState<FrameLoadResult | null>(null)
   const handleFramesLoaded = useCallback((result: FrameLoadResult) => {
     setFrameData(result)
@@ -115,7 +114,7 @@ export default function HomePage({ personalInfo, projectCount, experiences, tech
       {/* Post-video content */}
       <div style={{ background: 'var(--void)', position: 'relative', zIndex: 2 }}>
         <ExperienceSection experiences={experiences} />
-        <SkillsSection items={techStack} />
+        {skillsSection}
         <Footer name={personalInfo.name} />
       </div>
     </div>
