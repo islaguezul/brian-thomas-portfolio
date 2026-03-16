@@ -37,6 +37,9 @@ yarn-error.log*
 AI_PROMPT_SETUP.md
 CLAUDE.md
 
+# Extracted video frames (too large for git, regenerate with ffmpeg)
+public/frames/
+
 # vercel
 .vercel
 
