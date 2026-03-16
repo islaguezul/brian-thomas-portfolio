@@ -38,7 +38,7 @@ export default function Navbar({ contactEmail }: NavbarProps) {
         {/* Logo / Name */}
         <Link
           href="/"
-          className="font-space text-sm font-semibold tracking-wide"
+          className="font-space text-base font-semibold tracking-wide"
           style={{ color: 'var(--floral)' }}
         >
           Brian Thomas
@@ -50,15 +50,15 @@ export default function Navbar({ contactEmail }: NavbarProps) {
             <Link
               key={link.href}
               href={link.href}
-              className="text-xs transition-colors hover:opacity-80"
-              style={{ color: 'rgba(245, 222, 179, 0.5)' }}
+              className="text-sm font-medium transition-colors hover:opacity-80"
+              style={{ color: 'rgba(245, 222, 179, 0.85)' }}
             >
               {link.label}
             </Link>
           ))}
           <a
             href={contactHref}
-            className="text-xs px-4 py-1.5 rounded-full transition-colors"
+            className="text-sm font-medium px-4 py-1.5 rounded-full transition-colors"
             style={{
               background: 'rgba(107, 143, 181, 0.15)',
               color: 'var(--steel-blue)',
@@ -109,8 +109,8 @@ export default function Navbar({ contactEmail }: NavbarProps) {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm py-1"
-              style={{ color: 'rgba(245, 222, 179, 0.6)' }}
+              className="text-sm font-medium py-1"
+              style={{ color: 'rgba(245, 222, 179, 0.85)' }}
               onClick={() => setIsMobileMenuOpen(false)}
             >
               {link.label}

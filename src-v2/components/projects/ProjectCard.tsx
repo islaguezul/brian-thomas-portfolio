@@ -5,6 +5,14 @@ interface ProjectCardProps {
   onClick: () => void
 }
 
+const TAG_COLORS = [
+  { bg: 'rgba(212, 168, 85, 0.08)', border: 'rgba(212, 168, 85, 0.2)', text: 'var(--accretion)' },
+  { bg: 'rgba(107, 143, 181, 0.1)', border: 'rgba(107, 143, 181, 0.25)', text: 'var(--steel-blue)' },
+  { bg: 'rgba(160, 124, 176, 0.1)', border: 'rgba(160, 124, 176, 0.25)', text: 'var(--dusty-violet)' },
+  { bg: 'rgba(196, 120, 120, 0.1)', border: 'rgba(196, 120, 120, 0.25)', text: 'var(--muted-rose)' },
+  { bg: 'rgba(74, 111, 143, 0.1)', border: 'rgba(74, 111, 143, 0.25)', text: 'var(--deep-steel)' },
+]
+
 const STAGE_COLORS: Record<string, string> = {
   production: 'var(--steel-blue)',
   mvp: 'var(--accretion)',
@@ -67,19 +75,22 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       {/* Tech tags */}
       {project.technologies && project.technologies.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
-          {project.technologies.slice(0, 4).map((tech) => (
-            <span
-              key={tech}
-              className="text-[10px] px-2 py-0.5 rounded-full"
-              style={{
-                background: 'rgba(212, 168, 85, 0.06)',
-                color: 'rgba(245, 222, 179, 0.4)',
-                border: '1px solid rgba(212, 168, 85, 0.08)',
-              }}
-            >
-              {tech}
-            </span>
-          ))}
+          {project.technologies.slice(0, 4).map((tech, i) => {
+            const color = TAG_COLORS[i % TAG_COLORS.length]
+            return (
+              <span
+                key={tech}
+                className="text-[10px] px-2 py-0.5 rounded-full"
+                style={{
+                  background: color.bg,
+                  border: `1px solid ${color.border}`,
+                  color: color.text,
+                }}
+              >
+                {tech}
+              </span>
+            )
+          })}
           {project.technologies.length > 4 && (
             <span
               className="text-[10px] px-2 py-0.5"

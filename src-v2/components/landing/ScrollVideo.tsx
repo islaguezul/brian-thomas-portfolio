@@ -62,18 +62,20 @@ export default function ScrollVideo({ frames, totalFrames, heroOverlay, children
         drawHeight = drawWidth / imgRatio
       }
     } else {
-      // Cover-fit on desktop
+      // Cover-fit on desktop, slightly overscaled to crop bottom watermark
+      const bottomCrop = 1.14
       if (imgRatio > canvasRatio) {
-        drawHeight = displayHeight
+        drawHeight = displayHeight * bottomCrop
         drawWidth = drawHeight * imgRatio
       } else {
         drawWidth = displayWidth
-        drawHeight = drawWidth / imgRatio
+        drawHeight = (drawWidth / imgRatio) * bottomCrop
       }
     }
 
     const drawX = (displayWidth - drawWidth) / 2
-    const drawY = (displayHeight - drawHeight) / 2
+    // Anchor to top edge so the extra height is cropped from the bottom
+    const drawY = 0
 
     ctx.clearRect(0, 0, displayWidth, displayHeight)
     ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight)

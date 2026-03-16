@@ -9,9 +9,10 @@ import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates'
 
 interface ProjectsPageProps {
   initialProjects: Project[]
+  contactEmail?: string
 }
 
-export default function ProjectsPage({ initialProjects }: ProjectsPageProps) {
+export default function ProjectsPage({ initialProjects, contactEmail }: ProjectsPageProps) {
   const [projects, setProjects] = useState<Project[]>(initialProjects)
 
   const fetchProjects = useCallback(async () => {
@@ -34,7 +35,7 @@ export default function ProjectsPage({ initialProjects }: ProjectsPageProps) {
 
   return (
     <div style={{ background: 'var(--void)', minHeight: '100vh' }}>
-      <Navbar />
+      <Navbar contactEmail={contactEmail} />
 
       <div className="pt-24 pb-16 px-6">
         <div className="max-w-5xl mx-auto">

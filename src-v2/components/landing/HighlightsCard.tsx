@@ -14,7 +14,7 @@ export default function HighlightsCard({
   const highlights = [
     { value: `${yearsExperience}+`, label: 'Years Experience', color: 'var(--accretion)' },
     { value: `${projectCount}+`, label: 'Products Shipped', color: 'var(--wheat-light)' },
-    { value: specialization, label: 'Specialization', color: 'var(--dark-gold)' },
+    { value: specialization, label: 'Specialization', color: 'var(--steel-blue)' },
   ]
 
   return (
