@@ -1,0 +1,157 @@
+/* Deep Space Theme — Warm Cosmic Palette */
+
+/* Override smooth scrolling — breaks scroll-driven video */
+html {
+  scroll-behavior: auto !important;
+}
+
+/* CSS custom properties for the palette */
+:root {
+  --void: #02040a;
+  --warm-black: #0d0a06;
+  --deep-amber: #1a1008;
+  --dark-gold: #8b6914;
+  --accretion: #d4a855;
+  --wheat-light: #f5deb3;
+  --floral: #fffaf0;
+  --steel-blue: #6b8fb5;
+  --deep-steel: #4a6f8f;
+  --dusty-violet: #a07cb0;
+  --muted-rose: #c47878;
+}
+
+/* @property for animated gradient border (Chrome, Safari 16.4+) */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 135deg;
+  inherits: false;
+}
+
+/* Liquid Glass Card */
+.glass-card {
+  background: rgba(13, 10, 6, 0.42);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Animated gradient border wrapper */
+.glass-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(
+    var(--angle, 135deg),
+    rgba(212, 168, 85, 0.35),
+    rgba(107, 143, 181, 0.15),
+    rgba(245, 222, 179, 0.25),
+    rgba(212, 168, 85, 0.35)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-rotate 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes border-rotate {
+  to { --angle: 495deg; }
+}
+
+/* Specular top highlight */
+.glass-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 10%,
+    rgba(245, 222, 179, 0.3) 30%,
+    rgba(245, 222, 179, 0.5) 50%,
+    rgba(245, 222, 179, 0.3) 70%,
+    transparent 90%
+  );
+  pointer-events: none;
+}
+
+/* Inner radial glow */
+.glass-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 50%;
+  bottom: 50%;
+  background: radial-gradient(
+    ellipse at 30% 20%,
+    rgba(245, 222, 179, 0.06) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* Outer glow around glass cards */
+.glass-outer-glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 17px;
+  background: linear-gradient(
+    135deg,
+    rgba(212, 168, 85, 0.25) 0%,
+    rgba(107, 143, 181, 0.08) 50%,
+    rgba(212, 168, 85, 0.15) 100%
+  );
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+/* Glass navbar variant (more subtle) */
+.glass-nav {
+  background: rgba(13, 10, 6, 0.5);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom: 1px solid rgba(212, 168, 85, 0.08);
+  transition: background 0.4s ease;
+}
+
+.glass-nav--opaque {
+  background: rgba(13, 10, 6, 0.85);
+  border-bottom-color: rgba(212, 168, 85, 0.15);
+}
+
+/* Full-screen loader */
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--void);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease;
+}
+
+.loader-overlay--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-bar {
+  width: 200px;
+  height: 2px;
+  background: rgba(212, 168, 85, 0.15);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  background: var(--accretion);
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}

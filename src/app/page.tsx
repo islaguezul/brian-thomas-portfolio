@@ -1,11 +1,38 @@
-import ResumeHomepage from '@/components/ResumeHomepage'
+import HomePage from '@v2/pages/HomePage'
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
+import { getPersonalInfo, getProjects, getWorkExperience, getTechStack } from '@/lib/database/db'
+import type { Tenant } from '@/middleware'
 
 export const metadata: Metadata = {
-  title: 'Brian Thomas | Technical Program Manager',
-  description: 'Senior Technical Program Manager bridging the gap between complex engineering and product delivery. Shipping at scale since 2011.',
+  title: 'Brian Thomas | Technical Product Manager',
+  description: 'Technical Product Manager with 10+ years transforming complex technical challenges into scalable business solutions.',
 }
 
-export default function Home() {
-  return <ResumeHomepage />
+export default async function Home() {
+  const headersList = await headers()
+  const tenant = (headersList.get('x-tenant') || 'internal') as Tenant
+
+  // Direct database calls — no self-fetch anti-pattern
+  const [personalInfo, projects, experiences, techStack] = await Promise.all([
+    getPersonalInfo(tenant).catch(() => null),
+    getProjects(tenant).catch(() => []),
+    getWorkExperience(tenant).catch(() => []),
+    getTechStack(tenant).catch(() => []),
+  ])
+
+  const fallbackInfo = {
+    name: 'Brian Thomas',
+    title: 'Technical Product Manager',
+    email: '',
+  }
+
+  return (
+    <HomePage
+      personalInfo={personalInfo ?? fallbackInfo}
+      projectCount={projects.length}
+      experiences={experiences}
+      techStack={techStack}
+    />
+  )
 }
