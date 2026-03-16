@@ -18,7 +18,7 @@ export default function HighlightsCard({
   ]
 
   return (
-    <GlassCard className="w-full max-w-xl mx-auto">
+    <GlassCard className="w-full max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto">
       <div className="p-6 md:p-8">
         <div
           className="font-space text-[10px] tracking-[2px] uppercase mb-4"

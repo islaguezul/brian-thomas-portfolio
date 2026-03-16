@@ -82,9 +82,9 @@ export default function FrameLoader({ onLoaded }: FrameLoaderProps) {
             <button
               onClick={handleRetry}
               style={{
-                background: 'rgba(46, 196, 182, 0.15)',
-                color: 'var(--deep-teal)',
-                border: '1px solid rgba(46, 196, 182, 0.3)',
+                background: 'rgba(107, 143, 181, 0.15)',
+                color: 'var(--steel-blue)',
+                border: '1px solid rgba(107, 143, 181, 0.3)',
                 borderRadius: '20px',
                 padding: '8px 24px',
                 fontSize: '13px',

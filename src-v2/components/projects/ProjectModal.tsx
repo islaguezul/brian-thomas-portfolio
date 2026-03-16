@@ -25,6 +25,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="project-modal-title"
       onClick={onClose}
     >
       {/* Backdrop */}
@@ -61,6 +64,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             {project.stage}
           </span>
           <h2
+            id="project-modal-title"
             className="font-space text-xl font-bold mt-3"
             style={{ color: 'var(--floral)' }}
           >
@@ -158,9 +162,9 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               rel="noopener noreferrer"
               className="text-xs px-4 py-2 rounded-full"
               style={{
-                background: 'rgba(46, 196, 182, 0.15)',
-                color: 'var(--deep-teal)',
-                border: '1px solid rgba(46, 196, 182, 0.25)',
+                background: 'rgba(107, 143, 181, 0.15)',
+                color: 'var(--steel-blue)',
+                border: '1px solid rgba(107, 143, 181, 0.25)',
               }}
             >
               Live Site →

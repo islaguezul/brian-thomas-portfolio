@@ -14,7 +14,10 @@ html {
   --accretion: #d4a855;
   --wheat-light: #f5deb3;
   --floral: #fffaf0;
-  --deep-teal: #2ec4b6;
+  --steel-blue: #6b8fb5;
+  --deep-steel: #4a6f8f;
+  --dusty-violet: #a07cb0;
+  --muted-rose: #c47878;
 }
 
 /* @property for animated gradient border (Chrome, Safari 16.4+) */
@@ -43,7 +46,7 @@ html {
   background: linear-gradient(
     var(--angle, 135deg),
     rgba(212, 168, 85, 0.35),
-    rgba(46, 196, 182, 0.15),
+    rgba(107, 143, 181, 0.15),
     rgba(245, 222, 179, 0.25),
     rgba(212, 168, 85, 0.35)
   );
@@ -99,7 +102,7 @@ html {
   background: linear-gradient(
     135deg,
     rgba(212, 168, 85, 0.25) 0%,
-    rgba(46, 196, 182, 0.08) 50%,
+    rgba(107, 143, 181, 0.08) 50%,
     rgba(212, 168, 85, 0.15) 100%
   );
   filter: blur(1px);

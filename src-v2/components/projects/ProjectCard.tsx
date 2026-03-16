@@ -6,7 +6,7 @@ interface ProjectCardProps {
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  production: 'var(--deep-teal)',
+  production: 'var(--steel-blue)',
   mvp: 'var(--accretion)',
   backend: 'var(--dark-gold)',
   concept: 'var(--wheat-light)',

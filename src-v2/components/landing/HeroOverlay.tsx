@@ -7,31 +7,25 @@ interface HeroOverlayProps {
 export default function HeroOverlay({ name, title, style }: HeroOverlayProps) {
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-10 flex flex-col items-center justify-center"
-      style={{ mixBlendMode: 'screen', ...style }}
+      className="pointer-events-none flex flex-col items-center justify-center"
+      style={style}
     >
-      <div
-        className="text-center"
-        style={{ textShadow: '0 2px 20px rgba(0,0,0,0.8)' }}
-      >
+      <div className="text-center" style={{ textShadow: 'none' }}>
         <div
-          className="font-space text-xs tracking-[3px] uppercase mb-2"
-          style={{ color: 'var(--accretion)' }}
+          className="font-space text-base md:text-lg font-bold tracking-[4px] uppercase mb-3"
+          style={{
+            color: '#000',
+            WebkitTextStroke: '0.5px rgba(212, 168, 85, 0.5)',
+          }}
         >
           {title}
         </div>
         <h1
-          className="font-space text-4xl md:text-6xl font-bold mb-4"
-          style={{ color: 'var(--floral)' }}
+          className="font-space text-5xl md:text-7xl lg:text-8xl font-bold"
+          style={{ color: '#000', WebkitTextStroke: '1px rgba(212, 168, 85, 0.4)' }}
         >
           {name}
         </h1>
-        <div
-          className="text-xs tracking-wide animate-pulse"
-          style={{ color: 'rgba(245, 222, 179, 0.4)' }}
-        >
-          Scroll to explore
-        </div>
       </div>
     </div>
   )

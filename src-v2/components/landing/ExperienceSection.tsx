@@ -1,7 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import type { WorkExperience } from '@/lib/database/types'
+
+interface ExperienceSectionProps {
+  experiences: WorkExperience[]
+}
 
 function formatDate(date?: Date | string): string {
   if (!date) return ''
@@ -9,40 +12,7 @@ function formatDate(date?: Date | string): string {
   return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-export default function ExperienceSection() {
-  const [experiences, setExperiences] = useState<WorkExperience[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch('/api/resume/experience')
-        if (res.ok) {
-          setExperiences(await res.json())
-        }
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchData()
-  }, [])
-
-  if (isLoading) {
-    return (
-      <div className="py-16 px-6">
-        <div className="max-w-3xl mx-auto">
-          <div
-            className="font-space text-xs tracking-[2px] uppercase mb-8"
-            style={{ color: 'var(--accretion)' }}
-          >
-            Work Experience
-          </div>
-          <div style={{ color: 'rgba(245,222,179,0.3)' }} className="text-sm">Loading...</div>
-        </div>
-      </div>
-    )
-  }
-
+export default function ExperienceSection({ experiences }: ExperienceSectionProps) {
   return (
     <div className="py-16 px-6">
       <div className="max-w-3xl mx-auto">

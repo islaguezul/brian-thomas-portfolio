@@ -1,7 +1,7 @@
 import HomePage from '@v2/pages/HomePage'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { getPersonalInfo, getProjects } from '@/lib/database/db'
+import { getPersonalInfo, getProjects, getWorkExperience, getTechStack } from '@/lib/database/db'
 import type { Tenant } from '@/middleware'
 
 export const metadata: Metadata = {
@@ -14,9 +14,11 @@ export default async function Home() {
   const tenant = (headersList.get('x-tenant') || 'internal') as Tenant
 
   // Direct database calls — no self-fetch anti-pattern
-  const [personalInfo, projects] = await Promise.all([
+  const [personalInfo, projects, experiences, techStack] = await Promise.all([
     getPersonalInfo(tenant).catch(() => null),
     getProjects(tenant).catch(() => []),
+    getWorkExperience(tenant).catch(() => []),
+    getTechStack(tenant).catch(() => []),
   ])
 
   const fallbackInfo = {
@@ -29,6 +31,8 @@ export default async function Home() {
     <HomePage
       personalInfo={personalInfo ?? fallbackInfo}
       projectCount={projects.length}
+      experiences={experiences}
+      techStack={techStack}
     />
   )
 }

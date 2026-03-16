@@ -22,7 +22,10 @@ const config: Config = {
         'accretion': '#d4a855',
         'wheat-light': '#f5deb3',
         'floral': '#fffaf0',
-        'deep-teal': '#2ec4b6',
+        'steel-blue': '#6b8fb5',
+        'deep-steel': '#4a6f8f',
+        'dusty-violet': '#a07cb0',
+        'muted-rose': '#c47878',
       },
       animation: {
         'pulse-slow': 'pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

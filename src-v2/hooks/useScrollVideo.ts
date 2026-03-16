@@ -34,15 +34,14 @@ export function useScrollVideo({
 
       const rect = wrapper.getBoundingClientRect()
       const wrapperHeight = wrapper.offsetHeight
-      const viewportHeight = window.innerHeight
 
-      // How far the wrapper has scrolled past the top of the viewport
-      // 0 = wrapper top is at viewport top
-      // wrapperHeight - viewportHeight = wrapper bottom is at viewport bottom (sticky releases)
-      const scrollableDistance = wrapperHeight - viewportHeight
       const scrolled = -rect.top
 
-      const progress = Math.max(0, Math.min(1, scrolled / scrollableDistance))
+      // Map frames to the full distance the canvas is visible:
+      // from wrapper top at viewport top, to canvas fully scrolled off screen.
+      // This equals the full wrapperHeight (sticky range + the 100vh exit).
+      const visibleDistance = wrapperHeight
+      const progress = Math.max(0, Math.min(1, scrolled / visibleDistance))
       const frameIndex = Math.min(
         totalFrames - 1,
         Math.floor(progress * totalFrames)
@@ -61,7 +60,10 @@ export function useScrollVideo({
     handleScroll()
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      if (rafId.current) cancelAnimationFrame(rafId.current)
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current)
+        rafId.current = 0
+      }
     }
   }, [handleScroll])
 }

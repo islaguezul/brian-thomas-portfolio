@@ -1,29 +1,28 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import type { Project } from '@/lib/database/types'
 import Navbar from '@v2/components/layout/Navbar'
 import ProjectGrid from '@v2/components/projects/ProjectGrid'
 import Footer from '@v2/components/layout/Footer'
 import { useRealtimeUpdates } from '@/hooks/useRealtimeUpdates'
 
-export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+interface ProjectsPageProps {
+  initialProjects: Project[]
+}
 
-  const fetchProjects = async () => {
+export default function ProjectsPage({ initialProjects }: ProjectsPageProps) {
+  const [projects, setProjects] = useState<Project[]>(initialProjects)
+
+  const fetchProjects = useCallback(async () => {
     try {
       const res = await fetch('/api/projects')
       if (res.ok) {
         setProjects(await res.json())
       }
-    } finally {
-      setIsLoading(false)
+    } catch {
+      // keep existing data on fetch failure
     }
-  }
-
-  useEffect(() => {
-    fetchProjects()
   }, [])
 
   // Real-time updates
@@ -52,11 +51,7 @@ export default function ProjectsPage() {
             Projects & Case Studies
           </h1>
 
-          {isLoading ? (
-            <div style={{ color: 'rgba(245,222,179,0.3)' }} className="text-sm">
-              Loading projects...
-            </div>
-          ) : projects.length === 0 ? (
+          {projects.length === 0 ? (
             <div style={{ color: 'rgba(245,222,179,0.3)' }} className="text-sm">
               No projects yet.
             </div>

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { FrameLoadResult } from '@v2/lib/frame-loader'
-import type { PersonalInfo } from '@/lib/database/types'
+import type { PersonalInfo, WorkExperience, TechStackItem } from '@/lib/database/types'
 import FrameLoader from '@v2/components/landing/FrameLoader'
 import ScrollVideo from '@v2/components/landing/ScrollVideo'
 import HeroOverlay from '@v2/components/landing/HeroOverlay'
@@ -16,35 +16,30 @@ import Footer from '@v2/components/layout/Footer'
 interface HomePageProps {
   personalInfo: PersonalInfo
   projectCount: number
+  experiences: WorkExperience[]
+  techStack: TechStackItem[]
 }
 
-export default function HomePage({ personalInfo, projectCount }: HomePageProps) {
+export default function HomePage({ personalInfo, projectCount, experiences, techStack }: HomePageProps) {
   const [frameData, setFrameData] = useState<FrameLoadResult | null>(null)
-  const [heroOpacity, setHeroOpacity] = useState(1)
-
   const handleFramesLoaded = useCallback((result: FrameLoadResult) => {
     setFrameData(result)
   }, [])
 
-  // Fade out hero overlay as user scrolls into the first ~30% of the video section
+  const hasFrames = frameData && frameData.frames.length > 0
+
+  // Track scroll for "Scroll to explore" fade — lives at HomePage level
+  // so the fixed element has no intermediate ancestors
+  const [scrollHintVisible, setScrollHintVisible] = useState(true)
   useEffect(() => {
+    if (!hasFrames) return
     const handleScroll = () => {
-      const scrollY = window.scrollY
-      const fadeStart = window.innerHeight * 0.2
-      const fadeEnd = window.innerHeight * 0.8
-      if (scrollY <= fadeStart) {
-        setHeroOpacity(1)
-      } else if (scrollY >= fadeEnd) {
-        setHeroOpacity(0)
-      } else {
-        setHeroOpacity(1 - (scrollY - fadeStart) / (fadeEnd - fadeStart))
-      }
+      // Hide once user has scrolled at all — the CSS transition handles the fade
+      if (window.scrollY > 10) setScrollHintVisible(false)
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  const hasFrames = frameData && frameData.frames.length > 0
+  }, [hasFrames])
 
   return (
     <div style={{ background: 'var(--void)', minHeight: '100vh' }}>
@@ -54,22 +49,41 @@ export default function HomePage({ personalInfo, projectCount }: HomePageProps) 
       {/* Loading screen — unmounted after frames load */}
       {!frameData && <FrameLoader onLoaded={handleFramesLoaded} />}
 
+      {/* Fixed "Scroll to explore" — top-level so position:fixed is reliable */}
+      {hasFrames && (
+        <div
+          className="pointer-events-none fixed inset-0 z-30 flex items-start justify-center pt-[48vh]"
+          style={{
+            opacity: scrollHintVisible ? 1 : 0,
+            transition: 'opacity 0.6s ease-out',
+          }}
+        >
+          <div
+            className="text-sm md:text-base tracking-[3px] uppercase animate-pulse font-medium font-space"
+            style={{
+              color: '#000',
+            }}
+          >
+            Scroll to explore
+          </div>
+        </div>
+      )}
+
       {/* Video section with sticky canvas + glass cards as children */}
       {hasFrames && (
         <div className="relative">
-          {/* Hero overlay — fixed, fades out on scroll */}
-          <HeroOverlay
-            name={personalInfo.name}
-            title={personalInfo.title}
-            style={{ opacity: heroOpacity, transition: 'opacity 0.1s ease' }}
-          />
-
-          {/* Scroll video — glass cards are children so they scroll inside the wrapper */}
+          {/* Scroll video — hero + glass cards scroll together */}
           <ScrollVideo
             frames={frameData.frames}
             totalFrames={frameData.totalFrames}
+            heroOverlay={() => (
+              <HeroOverlay
+                name={personalInfo.name}
+                title={personalInfo.title}
+              />
+            )}
           >
-            <div className="flex flex-col gap-8 w-full px-6 max-w-xl mx-auto pb-32">
+            <div className="flex flex-col gap-8 w-full px-6 max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto pb-32">
               <AboutCard personalInfo={personalInfo} />
               <HighlightsCard
                 yearsExperience={personalInfo.yearsExperience ?? 10}
@@ -100,9 +114,9 @@ export default function HomePage({ personalInfo, projectCount }: HomePageProps) 
 
       {/* Post-video content */}
       <div style={{ background: 'var(--void)', position: 'relative', zIndex: 2 }}>
-        <ExperienceSection />
-        <SkillsSection />
-        <Footer />
+        <ExperienceSection experiences={experiences} />
+        <SkillsSection items={techStack} />
+        <Footer name={personalInfo.name} />
       </div>
     </div>
   )

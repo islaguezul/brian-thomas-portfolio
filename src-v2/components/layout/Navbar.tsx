@@ -60,9 +60,9 @@ export default function Navbar({ contactEmail }: NavbarProps) {
             href={contactHref}
             className="text-xs px-4 py-1.5 rounded-full transition-colors"
             style={{
-              background: 'rgba(46, 196, 182, 0.15)',
-              color: 'var(--deep-teal)',
-              border: '1px solid rgba(46, 196, 182, 0.25)',
+              background: 'rgba(107, 143, 181, 0.15)',
+              color: 'var(--steel-blue)',
+              border: '1px solid rgba(107, 143, 181, 0.25)',
             }}
           >
             Contact
@@ -119,7 +119,7 @@ export default function Navbar({ contactEmail }: NavbarProps) {
           <a
             href={contactHref}
             className="text-sm py-1"
-            style={{ color: 'var(--deep-teal)' }}
+            style={{ color: 'var(--steel-blue)' }}
           >
             Contact
           </a>

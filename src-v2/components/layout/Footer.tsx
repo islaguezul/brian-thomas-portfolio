@@ -1,4 +1,8 @@
-export default function Footer() {
+interface FooterProps {
+  name?: string
+}
+
+export default function Footer({ name = 'Brian Thomas' }: FooterProps) {
   return (
     <footer
       className="py-8 px-6 text-center"
@@ -8,7 +12,7 @@ export default function Footer() {
       }}
     >
       <div className="text-xs">
-        © {new Date().getFullYear()} Brian Thomas
+        © {new Date().getFullYear()} {name}
       </div>
     </footer>
   )
