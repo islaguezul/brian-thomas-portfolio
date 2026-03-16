@@ -7,14 +7,16 @@ interface SkillsSectionProps {
 }
 
 const TAG_COLORS = [
-  { bg: 'rgba(212, 168, 85, 0.08)', border: 'rgba(212, 168, 85, 0.2)', text: 'var(--accretion)' },
-  { bg: 'rgba(107, 143, 181, 0.1)', border: 'rgba(107, 143, 181, 0.25)', text: 'var(--steel-blue)' },
-  { bg: 'rgba(160, 124, 176, 0.1)', border: 'rgba(160, 124, 176, 0.25)', text: 'var(--dusty-violet)' },
-  { bg: 'rgba(196, 120, 120, 0.1)', border: 'rgba(196, 120, 120, 0.25)', text: 'var(--muted-rose)' },
-  { bg: 'rgba(74, 111, 143, 0.1)', border: 'rgba(74, 111, 143, 0.25)', text: 'var(--deep-steel)' },
+  { bg: 'rgba(212, 168, 85, 0.15)', border: 'rgba(212, 168, 85, 0.35)', text: 'var(--accretion)' },
+  { bg: 'rgba(107, 143, 181, 0.15)', border: 'rgba(107, 143, 181, 0.35)', text: 'var(--steel-blue)' },
+  { bg: 'rgba(160, 124, 176, 0.15)', border: 'rgba(160, 124, 176, 0.35)', text: 'var(--dusty-violet)' },
+  { bg: 'rgba(196, 120, 120, 0.15)', border: 'rgba(196, 120, 120, 0.35)', text: 'var(--muted-rose)' },
+  { bg: 'rgba(74, 111, 143, 0.15)', border: 'rgba(74, 111, 143, 0.35)', text: 'var(--wheat-light)' },
 ]
 
 export default function SkillsSection({ items }: SkillsSectionProps) {
+  if (!items || items.length === 0) return null
+
   return (
     <div className="py-16 px-6">
       <div className="max-w-3xl mx-auto">
