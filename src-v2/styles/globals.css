@@ -1,5 +1,10 @@
 /* Deep Space Theme — Warm Cosmic Palette */
 
+/* Override smooth scrolling — breaks scroll-driven video */
+html {
+  scroll-behavior: auto !important;
+}
+
 /* CSS custom properties for the palette */
 :root {
   --void: #02040a;

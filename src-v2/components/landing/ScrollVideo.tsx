@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useCallback, useEffect, useState } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 import { useScrollVideo } from '@v2/hooks/useScrollVideo'
 
 interface ScrollVideoProps {
@@ -98,12 +98,19 @@ export default function ScrollVideo({ frames, totalFrames, children }: ScrollVid
     onFrameChange: stableOnFrameChange,
   })
 
-  const scrollHeight = typeof window !== 'undefined' && window.innerWidth < 768 ? '250vh' : '350vh'
+  // Default to desktop height for SSR consistency; update on mount for mobile
+  const scrollHeightRef = useRef('350vh')
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      scrollHeightRef.current = '250vh'
+      if (wrapperRef.current) wrapperRef.current.style.height = '250vh'
+    }
+  }, [])
 
   return (
     <div
       ref={wrapperRef}
-      style={{ height: scrollHeight, position: 'relative' }}
+      style={{ height: scrollHeightRef.current, position: 'relative' }}
     >
       {/* Sticky canvas — stays fixed while wrapper scrolls */}
       <canvas
