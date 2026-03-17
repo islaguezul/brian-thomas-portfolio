@@ -38,6 +38,11 @@ AI_PROMPT_SETUP.md
 CLAUDE.md
 
 
+# tooling
+.claude/
+.playwright-mcp/
+.superpowers/
+
 # vercel
 .vercel
 
