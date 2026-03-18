@@ -26,6 +26,7 @@ export default function Navbar({ contactEmail }: NavbarProps) {
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/projects', label: 'Projects' },
+    { href: '/case-studies', label: 'Case Studies' },
   ]
 
   const contactHref = contactEmail ? `mailto:${contactEmail}` : '#'
