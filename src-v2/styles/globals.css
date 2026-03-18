@@ -29,7 +29,7 @@ html {
 
 /* Liquid Glass Card */
 .glass-card {
-  background: rgba(13, 10, 6, 0.42);
+  background: rgba(13, 10, 6, 0.62);
   backdrop-filter: blur(10px) saturate(1.2);
   -webkit-backdrop-filter: blur(10px) saturate(1.2);
   border-radius: 16px;

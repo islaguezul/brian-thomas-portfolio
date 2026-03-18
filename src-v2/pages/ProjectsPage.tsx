@@ -53,7 +53,7 @@ export default function ProjectsPage({ initialProjects, contactEmail }: Projects
           </h1>
 
           {projects.length === 0 ? (
-            <div style={{ color: 'rgba(245,222,179,0.3)' }} className="text-sm">
+            <div style={{ color: 'rgba(245,222,179,0.4)' }} className="text-sm">
               No projects yet.
             </div>
           ) : (

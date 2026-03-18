@@ -15,7 +15,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection, onSectionChange
 
   // Determine active state based on pathname for route-based navigation
   const isExperiencePage = pathname === '/';
-  const isCaseStudiesPage = pathname === '/case-studies';
+  const isProjectsPage = pathname === '/projects';
 
   const handleNavClick = (section: string) => {
     if (onSectionChange) {
@@ -47,14 +47,14 @@ const Navigation: React.FC<NavigationProps> = ({ currentSection, onSectionChange
               )}
             </Link>
             <Link
-              href="/case-studies"
-              onClick={() => handleNavClick('case-studies')}
+              href="/projects"
+              onClick={() => handleNavClick('projects')}
               className={`relative hover:text-blue-400 transition-all duration-300 font-medium ${
-                isCaseStudiesPage || currentSection === 'case-studies' ? 'text-blue-400' : ''
+                isProjectsPage || currentSection === 'projects' ? 'text-blue-400' : ''
               }`}
             >
-              Case Studies
-              {(isCaseStudiesPage || currentSection === 'case-studies') && (
+              Projects
+              {(isProjectsPage || currentSection === 'projects') && (
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gradient-to-r from-blue-400 to-purple-400"></span>
               )}
             </Link>

@@ -26,7 +26,7 @@ export default function AboutCard({ personalInfo }: AboutCardProps) {
         {personalInfo.executiveSummary && (
           <p
             className="text-sm leading-relaxed"
-            style={{ color: 'rgba(245, 222, 179, 0.65)' }}
+            style={{ color: 'rgba(245, 222, 179, 0.75)' }}
           >
             {personalInfo.executiveSummary}
           </p>

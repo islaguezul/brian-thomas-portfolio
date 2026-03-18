@@ -40,6 +40,7 @@ CLAUDE.md
 
 # tooling
 .claude/
+.mcp.json
 .playwright-mcp/
 .superpowers/
 

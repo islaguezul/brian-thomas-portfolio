@@ -129,7 +129,7 @@ const ImpactTimeline: React.FC<ImpactTimelineProps> = ({ className = '' }) => {
 
                   {/* View Case Study link */}
                   <Link
-                    href="/case-studies"
+                    href="/projects"
                     className="inline-flex items-center gap-2 mt-4 text-blue-400 hover:text-blue-300 transition-colors group text-sm font-medium"
                   >
                     View Related Projects

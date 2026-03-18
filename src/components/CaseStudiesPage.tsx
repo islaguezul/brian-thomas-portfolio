@@ -148,7 +148,7 @@ const CaseStudiesPage: React.FC = () => {
       <div className="fixed inset-0 bg-gradient-to-br from-slate-900/70 via-blue-900/50 to-slate-800/70 pointer-events-none" />
 
       {/* Navigation */}
-      <Navigation currentSection="case-studies" onSectionChange={() => {}} />
+      <Navigation currentSection="projects" onSectionChange={() => {}} />
 
       {/* Page Header */}
       <section className="relative pt-32 pb-16 overflow-hidden">

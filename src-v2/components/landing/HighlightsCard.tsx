@@ -14,7 +14,7 @@ export default function HighlightsCard({
   const highlights = [
     { value: `${yearsExperience}+`, label: 'Years Experience', color: 'var(--accretion)' },
     { value: `${projectCount}+`, label: 'Products Shipped', color: 'var(--wheat-light)' },
-    { value: specialization, label: 'Specialization', color: 'var(--steel-blue)' },
+    { value: specialization, label: 'Specialization', color: '#8bb0d4' },
   ]
 
   return (
@@ -41,7 +41,7 @@ export default function HighlightsCard({
               </div>
               <div
                 className="text-[10px] mt-1"
-                style={{ color: 'rgba(245, 222, 179, 0.4)' }}
+                style={{ color: 'rgba(245, 222, 179, 0.5)' }}
               >
                 {h.label}
               </div>

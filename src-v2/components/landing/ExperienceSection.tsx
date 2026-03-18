@@ -51,7 +51,7 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
                   </h3>
                   <span
                     className="text-xs whitespace-nowrap ml-4"
-                    style={{ color: 'rgba(245, 222, 179, 0.3)' }}
+                    style={{ color: 'rgba(245, 222, 179, 0.4)' }}
                   >
                     {formatDate(startDate)} – {isCurrent ? 'Present' : formatDate(endDate)}
                   </span>
@@ -68,7 +68,7 @@ export default function ExperienceSection({ experiences }: ExperienceSectionProp
                       <li
                         key={r.id}
                         className="text-xs leading-relaxed"
-                        style={{ color: 'rgba(245, 222, 179, 0.5)' }}
+                        style={{ color: 'rgba(245, 222, 179, 0.6)' }}
                       >
                         • {r.responsibility}
                       </li>

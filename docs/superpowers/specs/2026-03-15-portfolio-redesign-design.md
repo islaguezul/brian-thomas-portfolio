@@ -45,7 +45,7 @@ src-v2/
 ### What Changes in src/
 
 - `src/app/page.tsx` → imports `HomePage` from `src-v2/pages/`
-- `src/app/case-studies/page.tsx` → imports `ProjectsPage` from `src-v2/pages/`
+- `src/app/projects/page.tsx` → imports `ProjectsPage` from `src-v2/pages/`
 - `src/app/layout.tsx` → updated with new fonts (Space Grotesk + Inter), new global CSS
 - `src/app/globals.css` → replaced with `src-v2/styles/globals.css`
 
@@ -150,9 +150,9 @@ The video scroll height is tunable independently of card count, so pacing can be
 
 ## Other Pages
 
-### Projects Page (`/case-studies`)
+### Projects Page (`/projects`)
 
-- URL: `/case-studies` (matches existing route in `src/app/case-studies/page.tsx`)
+- URL: `/projects` (matches existing route in `src/app/projects/page.tsx`)
 - Card grid layout with redesigned cards in the deep space theme
 - Click card → modal overlay with full project details
 - Data from existing `/api/projects` endpoint (tenant-scoped)

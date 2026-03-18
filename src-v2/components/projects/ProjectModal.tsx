@@ -46,7 +46,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-lg"
-          style={{ color: 'rgba(245, 222, 179, 0.4)' }}
+          style={{ color: 'rgba(245, 222, 179, 0.5)' }}
           aria-label="Close"
         >
           ✕
@@ -73,7 +73,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           {project.description && (
             <p
               className="text-sm mt-2 leading-relaxed"
-              style={{ color: 'rgba(245, 222, 179, 0.6)' }}
+              style={{ color: 'rgba(245, 222, 179, 0.7)' }}
             >
               {project.description}
             </p>
@@ -91,7 +91,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
             </h3>
             <p
               className="text-xs leading-relaxed"
-              style={{ color: 'rgba(245, 222, 179, 0.5)' }}
+              style={{ color: 'rgba(245, 222, 179, 0.6)' }}
             >
               {project.detailedDescription}
             </p>
@@ -117,7 +117,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   <div className="text-sm font-semibold" style={{ color: 'var(--accretion)' }}>
                     {impact.metricValue}
                   </div>
-                  <div className="text-[10px]" style={{ color: 'rgba(245, 222, 179, 0.4)' }}>
+                  <div className="text-[10px]" style={{ color: 'rgba(245, 222, 179, 0.5)' }}>
                     {impact.metricKey}
                   </div>
                 </div>

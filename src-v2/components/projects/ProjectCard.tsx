@@ -18,8 +18,8 @@ const STAGE_COLORS: Record<string, string> = {
   mvp: 'var(--accretion)',
   backend: 'var(--dark-gold)',
   concept: 'var(--wheat-light)',
-  research: 'rgba(245, 222, 179, 0.5)',
-  legacy: 'rgba(245, 222, 179, 0.3)',
+  research: 'rgba(245, 222, 179, 0.6)',
+  legacy: 'rgba(245, 222, 179, 0.4)',
 }
 
 export default function ProjectCard({ project, onClick }: ProjectCardProps) {
@@ -49,7 +49,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
         {project.progress !== undefined && (
           <span
             className="text-[10px]"
-            style={{ color: 'rgba(245, 222, 179, 0.3)' }}
+            style={{ color: 'rgba(245, 222, 179, 0.4)' }}
           >
             {project.progress}%
           </span>
@@ -66,7 +66,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
       {project.description && (
         <p
           className="text-xs leading-relaxed mb-3 line-clamp-2"
-          style={{ color: 'rgba(245, 222, 179, 0.5)' }}
+          style={{ color: 'rgba(245, 222, 179, 0.6)' }}
         >
           {project.description}
         </p>
@@ -94,7 +94,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
           {project.technologies.length > 4 && (
             <span
               className="text-[10px] px-2 py-0.5"
-              style={{ color: 'rgba(245, 222, 179, 0.25)' }}
+              style={{ color: 'rgba(245, 222, 179, 0.35)' }}
             >
               +{project.technologies.length - 4}
             </span>

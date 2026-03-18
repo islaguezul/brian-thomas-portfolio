@@ -108,7 +108,7 @@ export default function FrameLoader({ onLoaded }: FrameLoaderProps) {
                 color: 'var(--wheat-light)',
                 fontSize: '11px',
                 marginTop: '12px',
-                opacity: 0.4,
+                opacity: 0.5,
               }}
             >
               {percentage}%
