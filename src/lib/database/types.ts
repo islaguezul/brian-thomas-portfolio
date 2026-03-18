@@ -292,3 +292,83 @@ export interface ExpertiseRadarItem {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+// ==================== Case Studies ====================
+
+export interface CaseStudy {
+  id?: number;
+  tenant?: string;
+  title?: string;
+  slug?: string;
+  category?: string;
+  summary?: string;
+  problem?: string;
+  // Context fields
+  industry?: string;
+  orgScale?: string;
+  org_scale?: string;
+  teamScope?: string;
+  team_scope?: string;
+  timeline?: string;
+  stakeholderCount?: string;
+  stakeholder_count?: string;
+  // Complexity signals
+  ambiguity?: string;
+  ambiguityDetail?: string;
+  ambiguity_detail?: string;
+  technicalDepth?: string;
+  technical_depth?: string;
+  technicalDepthDetail?: string;
+  technical_depth_detail?: string;
+  organizationalComplexity?: string;
+  organizational_complexity?: string;
+  organizationalComplexityDetail?: string;
+  organizational_complexity_detail?: string;
+  regulatoryConstraints?: string;
+  regulatory_constraints?: string;
+  regulatoryConstraintsDetail?: string;
+  regulatory_constraints_detail?: string;
+  // Metadata
+  displayOrder?: number;
+  display_order?: number;
+  isActive?: boolean;
+  is_active?: boolean;
+  createdAt?: string | Date;
+  created_at?: string | Date;
+  updatedAt?: string | Date;
+  updated_at?: string | Date;
+  // Nested children
+  approaches?: CaseStudyApproach[];
+  outcomes?: CaseStudyOutcome[];
+  skills?: CaseStudySkill[];
+}
+
+export interface CaseStudyApproach {
+  id?: number;
+  caseStudyId?: number;
+  case_study_id?: number;
+  stepText?: string;
+  step_text?: string;
+  displayOrder?: number;
+  display_order?: number;
+}
+
+export interface CaseStudyOutcome {
+  id?: number;
+  caseStudyId?: number;
+  case_study_id?: number;
+  metric?: string;
+  result?: string;
+  context?: string;
+  displayOrder?: number;
+  display_order?: number;
+}
+
+export interface CaseStudySkill {
+  id?: number;
+  caseStudyId?: number;
+  case_study_id?: number;
+  skill?: string;
+  displayOrder?: number;
+  display_order?: number;
+}
