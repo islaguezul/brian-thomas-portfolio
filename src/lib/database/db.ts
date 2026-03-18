@@ -19,8 +19,8 @@ if (!process.env.POSTGRES_URL_NON_POOLING) {
     process.env.POSTGRES_URL_NON_POOLING = process.env.POSTGRES_POSTGRES_URL_NON_POOLING;
   }
 }
-import type { 
-  PersonalInfo, 
+import type {
+  PersonalInfo,
   Project,
   ProjectFeature,
   ProjectImpact,
@@ -35,6 +35,10 @@ import type {
   SkillCategory,
   Skill,
   ProcessStrategy,
+  CaseStudy,
+  CaseStudyApproach,
+  CaseStudyOutcome,
+  CaseStudySkill,
 } from './types';
 
 export async function initializeDatabase() {
@@ -1111,6 +1115,312 @@ export async function runMigration002(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Error running migration 002:', error);
+    return false;
+  }
+}
+
+// ==================== Case Studies ====================
+
+export async function getCaseStudies(tenant: Tenant): Promise<CaseStudy[]> {
+  try {
+    const studies = await sql<CaseStudy>`
+      SELECT * FROM case_studies
+      WHERE tenant = ${tenant} AND is_active = true
+      ORDER BY display_order, created_at DESC
+    `;
+
+    const studiesWithRelations = await Promise.all(
+      studies.rows.map(async (study) => {
+        const [approaches, outcomes, skills] = await Promise.all([
+          sql`SELECT * FROM case_study_approaches WHERE case_study_id = ${study.id} AND tenant = ${tenant} ORDER BY display_order`,
+          sql`SELECT * FROM case_study_outcomes WHERE case_study_id = ${study.id} AND tenant = ${tenant} ORDER BY display_order`,
+          sql`SELECT * FROM case_study_skills WHERE case_study_id = ${study.id} AND tenant = ${tenant} ORDER BY display_order`,
+        ]);
+
+        return {
+          id: study.id,
+          tenant: study.tenant,
+          title: study.title,
+          slug: study.slug,
+          category: study.category,
+          summary: study.summary,
+          problem: study.problem,
+          industry: study.industry,
+          orgScale: study.org_scale,
+          teamScope: study.team_scope,
+          timeline: study.timeline,
+          stakeholderCount: study.stakeholder_count,
+          ambiguity: study.ambiguity,
+          ambiguityDetail: study.ambiguity_detail,
+          technicalDepth: study.technical_depth,
+          technicalDepthDetail: study.technical_depth_detail,
+          organizationalComplexity: study.organizational_complexity,
+          organizationalComplexityDetail: study.organizational_complexity_detail,
+          regulatoryConstraints: study.regulatory_constraints,
+          regulatoryConstraintsDetail: study.regulatory_constraints_detail,
+          displayOrder: study.display_order,
+          isActive: study.is_active,
+          createdAt: study.created_at,
+          updatedAt: study.updated_at,
+          approaches: approaches.rows.map((a) => ({
+            id: a.id,
+            caseStudyId: a.case_study_id,
+            stepText: a.step_text,
+            displayOrder: a.display_order,
+          })) as CaseStudyApproach[],
+          outcomes: outcomes.rows.map((o) => ({
+            id: o.id,
+            caseStudyId: o.case_study_id,
+            metric: o.metric,
+            result: o.result,
+            context: o.context,
+            displayOrder: o.display_order,
+          })) as CaseStudyOutcome[],
+          skills: skills.rows.map((s) => ({
+            id: s.id,
+            caseStudyId: s.case_study_id,
+            skill: s.skill,
+            displayOrder: s.display_order,
+          })) as CaseStudySkill[],
+        } as CaseStudy;
+      })
+    );
+
+    return studiesWithRelations;
+  } catch (error) {
+    console.error('Error fetching case studies:', error);
+    return [];
+  }
+}
+
+export async function getCaseStudy(tenant: Tenant, id: number): Promise<CaseStudy | null> {
+  try {
+    const studies = await sql<CaseStudy>`
+      SELECT * FROM case_studies WHERE id = ${id} AND tenant = ${tenant}
+    `;
+    if (studies.rows.length === 0) return null;
+
+    const study = studies.rows[0];
+    const [approaches, outcomes, skills] = await Promise.all([
+      sql`SELECT * FROM case_study_approaches WHERE case_study_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
+      sql`SELECT * FROM case_study_outcomes WHERE case_study_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
+      sql`SELECT * FROM case_study_skills WHERE case_study_id = ${id} AND tenant = ${tenant} ORDER BY display_order`,
+    ]);
+
+    return {
+      id: study.id,
+      tenant: study.tenant,
+      title: study.title,
+      slug: study.slug,
+      category: study.category,
+      summary: study.summary,
+      problem: study.problem,
+      industry: study.industry,
+      orgScale: study.org_scale,
+      teamScope: study.team_scope,
+      timeline: study.timeline,
+      stakeholderCount: study.stakeholder_count,
+      ambiguity: study.ambiguity,
+      ambiguityDetail: study.ambiguity_detail,
+      technicalDepth: study.technical_depth,
+      technicalDepthDetail: study.technical_depth_detail,
+      organizationalComplexity: study.organizational_complexity,
+      organizationalComplexityDetail: study.organizational_complexity_detail,
+      regulatoryConstraints: study.regulatory_constraints,
+      regulatoryConstraintsDetail: study.regulatory_constraints_detail,
+      displayOrder: study.display_order,
+      isActive: study.is_active,
+      createdAt: study.created_at,
+      updatedAt: study.updated_at,
+      approaches: approaches.rows.map((a) => ({
+        id: a.id,
+        caseStudyId: a.case_study_id,
+        stepText: a.step_text,
+        displayOrder: a.display_order,
+      })) as CaseStudyApproach[],
+      outcomes: outcomes.rows.map((o) => ({
+        id: o.id,
+        caseStudyId: o.case_study_id,
+        metric: o.metric,
+        result: o.result,
+        context: o.context,
+        displayOrder: o.display_order,
+      })) as CaseStudyOutcome[],
+      skills: skills.rows.map((s) => ({
+        id: s.id,
+        caseStudyId: s.case_study_id,
+        skill: s.skill,
+        displayOrder: s.display_order,
+      })) as CaseStudySkill[],
+    } as CaseStudy;
+  } catch (error) {
+    console.error('Error fetching case study:', error);
+    return null;
+  }
+}
+
+export async function createCaseStudy(tenant: Tenant, data: CaseStudy): Promise<CaseStudy | null> {
+  const client = await sql.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const study = await client.query(
+      `INSERT INTO case_studies (
+        title, slug, category, summary, problem,
+        industry, org_scale, team_scope, timeline, stakeholder_count,
+        ambiguity, ambiguity_detail, technical_depth, technical_depth_detail,
+        organizational_complexity, organizational_complexity_detail,
+        regulatory_constraints, regulatory_constraints_detail,
+        display_order, is_active, tenant
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+      RETURNING *`,
+      [
+        data.title, data.slug, data.category, data.summary, data.problem,
+        data.industry, data.orgScale || data.org_scale,
+        data.teamScope || data.team_scope, data.timeline,
+        data.stakeholderCount || data.stakeholder_count,
+        data.ambiguity, data.ambiguityDetail || data.ambiguity_detail,
+        data.technicalDepth || data.technical_depth,
+        data.technicalDepthDetail || data.technical_depth_detail,
+        data.organizationalComplexity || data.organizational_complexity,
+        data.organizationalComplexityDetail || data.organizational_complexity_detail,
+        data.regulatoryConstraints || data.regulatory_constraints,
+        data.regulatoryConstraintsDetail || data.regulatory_constraints_detail,
+        data.displayOrder || data.display_order || 0,
+        data.isActive !== undefined ? data.isActive : (data.is_active !== undefined ? data.is_active : true),
+        tenant,
+      ]
+    );
+
+    const studyId = study.rows[0].id;
+
+    if (data.approaches?.length) {
+      for (let i = 0; i < data.approaches.length; i++) {
+        const a = data.approaches[i];
+        await client.query(
+          'INSERT INTO case_study_approaches (case_study_id, tenant, step_text, display_order) VALUES ($1,$2,$3,$4)',
+          [studyId, tenant, a.stepText || a.step_text, i]
+        );
+      }
+    }
+
+    if (data.outcomes?.length) {
+      for (let i = 0; i < data.outcomes.length; i++) {
+        const o = data.outcomes[i];
+        await client.query(
+          'INSERT INTO case_study_outcomes (case_study_id, tenant, metric, result, context, display_order) VALUES ($1,$2,$3,$4,$5,$6)',
+          [studyId, tenant, o.metric, o.result, o.context || null, i]
+        );
+      }
+    }
+
+    if (data.skills?.length) {
+      for (let i = 0; i < data.skills.length; i++) {
+        const s = data.skills[i];
+        await client.query(
+          'INSERT INTO case_study_skills (case_study_id, tenant, skill, display_order) VALUES ($1,$2,$3,$4)',
+          [studyId, tenant, s.skill, i]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    return await getCaseStudy(tenant, studyId);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error creating case study:', error);
+    return null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateCaseStudy(tenant: Tenant, id: number, data: CaseStudy): Promise<CaseStudy | null> {
+  const client = await sql.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    await client.query(
+      `UPDATE case_studies SET
+        title=$1, slug=$2, category=$3, summary=$4, problem=$5,
+        industry=$6, org_scale=$7, team_scope=$8, timeline=$9, stakeholder_count=$10,
+        ambiguity=$11, ambiguity_detail=$12, technical_depth=$13, technical_depth_detail=$14,
+        organizational_complexity=$15, organizational_complexity_detail=$16,
+        regulatory_constraints=$17, regulatory_constraints_detail=$18,
+        display_order=$19, is_active=$20, updated_at=CURRENT_TIMESTAMP
+      WHERE id=$21 AND tenant=$22`,
+      [
+        data.title, data.slug, data.category, data.summary, data.problem,
+        data.industry, data.orgScale || data.org_scale,
+        data.teamScope || data.team_scope, data.timeline,
+        data.stakeholderCount || data.stakeholder_count,
+        data.ambiguity, data.ambiguityDetail || data.ambiguity_detail,
+        data.technicalDepth || data.technical_depth,
+        data.technicalDepthDetail || data.technical_depth_detail,
+        data.organizationalComplexity || data.organizational_complexity,
+        data.organizationalComplexityDetail || data.organizational_complexity_detail,
+        data.regulatoryConstraints || data.regulatory_constraints,
+        data.regulatoryConstraintsDetail || data.regulatory_constraints_detail,
+        data.displayOrder || data.display_order || 0,
+        data.isActive !== undefined ? data.isActive : (data.is_active !== undefined ? data.is_active : true),
+        id, tenant,
+      ]
+    );
+
+    // Delete and re-insert children
+    await client.query('DELETE FROM case_study_approaches WHERE case_study_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM case_study_outcomes WHERE case_study_id = $1 AND tenant = $2', [id, tenant]);
+    await client.query('DELETE FROM case_study_skills WHERE case_study_id = $1 AND tenant = $2', [id, tenant]);
+
+    if (data.approaches?.length) {
+      for (let i = 0; i < data.approaches.length; i++) {
+        const a = data.approaches[i];
+        await client.query(
+          'INSERT INTO case_study_approaches (case_study_id, tenant, step_text, display_order) VALUES ($1,$2,$3,$4)',
+          [id, tenant, a.stepText || a.step_text, i]
+        );
+      }
+    }
+
+    if (data.outcomes?.length) {
+      for (let i = 0; i < data.outcomes.length; i++) {
+        const o = data.outcomes[i];
+        await client.query(
+          'INSERT INTO case_study_outcomes (case_study_id, tenant, metric, result, context, display_order) VALUES ($1,$2,$3,$4,$5,$6)',
+          [id, tenant, o.metric, o.result, o.context || null, i]
+        );
+      }
+    }
+
+    if (data.skills?.length) {
+      for (let i = 0; i < data.skills.length; i++) {
+        const s = data.skills[i];
+        await client.query(
+          'INSERT INTO case_study_skills (case_study_id, tenant, skill, display_order) VALUES ($1,$2,$3,$4)',
+          [id, tenant, s.skill, i]
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+    return await getCaseStudy(tenant, id);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error updating case study:', error);
+    return null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteCaseStudy(tenant: Tenant, id: number): Promise<boolean> {
+  try {
+    await sql`DELETE FROM case_studies WHERE id = ${id} AND tenant = ${tenant}`;
+    return true;
+  } catch (error) {
+    console.error('Error deleting case study:', error);
     return false;
   }
 }
