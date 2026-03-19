@@ -10,9 +10,25 @@ Swap the data source from `TechStackItem[]` to `SkillCategory[]` and update the 
 
 ## Scope
 
-Two files changed. No new files, tables, APIs, or admin UI changes.
+Three files changed. No new files, tables, APIs, or admin UI changes.
 
 ## Changes
+
+### 0. `src/lib/database/types.ts` — Add snake_case aliases to `Skill` interface
+
+The database returns `skill_name`, `category_id`, `display_order` but the `Skill` interface only has camelCase fields. `getSkillCategories` in `db.ts` casts raw rows as `Skill[]` without field mapping, so the runtime data has snake_case keys. Add snake_case aliases to match the pattern used by `WorkExperience` and other types:
+
+```typescript
+export interface Skill {
+  id?: number
+  categoryId?: number
+  category_id?: number
+  skillName: string
+  skill_name?: string
+  displayOrder?: number
+  display_order?: number
+}
+```
 
 ### 1. `src/app/page.tsx` — Data source swap
 
@@ -30,16 +46,23 @@ Two files changed. No new files, tables, APIs, or admin UI changes.
 - Section header: change "Skills & Tech Stack" to "Skills"
 - Each category renders as a group:
   - Label: category icon (emoji) + category name, styled with `font-space text-xs tracking-[2px] uppercase`
-  - Pills: each skill in the category as a `rounded-full` pill tag
+  - Pills: each skill in the category as a `rounded-full` pill tag. Access skill name via `skill.skillName || skill.skill_name` to handle the database dual-naming pattern.
 - Color assignment: each category gets a color from the existing `TAG_COLORS` array by category index (`TAG_COLORS[categoryIndex % TAG_COLORS.length]`). All pills within a category share the same color for visual grouping.
 - Categories stack vertically with `gap-6` between groups
 - Empty categories (no skills array or empty skills array) are skipped
+- If all categories are empty after filtering, return `null`
 - If no categories at all, return `null`
+
+**Component type:**
+- Remains a server component (no `'use client'` directive needed — pure prop rendering)
 
 **Layout preserved:**
 - Same `py-16 px-6` section padding
 - Same `max-w-3xl mx-auto` container
 - Same pill styling: `text-xs px-4 py-2 rounded-full` with colored background/border/text
+
+**Sorting:**
+- Rendering order is already handled by the `getSkillCategories` database query (ordered by `display_order`). No client-side sorting needed.
 
 ## Data shape
 
