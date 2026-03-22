@@ -151,13 +151,17 @@ export interface SkillCategory {
   icon?: string;
   skills?: Skill[];
   displayOrder?: number;
+  display_order?: number;
 }
 
 export interface Skill {
   id?: number;
   categoryId?: number;
+  category_id?: number;
   skillName: string;
+  skill_name?: string;
   displayOrder?: number;
+  display_order?: number;
 }
 
 export interface ProcessStrategy {
