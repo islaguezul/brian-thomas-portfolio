@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marketing Orchestrator — AI Campaign Platform</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    display: flex;
+    color: #1a1b3a;
+  }
+
+  /* ===================== LEFT SIDEBAR ===================== */
+  .sidebar {
+    width: 240px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1a1b3a 0%, #151631 100%);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .sidebar-logo {
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .sidebar-logo .sparkle {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .sidebar-logo .brand {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .sidebar-logo .brand small {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .sidebar-nav {
+    padding: 16px 0;
+    flex: 1;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover {
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.03);
+  }
+  .nav-item.active {
+    color: #fff;
+    background: rgba(124, 58, 237, 0.12);
+    border-left-color: #7c3aed;
+  }
+  .nav-icon {
+    width: 18px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(124, 58, 237, 0.25);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #a78bfa;
+  }
+  .ai-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+  }
+
+  /* ===================== MAIN AREA ===================== */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* Top bar */
+  .topbar {
+    height: 56px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    flex-shrink: 0;
+  }
+  .breadcrumb {
+    font-size: 13px;
+    color: #888;
+  }
+  .breadcrumb span {
+    color: #1a1b3a;
+    font-weight: 600;
+  }
+  .topbar-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #7c3aed;
+  }
+
+  /* Content area */
+  .content-area {
+    flex: 1;
+    display: flex;
+    overflow: auto;
+  }
+  .content-main {
+    flex: 1;
+    padding: 28px;
+    min-width: 0;
+    overflow-y: auto;
+  }
+
+  /* Campaign header */
+  .campaign-header {
+    margin-bottom: 28px;
+  }
+  .campaign-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1a1b3a;
+    margin-bottom: 8px;
+  }
+  .campaign-meta {
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+    color: #666;
+  }
+  .campaign-meta strong {
+    color: #1a1b3a;
+    font-weight: 600;
+  }
+
+  /* Funnel */
+  .funnel {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .funnel-stage {
+    flex: 1;
+    min-width: 0;
+  }
+  .stage-header {
+    padding: 10px 14px;
+    border-radius: 10px 10px 0 0;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .stage-header .count {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.7;
+  }
+  .stage-body {
+    border-radius: 0 0 10px 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 180px;
+  }
+
+  /* Stage colors */
+  .stage-awareness .stage-header { background: #ede9fe; color: #6d28d9; }
+  .stage-awareness .stage-body { background: #f5f3ff; border: 1px solid #ede9fe; border-top: none; }
+
+  .stage-consideration .stage-header { background: #e0d4fc; color: #5b21b6; }
+  .stage-consideration .stage-body { background: #ede9fe; border: 1px solid #e0d4fc; border-top: none; }
+
+  .stage-conversion .stage-header { background: #ffedd5; color: #c2410c; }
+  .stage-conversion .stage-body { background: #fff7ed; border: 1px solid #ffedd5; border-top: none; }
+
+  .stage-retention .stage-header { background: #ccfbf1; color: #0f766e; }
+  .stage-retention .stage-body { background: #f0fdfa; border: 1px solid #ccfbf1; border-top: none; }
+
+  /* Deliverable cards */
+  .deliverable {
+    background: #fff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1a1b3a;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .deliverable-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .stage-awareness .deliverable-icon { background: #ede9fe; }
+  .stage-consideration .deliverable-icon { background: #e0d4fc; }
+  .stage-conversion .deliverable-icon { background: #ffedd5; }
+  .stage-retention .deliverable-icon { background: #ccfbf1; }
+
+  /* Connecting thread */
+  .thread-banner {
+    background: linear-gradient(90deg, #ede9fe, #ffedd5, #ccfbf1);
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .thread-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #7c3aed;
+    white-space: nowrap;
+  }
+  .thread-text {
+    font-size: 13px;
+    font-style: italic;
+    color: #444;
+    font-weight: 500;
+  }
+
+  /* Launch checklist */
+  .launch-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .launch-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1a1b3a;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .launch-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    border-top: 1px solid #f3f4f6;
+  }
+  .launch-item:first-of-type { border-top: none; }
+  .launch-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #fff;
+  }
+  .launch-check.done {
+    background: #22c55e;
+    border-color: #22c55e;
+  }
+  .launch-check.done::after {
+    content: '\2713';
+    font-weight: 700;
+  }
+  .launch-text {
+    flex: 1;
+    color: #444;
+  }
+  .launch-item.completed .launch-text {
+    text-decoration: line-through;
+    color: #999;
+  }
+  .utm-code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 10px;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: #666;
+  }
+
+  /* ===================== RIGHT PANEL ===================== */
+  .right-panel {
+    width: 240px;
+    background: #fff;
+    border-left: 1px solid #e5e7eb;
+    padding: 24px 18px;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .eval-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a1b3a;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .eval-subtitle {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 20px;
+  }
+
+  .eval-metric {
+    margin-bottom: 18px;
+  }
+  .eval-metric-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .eval-metric-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #444;
+  }
+  .eval-metric-value {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .eval-bar {
+    height: 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .eval-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s;
+  }
+  .eval-brand .eval-metric-value { color: #7c3aed; }
+  .eval-brand .eval-bar-fill { background: linear-gradient(90deg, #7c3aed, #a78bfa); width: 92%; }
+
+  .eval-cta .eval-metric-value { color: #f97316; }
+  .eval-cta .eval-bar-fill { background: linear-gradient(90deg, #f97316, #fb923c); width: 87%; }
+
+  .eval-audience .eval-metric-value { color: #0ea5e9; }
+  .eval-audience .eval-bar-fill { background: linear-gradient(90deg, #0ea5e9, #38bdf8); width: 95%; }
+
+  .eval-overall {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .eval-overall-score {
+    text-align: center;
+    font-size: 40px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed, #0ea5e9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+  .eval-overall-label {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    font-weight: 500;
+  }
+
+  .ai-suggestions {
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .ai-suggestions-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1a1b3a;
+    margin-bottom: 10px;
+  }
+  .suggestion {
+    font-size: 11px;
+    color: #666;
+    padding: 8px 10px;
+    background: #faf5ff;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    border-left: 3px solid #7c3aed;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sparkle">&#10024;</div>
+    <div class="brand">
+      Marketing<br>Orchestrator
+      <small>AI-Powered</small>
+    </div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-item">
+      <span class="nav-icon">&#9632;</span> Dashboard
+    </div>
+    <div class="nav-item active">
+      <span class="nav-icon">&#9883;</span> Campaigns
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">&#9733;</span> Clients
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">&#9776;</span> Content Library
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">&#9673;</span> Reports
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="ai-badge">
+      <span class="ai-dot"></span>
+      AI Status: Active &#10024;
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN AREA -->
+<div class="main">
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="breadcrumb">
+      Campaigns &rsaquo; <span>Spring Launch 2026</span>
+    </div>
+    <div class="topbar-badge">
+      &#10024; AI Routing: Campaign Mode
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-area">
+    <div class="content-main">
+
+      <!-- Campaign header -->
+      <div class="campaign-header">
+        <div class="campaign-title">Spring Launch 2026</div>
+        <div class="campaign-meta">
+          <div><strong>Goal:</strong> 500 MQLs</div>
+          <div><strong>Audience:</strong> B2B SaaS Decision Makers</div>
+          <div><strong>Timeline:</strong> Mar 15 &ndash; May 30</div>
+        </div>
+      </div>
+
+      <!-- Funnel -->
+      <div class="funnel">
+        <div class="funnel-stage stage-awareness">
+          <div class="stage-header">
+            Awareness <span class="count">3 items</span>
+          </div>
+          <div class="stage-body">
+            <div class="deliverable">
+              <div class="deliverable-icon">&#9998;</div>
+              Blog Series (3)
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128247;</div>
+              LinkedIn Ads (2)
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#127908;</div>
+              Podcast Guest Spot
+            </div>
+          </div>
+        </div>
+
+        <div class="funnel-stage stage-consideration">
+          <div class="stage-header">
+            Consideration <span class="count">3 items</span>
+          </div>
+          <div class="stage-body">
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128196;</div>
+              Whitepaper
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128200;</div>
+              Case Study
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#9993;</div>
+              Email Sequence (5)
+            </div>
+          </div>
+        </div>
+
+        <div class="funnel-stage stage-conversion">
+          <div class="stage-header">
+            Conversion <span class="count">3 items</span>
+          </div>
+          <div class="stage-body">
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128640;</div>
+              Demo CTA Page
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128218;</div>
+              Sales Deck
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#127873;</div>
+              Free Trial Offer
+            </div>
+          </div>
+        </div>
+
+        <div class="funnel-stage stage-retention">
+          <div class="stage-header">
+            Retention <span class="count">3 items</span>
+          </div>
+          <div class="stage-body">
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128075;</div>
+              Onboarding Emails
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#128202;</div>
+              NPS Survey
+            </div>
+            <div class="deliverable">
+              <div class="deliverable-icon">&#127775;</div>
+              Referral Program
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Connecting Thread -->
+      <div class="thread-banner">
+        <span class="thread-label">&#128279; Connecting Thread</span>
+        <span class="thread-text">"From chaos to clarity &mdash; how modern teams ship faster"</span>
+      </div>
+
+      <!-- Launch Checklist -->
+      <div class="launch-section">
+        <div class="launch-title">&#128640; Launch Checklist</div>
+
+        <div class="launch-item completed">
+          <div class="launch-check done"></div>
+          <span class="launch-text">UTM tracking codes generated for all assets</span>
+          <span class="utm-code">?utm_campaign=spring26</span>
+        </div>
+        <div class="launch-item completed">
+          <div class="launch-check done"></div>
+          <span class="launch-text">Email sequences loaded into Mailchimp</span>
+          <span class="utm-code">?utm_medium=email</span>
+        </div>
+        <div class="launch-item">
+          <div class="launch-check"></div>
+          <span class="launch-text">LinkedIn ad creatives submitted for review</span>
+          <span class="utm-code">?utm_source=linkedin</span>
+        </div>
+        <div class="launch-item">
+          <div class="launch-check"></div>
+          <span class="launch-text">Demo CTA page A/B test configured</span>
+          <span class="utm-code">?utm_content=demo_v2</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <aside class="right-panel">
+      <div class="eval-title">&#129302; AI Evaluation</div>
+      <div class="eval-subtitle">Campaign quality analysis</div>
+
+      <div class="eval-metric eval-brand">
+        <div class="eval-metric-header">
+          <span class="eval-metric-label">Brand Consistency</span>
+          <span class="eval-metric-value">92%</span>
+        </div>
+        <div class="eval-bar"><div class="eval-bar-fill"></div></div>
+      </div>
+
+      <div class="eval-metric eval-cta">
+        <div class="eval-metric-header">
+          <span class="eval-metric-label">CTA Strength</span>
+          <span class="eval-metric-value">87%</span>
+        </div>
+        <div class="eval-bar"><div class="eval-bar-fill"></div></div>
+      </div>
+
+      <div class="eval-metric eval-audience">
+        <div class="eval-metric-header">
+          <span class="eval-metric-label">Audience Fit</span>
+          <span class="eval-metric-value">95%</span>
+        </div>
+        <div class="eval-bar"><div class="eval-bar-fill"></div></div>
+      </div>
+
+      <div class="eval-overall">
+        <div class="eval-overall-score">91</div>
+        <div class="eval-overall-label">Overall Campaign Score</div>
+      </div>
+
+      <div class="ai-suggestions">
+        <div class="ai-suggestions-title">&#128161; AI Suggestions</div>
+        <div class="suggestion">Add a comparison chart to the Whitepaper for stronger consideration-stage impact.</div>
+        <div class="suggestion">Consider retargeting pixels on Blog Series pages to feed LinkedIn audiences.</div>
+        <div class="suggestion">NPS Survey timing could be moved to Day 14 post-onboarding for better response rates.</div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+</body>
+</html>

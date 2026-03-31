@@ -80,6 +80,35 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
           )}
         </div>
 
+        {/* Screenshots */}
+        {project.screenshots && project.screenshots.length > 0 && (
+          <div className="mb-6 -mx-6 md:-mx-8">
+            {project.screenshots
+              .filter((s) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const path = s.filePath || (s as any).file_path || ''
+                return path && !path.startsWith('data:')
+              })
+              .map((screenshot, i) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const src = screenshot.filePath || (screenshot as any).file_path
+                return (
+                <img
+                  key={screenshot.id ?? i}
+                  src={src}
+                  alt={screenshot.altText || project.name}
+                  className="w-full object-cover"
+                  style={{
+                    maxHeight: '360px',
+                    borderBottom: '1px solid rgba(212, 168, 85, 0.08)',
+                  }}
+                  loading="lazy"
+                />
+                )
+              })}
+          </div>
+        )}
+
         {/* Detailed description */}
         {project.detailedDescription && (
           <div className="mb-6">

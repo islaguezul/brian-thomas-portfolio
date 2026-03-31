@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — PM Productivity Sidebar</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #05050a 0%, #0a0a15 50%, #080812 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: flex-end;
+    align-items: stretch;
+    color: #e0e0e0;
+    overflow: hidden;
+  }
+
+  /* Faux desktop background */
+  .desktop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+  }
+  .desktop-window {
+    position: absolute;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.015);
+    backdrop-filter: blur(2px);
+  }
+  .desktop-window.w1 { top: 60px; left: 40px; width: 520px; height: 360px; }
+  .desktop-window.w2 { top: 140px; left: 120px; width: 480px; height: 300px; }
+  .desktop-window.w3 { bottom: 80px; left: 60px; width: 400px; height: 220px; }
+  .desktop-window .titlebar {
+    height: 32px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    border-radius: 10px 10px 0 0;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
+  }
+  .desktop-window .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+  }
+  .desktop-window .content-lines {
+    padding: 20px;
+  }
+  .desktop-window .line {
+    height: 8px;
+    background: rgba(255,255,255,0.025);
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  .desktop-window .line:nth-child(2) { width: 80%; }
+  .desktop-window .line:nth-child(3) { width: 60%; }
+  .desktop-window .line:nth-child(4) { width: 90%; }
+  .desktop-window .line:nth-child(5) { width: 45%; }
+
+  /* Sidebar */
+  .sidebar {
+    position: relative;
+    z-index: 10;
+    width: 380px;
+    min-height: 100vh;
+    background: #0a0a0f;
+    border-left: 1px solid #2a2a3e;
+    box-shadow:
+      -8px 0 40px rgba(0, 212, 255, 0.06),
+      -2px 0 20px rgba(0, 51, 160, 0.1),
+      inset 1px 0 0 rgba(0, 212, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  /* Focus mode bar */
+  .focus-bar {
+    height: 28px;
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.05));
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
+    color: #00d4ff;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+  }
+  .focus-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+    box-shadow: 0 0 12px #00d4ff, 0 0 4px #00d4ff;
+  }
+
+  /* Header */
+  .header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #2a2a3e;
+    background: linear-gradient(180deg, rgba(26, 26, 46, 0.5) 0%, transparent 100%);
+  }
+  .header .logo {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .header .title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    flex: 1;
+  }
+  .header .streak {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 149, 0, 0.12);
+    border: 1px solid rgba(255, 149, 0, 0.25);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ff9500;
+  }
+  .header .collapse-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #2a2a3e;
+    background: #1a1a2e;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Sections */
+  .section {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(42, 42, 62, 0.5);
+  }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #888;
+    margin-bottom: 12px;
+  }
+
+  /* Daily Mission */
+  .daily-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .daily-date {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .daily-count {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+  }
+  .task + .task {
+    border-top: 1px solid rgba(42, 42, 62, 0.3);
+  }
+  .checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #2a2a3e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .checkbox.checked {
+    background: #0033A0;
+    border-color: #0033A0;
+  }
+  .checkbox.checked::after {
+    content: '\2713';
+    font-size: 11px;
+    color: #fff;
+    font-weight: 700;
+  }
+  .task-text {
+    font-size: 13px;
+    color: #e0e0e0;
+    flex: 1;
+  }
+  .task.done .task-text {
+    text-decoration: line-through;
+    color: #555;
+  }
+  .task-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  .tag-high {
+    background: rgba(255, 51, 102, 0.12);
+    color: #ff3366;
+    border: 1px solid rgba(255, 51, 102, 0.2);
+  }
+  .tag-med {
+    background: rgba(255, 149, 0, 0.12);
+    color: #ff9500;
+    border: 1px solid rgba(255, 149, 0, 0.2);
+  }
+
+  /* Progress bar */
+  .progress-container {
+    margin-top: 14px;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: #1a1a2e;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 66%;
+    background: linear-gradient(90deg, #0033A0, #00d4ff);
+    border-radius: 3px;
+    box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  }
+
+  /* Time Tracker */
+  .tracker-card {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(10, 10, 15, 0.8));
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .tracker-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #0033A0, #00d4ff, #0033A0);
+  }
+  .tracker-ticket {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: #00d4ff;
+    margin-bottom: 4px;
+  }
+  .tracker-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .tracker-time {
+    font-size: 36px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: #00d4ff;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.1);
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+  .tracker-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn-stop {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255, 51, 102, 0.15);
+    color: #ff3366;
+    border: 1px solid rgba(255, 51, 102, 0.25);
+    font-family: inherit;
+  }
+  .btn-log {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #2a2a3e;
+    background: #1a1a2e;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  /* Rocket Progress */
+  .rocket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .rocket-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .rocket-pct {
+    font-size: 13px;
+    font-weight: 600;
+    color: #00d4ff;
+  }
+  .rocket-bar-wrapper {
+    position: relative;
+    height: 24px;
+    margin-bottom: 10px;
+  }
+  .rocket-bar-bg {
+    position: absolute;
+    inset: 0;
+    background: #1a1a2e;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .rocket-bar-fill {
+    height: 100%;
+    width: 60%;
+    background: linear-gradient(90deg, #0033A0 0%, #0055cc 30%, #00d4ff 100%);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 0 16px rgba(0, 212, 255, 0.3);
+  }
+  .rocket-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
+    border-radius: 12px;
+  }
+  .rocket-icon {
+    position: absolute;
+    top: 50%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    filter: drop-shadow(0 0 6px rgba(0, 212, 255, 0.6));
+    z-index: 2;
+  }
+  .rocket-stages {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #555;
+    position: relative;
+    padding-top: 4px;
+  }
+  .rocket-stages span {
+    text-align: center;
+    flex: 1;
+  }
+  .rocket-stages .active-stage {
+    color: #00d4ff;
+    font-weight: 600;
+  }
+  .rocket-stages .done-stage {
+    color: #00ff88;
+  }
+  .stage-arrow {
+    color: #333;
+  }
+
+  /* Quick Reports */
+  .quick-reports {
+    display: flex;
+    gap: 8px;
+  }
+  .report-btn {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: 8px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+    color: #00d4ff;
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .report-btn:hover {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.2);
+  }
+
+  /* Bottom spacing */
+  .sidebar-footer {
+    padding: 16px 20px;
+    margin-top: auto;
+    border-top: 1px solid rgba(42, 42, 62, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #555;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #00ff88;
+    box-shadow: 0 0 6px #00ff88;
+  }
+</style>
+</head>
+<body>
+
+<!-- Faux Desktop -->
+<div class="desktop">
+  <div class="desktop-window w1">
+    <div class="titlebar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="content-lines">
+      <div class="line" style="width:100%"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
+  <div class="desktop-window w2">
+    <div class="titlebar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="content-lines">
+      <div class="line" style="width:100%"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
+  <div class="desktop-window w3">
+    <div class="titlebar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="content-lines">
+      <div class="line" style="width:100%"></div>
+      <div class="line"></div>
+      <div class="line"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar App -->
+<div class="sidebar">
+
+  <!-- Focus Mode Bar -->
+  <div class="focus-bar">
+    Focus Mode: 18 min remaining
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <span class="logo">🚀</span>
+    <span class="title">Mission Control</span>
+    <div class="streak">🔥 7</div>
+    <button class="collapse-btn">‹</button>
+  </div>
+
+  <!-- Daily Mission -->
+  <div class="section">
+    <div class="section-label">Daily Mission</div>
+    <div class="daily-header">
+      <span class="daily-date">Tuesday, March 30</span>
+      <span class="daily-count">2 / 3</span>
+    </div>
+
+    <div class="task done">
+      <div class="checkbox checked"></div>
+      <span class="task-text">Review API migration PRD</span>
+      <span class="task-tag tag-high">High</span>
+    </div>
+    <div class="task done">
+      <div class="checkbox checked"></div>
+      <span class="task-text">Update sprint board for standup</span>
+      <span class="task-tag tag-med">Med</span>
+    </div>
+    <div class="task">
+      <div class="checkbox"></div>
+      <span class="task-text">Draft stakeholder update email</span>
+      <span class="task-tag tag-high">High</span>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-header">
+        <span>Daily Progress</span>
+        <span>66%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time Tracker -->
+  <div class="section">
+    <div class="section-label">Time Tracker</div>
+    <div class="tracker-card">
+      <div class="tracker-ticket">JIRA-4521</div>
+      <div class="tracker-name">API Migration</div>
+      <div class="tracker-time">01:23:45</div>
+      <div class="tracker-actions">
+        <button class="btn-stop">&#9632; Stop</button>
+        <button class="btn-log">Log to Tempo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rocket Progress -->
+  <div class="section">
+    <div class="section-label">Career Rocket</div>
+    <div class="rocket-header">
+      <span class="rocket-label">New Glenn</span>
+      <span class="rocket-pct">60%</span>
+    </div>
+    <div class="rocket-bar-wrapper">
+      <div class="rocket-bar-bg">
+        <div class="rocket-bar-fill"></div>
+      </div>
+      <div class="rocket-icon">🚀</div>
+    </div>
+    <div class="rocket-stages">
+      <span class="done-stage">Fueling</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="done-stage">New Shepard</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span class="active-stage">New Glenn</span>
+      <span class="stage-arrow">&rarr;</span>
+      <span>Blue Moon</span>
+    </div>
+  </div>
+
+  <!-- Quick Reports -->
+  <div class="section">
+    <div class="section-label">Quick Reports</div>
+    <div class="quick-reports">
+      <button class="report-btn">Standup</button>
+      <button class="report-btn">Weekly</button>
+      <button class="report-btn">Tempo</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <div class="status-dot"></div>
+    <span>Synced with Jira &middot; 2 min ago</span>
+  </div>
+
+</div>
+
+</body>
+</html>

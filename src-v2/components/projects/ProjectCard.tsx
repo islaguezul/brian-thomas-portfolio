@@ -24,16 +24,36 @@ const STAGE_COLORS: Record<string, string> = {
 
 export default function ProjectCard({ project, onClick }: ProjectCardProps) {
   const stageColor = STAGE_COLORS[project.stage] || 'var(--wheat-light)'
+  const firstScreenshot = project.screenshots?.[0]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const screenshotPath = firstScreenshot?.filePath || (firstScreenshot as any)?.file_path
+  const hasScreenshot = screenshotPath && !screenshotPath.startsWith('data:')
 
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-xl p-5 transition-transform hover:scale-[1.02] cursor-pointer"
+      className="w-full text-left rounded-xl overflow-hidden transition-transform hover:scale-[1.02] cursor-pointer"
       style={{
         background: 'rgba(212, 168, 85, 0.04)',
         border: '1px solid rgba(212, 168, 85, 0.1)',
       }}
     >
+      {/* Screenshot thumbnail */}
+      {hasScreenshot && (
+        <div
+          className="w-full h-40 overflow-hidden"
+          style={{ borderBottom: '1px solid rgba(212, 168, 85, 0.08)' }}
+        >
+          <img
+            src={screenshotPath}
+            alt={firstScreenshot?.altText || project.name}
+            className="w-full h-full object-cover object-top"
+            loading="lazy"
+          />
+        </div>
+      )}
+
+      <div className="p-5">
       {/* Stage badge */}
       <div className="flex items-center justify-between mb-3">
         <span
@@ -101,6 +121,7 @@ export default function ProjectCard({ project, onClick }: ProjectCardProps) {
           )}
         </div>
       )}
+      </div>
     </button>
   )
 }

@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>CryptoBot — AI Trading Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2129;
+    --border: #30363d;
+    --border-light: #3d444d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --text-dim: #6e7681;
+    --green: #00d68f;
+    --green-bg: rgba(0, 214, 143, 0.08);
+    --red: #ff6b6b;
+    --red-bg: rgba(255, 107, 107, 0.08);
+    --blue: #58a6ff;
+    --blue-bg: rgba(88, 166, 255, 0.08);
+    --amber: #d29922;
+    --amber-bg: rgba(210, 153, 34, 0.08);
+    --cyan: #39d0d8;
+  }
+
+  html, body {
+    width: 1280px;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+  }
+
+  /* ── Top Bar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .logo {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #000;
+  }
+
+  .ai-status {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(0, 214, 143, 0.5);
+  }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .portfolio-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .badge-green {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(0, 214, 143, 0.2);
+  }
+
+  /* ── Main Layout ── */
+  .dashboard {
+    display: flex;
+    gap: 1px;
+    background: var(--border);
+    min-height: calc(100vh - 56px - 40px);
+  }
+
+  .main-panel {
+    flex: 0 0 65%;
+    background: var(--bg);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .side-panel {
+    flex: 1;
+    background: var(--bg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-body {
+    padding: 18px;
+  }
+
+  /* ── Price Chart ── */
+  .chart-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .chart-pair {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .chart-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .chart-change {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .chart-timeframes {
+    display: flex;
+    gap: 4px;
+  }
+
+  .tf-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+  }
+
+  .tf-btn.active {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  /* Candlestick chart simulation */
+  .chart-area {
+    position: relative;
+    height: 260px;
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 20px 0 30px;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  }
+
+  /* Grid lines */
+  .chart-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg,
+        transparent,
+        transparent 51px,
+        rgba(48, 54, 61, 0.3) 51px,
+        rgba(48, 54, 61, 0.3) 52px);
+  }
+
+  .candle-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .candle-wick {
+    width: 1px;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .candle-body {
+    width: 12px;
+    border-radius: 1px;
+    min-height: 4px;
+  }
+
+  .candle-green .candle-body { background: var(--green); color: var(--green); }
+  .candle-green .candle-wick { background: var(--green); }
+  .candle-red .candle-body { background: var(--red); color: var(--red); }
+  .candle-red .candle-wick { background: var(--red); }
+
+  /* Trend line overlay */
+  .trend-line {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    height: 200px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .trend-line svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Y-axis labels */
+  .chart-y-labels {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 30px;
+    width: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px 0;
+  }
+
+  .y-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+
+  /* ── Positions Table ── */
+  .positions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .positions-table th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .positions-table td {
+    padding: 12px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+  }
+
+  .positions-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .asset-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+  }
+
+  .asset-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .asset-icon.btc { background: linear-gradient(135deg, #f7931a, #e8850f); color: #fff; }
+  .asset-icon.eth { background: linear-gradient(135deg, #627eea, #4e6ad6); color: #fff; }
+  .asset-icon.sol { background: linear-gradient(135deg, #9945ff, #14f195); color: #fff; }
+
+  .price-cell {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .pnl-positive {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .pnl-negative {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--red);
+  }
+
+  .action-btn {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  /* ── Signal Items ── */
+  .signal-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.3);
+  }
+
+  .signal-item:last-child { border-bottom: none; }
+
+  .signal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .signal-dot.buy { background: var(--green); box-shadow: 0 0 8px rgba(0, 214, 143, 0.4); }
+  .signal-dot.hold { background: var(--amber); box-shadow: 0 0 8px rgba(210, 153, 34, 0.4); }
+  .signal-dot.sell { background: var(--red); box-shadow: 0 0 8px rgba(255, 107, 107, 0.4); }
+
+  .signal-content { flex: 1; }
+
+  .signal-asset {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .signal-action {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .signal-confidence {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* ── Sentiment Bar ── */
+  .sentiment-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sentiment-bar-track {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .sentiment-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    width: 68%;
+  }
+
+  .sentiment-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* ── Risk Management ── */
+  .risk-items {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .risk-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .risk-label {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .risk-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .risk-value.ok { color: var(--green); }
+  .risk-value.warning { color: var(--amber); }
+
+  /* Gauge */
+  .gauge-container {
+    margin-top: 4px;
+  }
+
+  .gauge-track {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+
+  .gauge-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 42%;
+    background: linear-gradient(90deg, var(--green), var(--amber));
+  }
+
+  .gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+
+  /* ── Status Pill ── */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-active {
+    background: var(--green-bg);
+    color: var(--green);
+    border: 1px solid rgba(0, 214, 143, 0.2);
+  }
+
+  /* ── Bottom Bar ── */
+  .bottombar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 24px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .bottombar-left, .bottombar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .bottombar span.mono-val {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <div class="logo-icon">C</div>
+        CryptoBot
+      </div>
+      <div class="ai-status">
+        AI Status:
+        <div class="status-dot"></div>
+        Active
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size: 13px; color: var(--text-muted);">Portfolio:</span>
+      <span class="portfolio-value">$47,382.91</span>
+      <span class="badge badge-green">24h: +3.2%</span>
+    </div>
+  </header>
+
+  <!-- Dashboard -->
+  <div class="dashboard">
+
+    <!-- Left Main Panel -->
+    <div class="main-panel">
+
+      <!-- Price Chart -->
+      <div class="card" style="flex: 1;">
+        <div class="card-header">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <span class="chart-pair">BTC / USD</span>
+            <div class="chart-timeframes">
+              <span class="tf-btn">1H</span>
+              <span class="tf-btn">4H</span>
+              <span class="tf-btn active">1D</span>
+              <span class="tf-btn">1W</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 10px;">
+            <span class="chart-price">$67,234.50</span>
+            <span class="chart-change">+3.28%</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 18px 18px 12px; position: relative;">
+          <div class="chart-area">
+            <!-- Simulated candlesticks -->
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 18px;"></div>
+              <div class="candle-body" style="height: 45px;"></div>
+              <div class="candle-wick" style="height: 12px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 10px;"></div>
+              <div class="candle-body" style="height: 30px;"></div>
+              <div class="candle-wick" style="height: 20px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 22px;"></div>
+              <div class="candle-body" style="height: 38px;"></div>
+              <div class="candle-wick" style="height: 8px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 14px;"></div>
+              <div class="candle-body" style="height: 22px;"></div>
+              <div class="candle-wick" style="height: 16px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 8px;"></div>
+              <div class="candle-body" style="height: 55px;"></div>
+              <div class="candle-wick" style="height: 10px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 12px;"></div>
+              <div class="candle-body" style="height: 40px;"></div>
+              <div class="candle-wick" style="height: 6px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 20px;"></div>
+              <div class="candle-body" style="height: 28px;"></div>
+              <div class="candle-wick" style="height: 14px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 6px;"></div>
+              <div class="candle-body" style="height: 48px;"></div>
+              <div class="candle-wick" style="height: 8px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 10px;"></div>
+              <div class="candle-body" style="height: 35px;"></div>
+              <div class="candle-wick" style="height: 12px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 18px;"></div>
+              <div class="candle-body" style="height: 42px;"></div>
+              <div class="candle-wick" style="height: 10px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 8px;"></div>
+              <div class="candle-body" style="height: 52px;"></div>
+              <div class="candle-wick" style="height: 14px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 16px;"></div>
+              <div class="candle-body" style="height: 20px;"></div>
+              <div class="candle-wick" style="height: 18px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 4px;"></div>
+              <div class="candle-body" style="height: 60px;"></div>
+              <div class="candle-wick" style="height: 8px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 10px;"></div>
+              <div class="candle-body" style="height: 44px;"></div>
+              <div class="candle-wick" style="height: 6px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 24px;"></div>
+              <div class="candle-body" style="height: 32px;"></div>
+              <div class="candle-wick" style="height: 10px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 6px;"></div>
+              <div class="candle-body" style="height: 50px;"></div>
+              <div class="candle-wick" style="height: 12px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 8px;"></div>
+              <div class="candle-body" style="height: 42px;"></div>
+              <div class="candle-wick" style="height: 10px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 4px;"></div>
+              <div class="candle-body" style="height: 58px;"></div>
+              <div class="candle-wick" style="height: 6px;"></div>
+            </div>
+            <div class="candle-group candle-red" style="height: 100%;">
+              <div class="candle-wick" style="height: 14px;"></div>
+              <div class="candle-body" style="height: 26px;"></div>
+              <div class="candle-wick" style="height: 20px;"></div>
+            </div>
+            <div class="candle-group candle-green" style="height: 100%;">
+              <div class="candle-wick" style="height: 6px;"></div>
+              <div class="candle-body" style="height: 64px;"></div>
+              <div class="candle-wick" style="height: 4px;"></div>
+            </div>
+
+            <!-- Trend line -->
+            <div class="trend-line">
+              <svg viewBox="0 0 800 200" preserveAspectRatio="none" fill="none">
+                <defs>
+                  <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#39d0d8" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#39d0d8" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,140 C40,135 80,130 120,125 C160,118 200,140 240,132 C280,124 320,100 360,95 C400,88 440,92 480,80 C520,72 560,78 600,65 C640,55 680,50 720,42 C760,36 800,30 800,30 L800,200 L0,200 Z" fill="url(#trendGrad)"/>
+                <path d="M0,140 C40,135 80,130 120,125 C160,118 200,140 240,132 C280,124 320,100 360,95 C400,88 440,92 480,80 C520,72 560,78 600,65 C640,55 680,50 720,42 C760,36 800,30 800,30" stroke="#39d0d8" stroke-width="2" stroke-opacity="0.8"/>
+              </svg>
+            </div>
+
+            <!-- Y-axis -->
+            <div class="chart-y-labels">
+              <span class="y-label">$69,000</span>
+              <span class="y-label">$68,000</span>
+              <span class="y-label">$67,000</span>
+              <span class="y-label">$66,000</span>
+              <span class="y-label">$65,000</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Positions -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Active Positions</span>
+          <span style="font-size: 12px; color: var(--text-dim);">3 Open</span>
+        </div>
+        <table class="positions-table">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Entry Price</th>
+              <th>Current</th>
+              <th>P&L</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="asset-cell">
+                  <div class="asset-icon btc">B</div>
+                  <div>
+                    <div>Bitcoin</div>
+                    <div style="font-size: 11px; color: var(--text-dim); font-weight: 400;">BTC</div>
+                  </div>
+                </div>
+              </td>
+              <td class="price-cell mono">$65,100.00</td>
+              <td class="price-cell mono">$67,234.50</td>
+              <td class="pnl-positive mono">+$2,134.50 (+3.2%)</td>
+              <td><span class="action-btn">Close</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="asset-cell">
+                  <div class="asset-icon eth">E</div>
+                  <div>
+                    <div>Ethereum</div>
+                    <div style="font-size: 11px; color: var(--text-dim); font-weight: 400;">ETH</div>
+                  </div>
+                </div>
+              </td>
+              <td class="price-cell mono">$3,450.00</td>
+              <td class="price-cell mono">$3,521.40</td>
+              <td class="pnl-positive mono">+$71.40 (+2.1%)</td>
+              <td><span class="action-btn">Close</span></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="asset-cell">
+                  <div class="asset-icon sol">S</div>
+                  <div>
+                    <div>Solana</div>
+                    <div style="font-size: 11px; color: var(--text-dim); font-weight: 400;">SOL</div>
+                  </div>
+                </div>
+              </td>
+              <td class="price-cell mono">$142.30</td>
+              <td class="price-cell mono">$138.90</td>
+              <td class="pnl-negative mono">-$3.40 (-2.4%)</td>
+              <td><span class="action-btn">Close</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Side Panel -->
+    <div class="side-panel">
+
+      <!-- AI Signals -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">AI Signals</span>
+          <span class="status-pill status-active">Live</span>
+        </div>
+        <div class="card-body">
+          <div class="signal-item">
+            <div class="signal-dot buy"></div>
+            <div class="signal-content">
+              <div class="signal-asset">BTC</div>
+              <div class="signal-action">Strong Buy</div>
+            </div>
+            <div class="signal-confidence" style="color: var(--green);">87%</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-dot hold"></div>
+            <div class="signal-content">
+              <div class="signal-asset">ETH</div>
+              <div class="signal-action">Hold</div>
+            </div>
+            <div class="signal-confidence" style="color: var(--amber);">72%</div>
+          </div>
+          <div class="signal-item">
+            <div class="signal-dot sell"></div>
+            <div class="signal-content">
+              <div class="signal-asset">DOGE</div>
+              <div class="signal-action">Sell</div>
+            </div>
+            <div class="signal-confidence" style="color: var(--red);">91%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sentiment Analysis -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Sentiment Analysis</span>
+        </div>
+        <div class="card-body">
+          <div class="sentiment-label">
+            Market Sentiment: <span style="color: var(--green);">Bullish</span>
+          </div>
+          <div class="sentiment-bar-track">
+            <div class="sentiment-bar-fill"></div>
+          </div>
+          <div class="sentiment-labels">
+            <span>Bearish</span>
+            <span style="color: var(--text-muted); font-weight: 600;">68%</span>
+            <span>Bullish</span>
+          </div>
+          <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <span style="padding: 4px 10px; border-radius: 6px; background: var(--green-bg); color: var(--green); font-size: 11px; font-weight: 600; border: 1px solid rgba(0,214,143,0.15);">Fear & Greed: 72</span>
+            <span style="padding: 4px 10px; border-radius: 6px; background: var(--blue-bg); color: var(--blue); font-size: 11px; font-weight: 600; border: 1px solid rgba(88,166,255,0.15);">Social: Positive</span>
+            <span style="padding: 4px 10px; border-radius: 6px; background: var(--amber-bg); color: var(--amber); font-size: 11px; font-weight: 600; border: 1px solid rgba(210,153,34,0.15);">Vol: Moderate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Risk Management -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Risk Management</span>
+        </div>
+        <div class="card-body">
+          <div class="risk-items">
+            <div class="risk-row">
+              <span class="risk-label">Max Drawdown</span>
+              <span class="risk-value ok mono">5.0%</span>
+            </div>
+            <div class="risk-row">
+              <span class="risk-label">Stop Loss</span>
+              <span class="risk-value ok">Active</span>
+            </div>
+            <div class="risk-row">
+              <span class="risk-label">Daily Loss Limit</span>
+              <span class="risk-value ok mono">$1,200 remaining</span>
+            </div>
+            <div>
+              <div class="risk-row" style="margin-bottom: 8px;">
+                <span class="risk-label">Portfolio Heat</span>
+                <span class="risk-value warning mono">42%</span>
+              </div>
+              <div class="gauge-container">
+                <div class="gauge-track">
+                  <div class="gauge-fill"></div>
+                </div>
+                <div class="gauge-labels">
+                  <span>Low</span>
+                  <span>Medium</span>
+                  <span>High</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <footer class="bottombar">
+    <div class="bottombar-left">
+      <span>Last trade: <span class="mono-val">2 min ago</span></span>
+      <span>Trades today: <span class="mono-val">14</span></span>
+    </div>
+    <div class="bottombar-right">
+      <span>Uptime: <span class="mono-val">99.7%</span></span>
+      <span>Latency: <span class="mono-val">12ms</span></span>
+      <span style="color: var(--green); display: flex; align-items: center; gap: 4px;">
+        <div style="width: 6px; height: 6px; border-radius: 50%; background: var(--green);"></div>
+        All systems operational
+      </span>
+    </div>
+  </footer>
+
+</body>
+</html>

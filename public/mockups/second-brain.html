@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>Second Brain - ADHD Productivity App</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    width: 1280px;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #e0f2fe 0%, #ede9fe 50%, #fce7f3 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  /* ── Phone Frame ── */
+  .phone-frame {
+    width: 375px;
+    height: 812px;
+    border-radius: 40px;
+    background: #F8FAFC;
+    border: 6px solid #1e293b;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 2px #334155,
+      0 25px 80px rgba(0, 0, 0, 0.25),
+      0 10px 30px rgba(0, 0, 0, 0.15),
+      inset 0 0 0 1px rgba(255,255,255,0.1);
+  }
+
+  /* ── Status Bar ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px 8px 28px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  .status-time { font-size: 15px; font-weight: 700; }
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .status-icons .bar {
+    display: inline-flex;
+    gap: 1.5px;
+    align-items: flex-end;
+    height: 11px;
+  }
+  .status-icons .bar span {
+    display: block;
+    width: 3px;
+    background: #1e293b;
+    border-radius: 1px;
+  }
+  .battery {
+    width: 24px;
+    height: 11px;
+    border: 1.5px solid #1e293b;
+    border-radius: 2.5px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 1.5px;
+  }
+  .battery::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 3px;
+    width: 2px;
+    height: 5px;
+    background: #1e293b;
+    border-radius: 0 1px 1px 0;
+  }
+  .battery-fill {
+    width: 78%;
+    height: 100%;
+    background: #10b981;
+    border-radius: 1px;
+  }
+  .wifi-icon {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  /* ── Content ── */
+  .screen {
+    padding: 0 20px;
+    overflow-y: auto;
+    height: calc(812px - 48px - 70px);
+  }
+
+  /* Header */
+  .header {
+    padding: 8px 0 16px 0;
+  }
+  .greeting {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+  }
+  .greeting-wave { font-size: 22px; }
+  .date-line {
+    font-size: 13px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-top: 4px;
+  }
+
+  /* XP Progress */
+  .xp-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .xp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .xp-level {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  .xp-points {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+  }
+  .xp-bar-track {
+    height: 10px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .xp-bar-fill {
+    height: 100%;
+    width: 65%;
+    background: linear-gradient(90deg, #0EA5E9, #14B8A6);
+    border-radius: 10px;
+    position: relative;
+  }
+  .xp-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: rgba(255,255,255,0.3);
+    border-radius: 10px 10px 0 0;
+  }
+  .xp-subtitle {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 6px;
+    text-align: right;
+  }
+
+  /* Streak Calendar */
+  .streak-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .streak-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .streak-title .fire { font-size: 14px; }
+  .streak-count {
+    font-size: 12px;
+    color: #14B8A6;
+    font-weight: 600;
+    margin-left: auto;
+  }
+  .streak-days {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .streak-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+  }
+  .streak-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+  }
+  .streak-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .streak-dot.done {
+    background: #14B8A6;
+    color: #fff;
+  }
+  .streak-dot.today {
+    background: #0EA5E9;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+    animation: pulse-today 2s ease-in-out infinite;
+  }
+  @keyframes pulse-today {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25); }
+    50% { box-shadow: 0 0 0 6px rgba(14, 165, 233, 0.12); }
+  }
+  .streak-dot.future {
+    background: #e2e8f0;
+    color: #94a3b8;
+  }
+
+  /* Priority Matrix */
+  .matrix-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .matrix-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+  }
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .matrix-cell {
+    padding: 10px;
+    border-radius: 10px;
+    min-height: 64px;
+  }
+  .matrix-cell-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    opacity: 0.8;
+  }
+  .matrix-task {
+    font-size: 11px;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: inherit;
+    opacity: 0.9;
+  }
+  .matrix-task-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cell-do {
+    background: #fef2f2;
+    color: #991b1b;
+  }
+  .cell-do .matrix-task-dot { background: #ef4444; }
+  .cell-schedule {
+    background: #eff6ff;
+    color: #1e40af;
+  }
+  .cell-schedule .matrix-task-dot { background: #3b82f6; }
+  .cell-delegate {
+    background: #fefce8;
+    color: #854d0e;
+  }
+  .cell-delegate .matrix-task-dot { background: #eab308; }
+  .cell-eliminate {
+    background: #f1f5f9;
+    color: #475569;
+  }
+  .cell-eliminate .matrix-task-dot { background: #94a3b8; }
+
+  /* Burnout / Energy */
+  .energy-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .energy-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    white-space: nowrap;
+  }
+  .energy-bar-track {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .energy-bar-fill {
+    height: 100%;
+    width: 72%;
+    background: linear-gradient(90deg, #10b981, #34d399);
+    border-radius: 8px;
+  }
+  .energy-status {
+    font-size: 12px;
+    font-weight: 600;
+    color: #10b981;
+    white-space: nowrap;
+  }
+
+  /* Task List */
+  .tasks-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tasks-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 12px;
+  }
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .task-item:last-child { border-bottom: none; }
+  .task-checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 2px solid #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px;
+    color: transparent;
+  }
+  .task-checkbox.done {
+    background: #14B8A6;
+    border-color: #14B8A6;
+    color: #fff;
+  }
+  .task-content { flex: 1; }
+  .task-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+  }
+  .task-name.done {
+    text-decoration: line-through;
+    color: #94a3b8;
+  }
+  .task-time {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  .task-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .tag-focus { background: #dbeafe; color: #2563eb; }
+  .tag-errand { background: #fef3c7; color: #b45309; }
+  .tag-done { background: #d1fae5; color: #047857; }
+
+  /* FAB */
+  .fab {
+    position: absolute;
+    bottom: 84px;
+    right: 24px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #0EA5E9, #0284c7);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+  }
+
+  /* Bottom Tab Bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 10px;
+    justify-content: space-around;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+  .tab-item.active { color: #0EA5E9; }
+  .tab-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .tab-active-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #0EA5E9;
+    margin-top: -2px;
+  }
+
+  /* ── App Info next to phone ── */
+  .page-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+  }
+  .app-info {
+    max-width: 340px;
+  }
+  .app-info .app-name {
+    font-size: 36px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .app-info .app-name span {
+    background: linear-gradient(90deg, #0EA5E9, #14B8A6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .app-info .tagline {
+    font-size: 18px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .feature-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .feature-text {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.5;
+  }
+  .feature-text strong { color: #0f172a; }
+</style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+  <!-- App Info -->
+  <div class="app-info">
+    <div class="app-name"><span>Second Brain</span></div>
+    <div class="tagline">The ADHD productivity app that works with your brain, not against it.</div>
+    <div class="feature-list">
+      <div class="feature-item">
+        <div class="feature-icon" style="background: #dbeafe;">&#127919;</div>
+        <div class="feature-text"><strong>Priority Matrix</strong> &mdash; Eisenhower grid keeps you focused on what actually matters</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background: #d1fae5;">&#128293;</div>
+        <div class="feature-text"><strong>Streak System</strong> &mdash; Gamified consistency tracking with XP and levels</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background: #fef3c7;">&#128171;</div>
+        <div class="feature-text"><strong>Burnout Guard</strong> &mdash; Energy monitoring prevents crash cycles</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon" style="background: #ede9fe;">&#9889;</div>
+        <div class="feature-text"><strong>Quick Capture</strong> &mdash; One-tap task entry so thoughts don't slip away</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phone -->
+  <div class="phone-frame">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="status-time">9:41</div>
+      <div class="status-icons">
+        <div class="bar">
+          <span style="height: 4px;"></span>
+          <span style="height: 6px;"></span>
+          <span style="height: 8px;"></span>
+          <span style="height: 11px;"></span>
+        </div>
+        <span class="wifi-icon">&#9679;&#9702;&#9702;</span>
+        <div class="battery">
+          <div class="battery-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen Content -->
+    <div class="screen">
+
+      <!-- Header -->
+      <div class="header">
+        <div class="greeting">Good morning, Brian <span class="greeting-wave">&#128075;</span></div>
+        <div class="date-line">Sunday, March 30, 2026</div>
+      </div>
+
+      <!-- XP Progress -->
+      <div class="xp-card">
+        <div class="xp-header">
+          <div class="xp-level">Level 7 &mdash; Focus Master</div>
+          <div class="xp-points">1,340 / 2,000 XP</div>
+        </div>
+        <div class="xp-bar-track">
+          <div class="xp-bar-fill"></div>
+        </div>
+        <div class="xp-subtitle">660 XP to Level 8</div>
+      </div>
+
+      <!-- Streak Calendar -->
+      <div class="streak-card">
+        <div class="streak-title">
+          <span class="fire">&#128293;</span> Weekly Streak
+          <span class="streak-count">5 days</span>
+        </div>
+        <div class="streak-days">
+          <div class="streak-day">
+            <div class="streak-label">Mon</div>
+            <div class="streak-dot done">&#10003;</div>
+          </div>
+          <div class="streak-day">
+            <div class="streak-label">Tue</div>
+            <div class="streak-dot done">&#10003;</div>
+          </div>
+          <div class="streak-day">
+            <div class="streak-label">Wed</div>
+            <div class="streak-dot done">&#10003;</div>
+          </div>
+          <div class="streak-day">
+            <div class="streak-label">Thu</div>
+            <div class="streak-dot done">&#10003;</div>
+          </div>
+          <div class="streak-day">
+            <div class="streak-label">Fri</div>
+            <div class="streak-dot done">&#10003;</div>
+          </div>
+          <div class="streak-day">
+            <div class="streak-label">Sat</div>
+            <div class="streak-dot today">&#9679;</div>
+          </div>
+          <div class="streak-day">
+            <div class="streak-label">Sun</div>
+            <div class="streak-dot future"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Priority Matrix -->
+      <div class="matrix-card">
+        <div class="matrix-title">Priority Matrix</div>
+        <div class="matrix-grid">
+          <div class="matrix-cell cell-do">
+            <div class="matrix-cell-label">Do First</div>
+            <div class="matrix-task"><span class="matrix-task-dot"></span> Finalize Q2 roadmap</div>
+            <div class="matrix-task"><span class="matrix-task-dot"></span> Review PR #247</div>
+          </div>
+          <div class="matrix-cell cell-schedule">
+            <div class="matrix-cell-label">Schedule</div>
+            <div class="matrix-task"><span class="matrix-task-dot"></span> Dentist appointment</div>
+            <div class="matrix-task"><span class="matrix-task-dot"></span> Update portfolio</div>
+          </div>
+          <div class="matrix-cell cell-delegate">
+            <div class="matrix-cell-label">Delegate</div>
+            <div class="matrix-task"><span class="matrix-task-dot"></span> Team standup notes</div>
+          </div>
+          <div class="matrix-cell cell-eliminate">
+            <div class="matrix-cell-label">Eliminate</div>
+            <div class="matrix-task"><span class="matrix-task-dot"></span> Reorganize bookmarks</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Energy / Burnout -->
+      <div class="energy-card">
+        <div class="energy-label">&#128171; Energy</div>
+        <div class="energy-bar-track">
+          <div class="energy-bar-fill"></div>
+        </div>
+        <div class="energy-status">Good</div>
+      </div>
+
+      <!-- Quick Tasks -->
+      <div class="tasks-card">
+        <div class="tasks-title">Up Next</div>
+        <div class="task-item">
+          <div class="task-checkbox done">&#10003;</div>
+          <div class="task-content">
+            <div class="task-name done">Morning journal entry</div>
+            <div class="task-time">Completed at 8:15 AM</div>
+          </div>
+          <span class="task-tag tag-done">Done</span>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div class="task-content">
+            <div class="task-name">Deep work: roadmap draft</div>
+            <div class="task-time">~45 min &middot; High focus</div>
+          </div>
+          <span class="task-tag tag-focus">Focus</span>
+        </div>
+        <div class="task-item">
+          <div class="task-checkbox"></div>
+          <div class="task-content">
+            <div class="task-name">Pick up prescriptions</div>
+            <div class="task-time">~15 min &middot; Low effort</div>
+          </div>
+          <span class="task-tag tag-errand">Errand</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FAB -->
+    <div class="fab">+</div>
+
+    <!-- Bottom Tab Bar -->
+    <div class="tab-bar">
+      <div class="tab-item active">
+        <span class="tab-icon">&#9632;</span>
+        Dashboard
+        <div class="tab-active-dot"></div>
+      </div>
+      <div class="tab-item">
+        <span class="tab-icon">&#9744;</span>
+        Tasks
+      </div>
+      <div class="tab-item">
+        <span class="tab-icon">&#9201;</span>
+        Focus
+      </div>
+      <div class="tab-item">
+        <span class="tab-icon">&#128218;</span>
+        Memory
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</body>
+</html>
