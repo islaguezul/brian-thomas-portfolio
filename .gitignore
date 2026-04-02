@@ -37,6 +37,16 @@ yarn-error.log*
 AI_PROMPT_SETUP.md
 CLAUDE.md
 
+# Local working files
+*.docx
+PORTFOLIO_CONTENT_UPDATE.json
+PROFESSIONAL_CASE_STUDIES.json
+docs/blackhole.png
+docs/superpowers/plans/2026-03-17-professional-case-studies.md
+public/frames-test-input/
+public/frames-test-output/
+public/upscale-compare.html
+
 
 # tooling
 .claude/
