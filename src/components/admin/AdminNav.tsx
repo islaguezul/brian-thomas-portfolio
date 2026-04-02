@@ -12,6 +12,7 @@ import {
   LogOut,
   Database,
   Sparkles,
+  Lightbulb,
   TrendingUp,
   Menu,
   X,
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/admin/metrics', label: 'Metrics', icon: TrendingUp },
   { href: '/admin/resume', label: 'Resume', icon: FileText },
   { href: '/admin/content', label: 'Content', icon: Sparkles },
+  { href: '/admin/skills', label: 'Skills', icon: Lightbulb },
   { href: '/admin/database', label: 'Database', icon: Database },
 ];
 
