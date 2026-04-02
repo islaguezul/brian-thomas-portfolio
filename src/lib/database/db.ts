@@ -1000,6 +1000,79 @@ export async function deleteSkill(tenant: Tenant, id: number): Promise<boolean> 
   }
 }
 
+export async function reorderSkillItems(
+  tenant: Tenant,
+  type: 'category' | 'skill',
+  id: number,
+  direction: 'up' | 'down',
+  categoryId?: number
+): Promise<boolean> {
+  try {
+    if (type === 'category') {
+      // Get current category
+      const current = await sql`
+        SELECT id, display_order FROM skill_categories
+        WHERE id = ${id} AND tenant = ${tenant}
+      `;
+      if (current.rows.length === 0) return false;
+      const currentOrder = current.rows[0].display_order;
+
+      // Find adjacent category
+      const adjacent = direction === 'up'
+        ? await sql`
+            SELECT id, display_order FROM skill_categories
+            WHERE tenant = ${tenant} AND display_order < ${currentOrder}
+            ORDER BY display_order DESC LIMIT 1
+          `
+        : await sql`
+            SELECT id, display_order FROM skill_categories
+            WHERE tenant = ${tenant} AND display_order > ${currentOrder}
+            ORDER BY display_order ASC LIMIT 1
+          `;
+      if (adjacent.rows.length === 0) return false;
+
+      // Swap display_order
+      const adjacentOrder = adjacent.rows[0].display_order;
+      const adjacentId = adjacent.rows[0].id;
+      await sql`UPDATE skill_categories SET display_order = ${adjacentOrder} WHERE id = ${id} AND tenant = ${tenant}`;
+      await sql`UPDATE skill_categories SET display_order = ${currentOrder} WHERE id = ${adjacentId} AND tenant = ${tenant}`;
+    } else {
+      // Get current skill
+      const current = await sql`
+        SELECT id, display_order FROM skills
+        WHERE id = ${id} AND tenant = ${tenant}
+      `;
+      if (current.rows.length === 0) return false;
+      const currentOrder = current.rows[0].display_order;
+
+      // Find adjacent skill within same category
+      const adjacent = direction === 'up'
+        ? await sql`
+            SELECT id, display_order FROM skills
+            WHERE tenant = ${tenant} AND category_id = ${categoryId} AND display_order < ${currentOrder}
+            ORDER BY display_order DESC LIMIT 1
+          `
+        : await sql`
+            SELECT id, display_order FROM skills
+            WHERE tenant = ${tenant} AND category_id = ${categoryId} AND display_order > ${currentOrder}
+            ORDER BY display_order ASC LIMIT 1
+          `;
+      if (adjacent.rows.length === 0) return false;
+
+      // Swap display_order
+      const adjacentOrder = adjacent.rows[0].display_order;
+      const adjacentId = adjacent.rows[0].id;
+      await sql`UPDATE skills SET display_order = ${adjacentOrder} WHERE id = ${id} AND tenant = ${tenant}`;
+      await sql`UPDATE skills SET display_order = ${currentOrder} WHERE id = ${adjacentId} AND tenant = ${tenant}`;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error reordering skill items:', error);
+    return false;
+  }
+}
+
 // Process & Strategy
 export async function getProcessStrategies(tenant: Tenant): Promise<ProcessStrategy[]> {
   try {
