@@ -51,10 +51,10 @@ export default function CaseStudiesPage({ initialCaseStudies, contactEmail }: Ca
             Professional Case Studies
           </h1>
           <p
-            className="text-sm mb-8 max-w-2xl"
+            className="text-sm mb-8"
             style={{ color: 'rgba(245, 222, 179, 0.6)' }}
           >
-            Programs and initiatives I&apos;ve led as a Technical Product Manager — focused on decisions and outcomes.
+            Programs and initiatives I&apos;ve led as a Technical Product Manager, focused on decisions and outcomes.
           </p>
 
           {caseStudies.length === 0 ? (
