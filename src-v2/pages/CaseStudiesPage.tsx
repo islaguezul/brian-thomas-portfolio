@@ -42,7 +42,7 @@ export default function CaseStudiesPage({ initialCaseStudies, contactEmail }: Ca
             className="font-space text-xs tracking-[2px] uppercase mb-2"
             style={{ color: 'var(--accretion)' }}
           >
-            Leadership
+            Product Leadership
           </div>
           <h1
             className="font-space text-2xl md:text-3xl font-bold mb-3"
