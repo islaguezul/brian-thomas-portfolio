@@ -211,7 +211,7 @@ const CaseStudiesPage: React.FC = () => {
               Brian Thomas
             </h5>
             <p className="text-sm text-slate-400 max-w-md mx-auto">
-              Technical Program Manager | AI Enthusiast | Process Innovator
+              Technical Product Manager | AI Enthusiast | Process Innovator
             </p>
           </div>
           <div className="mt-8 pt-8 border-t border-slate-800 text-center">
