@@ -85,8 +85,8 @@ export default function HomePage({ personalInfo, projectCount, experiences, skil
             <div className="flex flex-col gap-8 w-full px-6 max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto pb-32">
               <AboutCard personalInfo={personalInfo} />
               <HighlightsCard
-                yearsExperience={personalInfo.yearsExperience ?? 10}
-                projectCount={projectCount}
+                yearsExperience={personalInfo.yearsExperience ?? 15}
+                projectCount={Math.max(projectCount, 20)}
                 specialization="Data & AI"
               />
             </div>
