@@ -4,6 +4,8 @@ import { headers } from 'next/headers'
 import { getCaseStudies, getPersonalInfo } from '@/lib/database/db'
 import type { Tenant } from '@/middleware'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Case Studies | Brian Thomas',
   description: 'Professional case studies from Technical Program Management leadership.',
