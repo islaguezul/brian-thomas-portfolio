@@ -87,7 +87,7 @@ export default function HomePage({ personalInfo, projectCount, experiences, skil
               <HighlightsCard
                 yearsExperience={personalInfo.yearsExperience ?? 10}
                 projectCount={projectCount}
-                specialization={personalInfo.title?.includes('AI') ? 'AI' : personalInfo.title?.split(' ')[0] ?? 'Tech'}
+                specialization="Data & AI"
               />
             </div>
           </ScrollVideo>
