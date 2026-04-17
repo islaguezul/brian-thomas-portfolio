@@ -39,6 +39,7 @@ CLAUDE.md
 
 # Local working files
 *.docx
+*.pdf
 PORTFOLIO_CONTENT_UPDATE.json
 PROFESSIONAL_CASE_STUDIES.json
 docs/blackhole.png
