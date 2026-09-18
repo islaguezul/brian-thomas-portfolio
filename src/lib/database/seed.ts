@@ -9,15 +9,15 @@ export async function seedDatabase() {
         bio, tagline, executive_summary, years_experience, start_year
       ) VALUES (
         'Brian Thomas',
-        'Technical Product Manager',
+        'Director, AI & Automation',
         'brianjamesthomas@outlook.com',
         '(707) 536-8398',
         'Tacoma, WA',
         'https://linkedin.com/in/brianjamesthomas',
         'https://github.com/bthomas4',
-        'I''m a Technical Product Manager passionate about leveraging AI and cutting-edge technology to solve complex business challenges. With over a decade of experience spanning process optimization, enterprise software development, and strategic product management, I bring a unique blend of technical expertise and business acumen to every project. I thrive at the intersection of innovation and practical implementation, transforming ambitious ideas into scalable solutions that drive real business value.',
-        'Technical Product Manager | AI Enthusiast | Process Innovator',
-        'Results-driven Technical Product Manager with a proven track record of driving innovation and operational excellence across diverse industries. I specialize in translating complex technical concepts into actionable business strategies, with particular expertise in AI/ML integration, process automation, and enterprise software development. My approach combines data-driven decision making with creative problem-solving to deliver products that not only meet user needs but exceed business expectations.',
+        'I''m a Director of AI & Automation passionate about leveraging AI and cutting-edge technology to solve complex business challenges. With over a decade of experience spanning process optimization, enterprise software development, and strategic product management, I bring a unique blend of technical expertise and business acumen to every project. I thrive at the intersection of innovation and practical implementation, transforming ambitious ideas into scalable solutions that drive real business value.',
+        'Director, AI & Automation | AI Enthusiast | Process Innovator',
+        'Results-driven Director of AI & Automation with a proven track record of driving innovation and operational excellence across diverse industries. I specialize in translating complex technical concepts into actionable business strategies, with particular expertise in AI/ML integration, process automation, and enterprise software development. My approach combines data-driven decision making with creative problem-solving to deliver products that not only meet user needs but exceed business expectations.',
         13,
         2011
       ) ON CONFLICT (id) DO NOTHING

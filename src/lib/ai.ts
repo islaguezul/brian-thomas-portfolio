@@ -22,7 +22,7 @@ export async function enhanceText({
   field,
   context: _context,
   currentValue,
-  role = 'Technical Product Manager'
+  role = 'Director, AI & Automation'
 }: EnhanceOptions): Promise<string> {
   try {
     // Get personal context for better prompting
@@ -31,7 +31,7 @@ export async function enhanceText({
       name: personalInfo.name || 'Brian Thomas',
       yearsExperience: personalInfo.yearsExperience || 13,
       currentCompany: 'Blue Origin', // Could be extracted from work experience
-      targetRole: 'Senior Technical Product Manager'
+      targetRole: 'Director, AI & Automation'
     } : undefined;
 
     // Build sophisticated prompt

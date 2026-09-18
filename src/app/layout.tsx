@@ -6,13 +6,13 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space' })
 
 export const metadata: Metadata = {
-  title: 'Brian Thomas - Technical Product Manager',
-  description: 'Technical Product Manager with 10+ years of experience transforming complex technical challenges into scalable business solutions. Expert in AI integration, process improvement, and enterprise architecture.',
-  keywords: 'Technical Product Manager, AI Integration, Process Management, Full-Stack Architecture, BPMN 2.0, Blue Origin, Software Development',
+  title: 'Brian Thomas - Director, AI & Automation',
+  description: 'Director, AI & Automation with 10+ years of experience transforming complex technical challenges into scalable business solutions. Expert in AI integration, process improvement, and enterprise architecture.',
+  keywords: 'Director of AI & Automation, AI Integration, Process Management, Full-Stack Architecture, BPMN 2.0, Blue Origin, Software Development',
   authors: [{ name: 'Brian Thomas' }],
   creator: 'Brian Thomas',
   openGraph: {
-    title: 'Brian Thomas - Technical Product Manager',
+    title: 'Brian Thomas - Director, AI & Automation',
     description: 'Transforming complex technical challenges into scalable business solutions through systematic product development and AI integration.',
     url: 'https://briantpm.com',
     siteName: 'Brian Thomas Portfolio',
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Brian Thomas - Technical Product Manager',
-    description: 'Technical Product Manager specializing in AI integration and enterprise architecture',
+    title: 'Brian Thomas - Director, AI & Automation',
+    description: 'Director of AI & Automation specializing in AI integration and enterprise architecture',
   },
 }
 

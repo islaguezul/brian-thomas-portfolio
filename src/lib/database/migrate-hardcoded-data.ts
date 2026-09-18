@@ -8,7 +8,7 @@ export async function migrateHardcodedData() {
     console.log('📝 Migrating personal info...');
     const personalInfo = {
       name: 'Brian Thomas',
-      title: 'Technical Product Manager',
+      title: 'Director, AI & Automation',
       email: 'brianjamesthomas@outlook.com',
       phone: '(707) 536-8398',
       location: 'Tacoma, WA',

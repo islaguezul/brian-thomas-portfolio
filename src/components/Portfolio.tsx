@@ -544,7 +544,7 @@ const MainPortfolio = () => {
                           Brian Thomas
                         </span>
                         <br />
-                        <span className="text-white">Senior Technical Product Manager</span>
+                        <span className="text-white">Director, AI & Automation</span>
                       </h1>
                       <p className="text-xl text-slate-300 leading-relaxed max-w-xl">
                         {personalInfo?.bio || 
@@ -907,7 +907,7 @@ const MainPortfolio = () => {
               <div className="text-center md:text-left mb-6 md:mb-0">
                 <h5 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">Brian Thomas</h5>
                 <p className="text-sm text-slate-400 max-w-md">
-                  Technical Product Manager | AI Enthusiast | Process Innovator
+                  Director, AI & Automation | AI Enthusiast | Process Innovator
                 </p>
               </div>
               <div className="flex flex-wrap gap-6 justify-center md:justify-end">

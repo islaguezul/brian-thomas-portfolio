@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Case Studies | Brian Thomas',
-  description: 'Professional case studies from Technical Program Management leadership.',
+  description: 'Professional case studies from AI and automation leadership.',
 }
 
 export default async function CaseStudiesRoute() {
