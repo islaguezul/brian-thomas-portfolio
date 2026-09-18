@@ -8,7 +8,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space
 export const metadata: Metadata = {
   title: 'Brian Thomas - Director, AI & Automation',
   description: 'Director, AI & Automation with 10+ years of experience transforming complex technical challenges into scalable business solutions. Expert in AI integration, process improvement, and enterprise architecture.',
-  keywords: 'Director of AI & Automation, AI Integration, Process Management, Full-Stack Architecture, BPMN 2.0, Blue Origin, Software Development',
+  keywords: 'Director of AI & Automation, AI Integration, Process Management, Full-Stack Architecture, BPMN 2.0, Frontier Door & Cabinet, Software Development',
   authors: [{ name: 'Brian Thomas' }],
   creator: 'Brian Thomas',
   openGraph: {

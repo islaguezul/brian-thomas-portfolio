@@ -18,7 +18,7 @@ export async function seedDatabase() {
         'I''m a Director of AI & Automation passionate about leveraging AI and cutting-edge technology to solve complex business challenges. With over a decade of experience spanning process optimization, enterprise software development, and strategic product management, I bring a unique blend of technical expertise and business acumen to every project. I thrive at the intersection of innovation and practical implementation, transforming ambitious ideas into scalable solutions that drive real business value.',
         'Director, AI & Automation | AI Enthusiast | Process Innovator',
         'Results-driven Director of AI & Automation with a proven track record of driving innovation and operational excellence across diverse industries. I specialize in translating complex technical concepts into actionable business strategies, with particular expertise in AI/ML integration, process automation, and enterprise software development. My approach combines data-driven decision making with creative problem-solving to deliver products that not only meet user needs but exceed business expectations.',
-        13,
+        15,
         2011
       ) ON CONFLICT (id) DO NOTHING
     `;
@@ -102,10 +102,25 @@ export async function seedDatabase() {
     // Work Experience
     const experiences = [
       {
+        title: 'Director, AI & Automation',
+        company: 'Frontier Door & Cabinet',
+        startDate: '2026-05-01',
+        isCurrent: true,
+        responsibilities: [
+          'Rolled out Claude Enterprise company-wide, enablement first, then stood up an internal chat platform and a multi-vendor model gateway behind company-owned identity, logging, and cost controls, with a model and vendor strategy that ensures the company is never locked in.',
+          'Shipped a defect tracking app for operations, a warehouse forecasting dashboard, a door configurator that produces bills of materials, and a work-tracking board in Microsoft 365, all on Power Platform and Azure; now rehosting an AI estimating takeoff tool.',
+          'Created a version-controlled data layer in Dataverse with Fabric and OneLake, managed as code; mapped an ERP with no documented API and automated workflows across SharePoint, OneDrive, and meeting capture, with a full Digital Thread as the north star.',
+          'Launched a citizen developer program where the people closest to the work build with AI; now building the agent-driven pipeline that promotes their tools into architected software, with a governed source of truth for each tool\'s data so the foundation grows from real demand. Two checks stay human: what a tool does, and that its rebuild matches.',
+          'Stood up an Azure landing zone with containerized services, Key Vault for every secret, least-privilege Entra ID identities with a tested kill switch, and a team password manager, with static analysis and secret scanning on every push; now hardening the supply chain.',
+          'Published an AI & Automation Hub on SharePoint, a public work board showing every initiative\'s status, a company knowledge base, and a design system for everyone who builds at the company, so the executive team sees what is built, why, and where it stands.',
+          'Established an AI-native engineering practice: agentic development with written decision records for every architectural choice, independent multi-model review before anything irreversible ships, skills and templates that encode how software is built, and AI standards adopted with IT. The practice is the product.'
+        ]
+      },
+      {
         title: 'Business Process Analyst',
         company: 'Blue Origin',
         startDate: '2022-01-01',
-        isCurrent: true,
+        endDate: '2026-04-30',
         responsibilities: [
           'Led cross-functional teams in implementing enterprise-wide process improvements',
           'Developed data-driven dashboards reducing decision-making time by 40%',

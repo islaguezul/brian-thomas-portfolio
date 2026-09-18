@@ -29,8 +29,8 @@ export async function enhanceText({
     const personalInfo = await getPersonalInfo('internal');
     const personalContext = personalInfo ? {
       name: personalInfo.name || 'Brian Thomas',
-      yearsExperience: personalInfo.yearsExperience || 13,
-      currentCompany: 'Blue Origin', // Could be extracted from work experience
+      yearsExperience: personalInfo.yearsExperience || 15,
+      currentCompany: 'Frontier Door & Cabinet', // Could be extracted from work experience
       targetRole: 'Director, AI & Automation'
     } : undefined;
 

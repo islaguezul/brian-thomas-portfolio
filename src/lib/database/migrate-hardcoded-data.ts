@@ -15,9 +15,9 @@ export async function migrateHardcodedData() {
       linkedinUrl: 'https://linkedin.com/in/brianjamesthomas',
       githubUrl: '', // Add if you have one
       bio: 'I thrive at the intersection of technology, process, and people—translating ambiguity into clarity and vision into reality.',
-      tagline: 'Turning Vision into Reality Through Technology & Process',
-      executiveSummary: "I thrive at the intersection of technology, process, and people—translating ambiguity into clarity and vision into reality. At Blue Origin, I've built bridges between engineering and operations, launching process frameworks that empower teams to deliver at scale. My experience spans the full product and process lifecycle: from mapping out the Engines business unit's first end-to-end workflows, to championing BPMN 2.0 adoption, to guiding data-driven improvements that shape both culture and outcomes. Whether I'm architecting a new tool, aligning stakeholders, or untangling legacy systems, I bring curiosity, rigor, and a bias for action. I'm passionate about building systems and products that not only work, but make work better for everyone involved.",
-      yearsExperience: 13,
+      tagline: 'Turning Vision into Reality Through AI & Automation',
+      executiveSummary: "I thrive at the intersection of technology, process, and people—translating ambiguity into clarity and vision into reality. At Frontier Door & Cabinet—a full-vertical manufacturer, distributor, and installer of commercial, government, and multi-family cabinetry, doors, and countertops—I lead AI and automation, a function that didn't exist before this role. I'm building it from zero: the strategy, the platform, the standards, and the first generation of software that runs on them. As a member of the executive team, I own the whole practice: from the company's AI strategy and the platform underneath it, to the standards for how software is built and promoted, to the governance that keeps company data inside approved systems and the delivery of the applications and integrations the business depends on. Whether I'm deciding what we build, buy, or skip, untangling an ERP with no documented API, or working alongside IT rather than around it so the mandate is earned, not asserted, I bring curiosity, rigor, and a bias for action. I'm passionate about building systems that compound—each tool leaves behind more foundation than it consumed, the practice that produced it gets faster with every release, and work gets better for everyone involved.",
+      yearsExperience: 15,
       startYear: 2011
     };
 
@@ -41,12 +41,29 @@ export async function migrateHardcodedData() {
     console.log('💼 Migrating work experience...');
     const workExperiences = [
       {
-        title: 'Business Process Analyst',
-        company: 'Blue Origin',
-        startDate: '2022-01-01',
+        title: 'Director, AI & Automation',
+        company: 'Frontier Door & Cabinet',
+        startDate: '2026-05-01',
         endDate: null,
         isCurrent: true,
         displayOrder: 1,
+        responsibilities: [
+          'Rolled out Claude Enterprise company-wide, enablement first, then stood up an internal chat platform and a multi-vendor model gateway behind company-owned identity, logging, and cost controls, with a model and vendor strategy that ensures the company is never locked in.',
+          'Shipped a defect tracking app for operations, a warehouse forecasting dashboard, a door configurator that produces bills of materials, and a work-tracking board in Microsoft 365, all on Power Platform and Azure; now rehosting an AI estimating takeoff tool.',
+          'Created a version-controlled data layer in Dataverse with Fabric and OneLake, managed as code; mapped an ERP with no documented API and automated workflows across SharePoint, OneDrive, and meeting capture, with a full Digital Thread as the north star.',
+          'Launched a citizen developer program where the people closest to the work build with AI; now building the agent-driven pipeline that promotes their tools into architected software, with a governed source of truth for each tool\'s data so the foundation grows from real demand. Two checks stay human: what a tool does, and that its rebuild matches.',
+          'Stood up an Azure landing zone with containerized services, Key Vault for every secret, least-privilege Entra ID identities with a tested kill switch, and a team password manager, with static analysis and secret scanning on every push; now hardening the supply chain.',
+          'Published an AI & Automation Hub on SharePoint, a public work board showing every initiative\'s status, a company knowledge base, and a design system for everyone who builds at the company, so the executive team sees what is built, why, and where it stands.',
+          'Established an AI-native engineering practice: agentic development with written decision records for every architectural choice, independent multi-model review before anything irreversible ships, skills and templates that encode how software is built, and AI standards adopted with IT. The practice is the product.'
+        ]
+      },
+      {
+        title: 'Business Process Analyst',
+        company: 'Blue Origin',
+        startDate: '2022-01-01',
+        endDate: '2026-04-30',
+        isCurrent: false,
+        displayOrder: 2,
         responsibilities: [
           'Partnered with engineering, operations, and leadership to define and optimize end-to-end business processes for the Engines business unit, enabling scalable and efficient delivery of technical products and programs.',
           'Led requirements gathering, process mapping, and stakeholder alignment for the Engines Build Manifest tool, directly supporting product development and lifecycle management.',
@@ -61,7 +78,7 @@ export async function migrateHardcodedData() {
         startDate: '2017-11-01',
         endDate: '2021-12-31',
         isCurrent: false,
-        displayOrder: 2,
+        displayOrder: 3,
         responsibilities: [
           'Pioneered a comprehensive process management function, crafting roadmaps, risk assessments, and models to guide organizational improvements, including renewable energy projects and high-load systems. Results included adopting ERPs with enterprise architectures instead of inefficient manual process changes and complicated organizational change management projects',
           'Drove process maturity through actionable insights, leveraging data visualization tools such as Tableau and Power BI for project outcomes in utility infrastructure and energy systems'
@@ -73,7 +90,7 @@ export async function migrateHardcodedData() {
         startDate: '2016-01-01',
         endDate: '2017-10-31',
         isCurrent: false,
-        displayOrder: 3,
+        displayOrder: 4,
         responsibilities: [
           'Managed the team\'s work structure, burndown tracking, and dependencies, using both Visual Studio Online (customer-side) and MS Project (vendor)',
           'Collaborated with value-stream and scrum leads, and technical project managers, to define and model process and inform users\' change impacts. This resulted in informed change management strategy and a smooth transition of process to align with SAP out-of-the-box processes',
@@ -86,7 +103,7 @@ export async function migrateHardcodedData() {
         startDate: '2011-07-01',
         endDate: '2016-01-31',
         isCurrent: false,
-        displayOrder: 4,
+        displayOrder: 5,
         responsibilities: [
           'Managed boutique mobile, onsite, and cloud-based SaaS app design and definition, and responsible for the full SDLC project, from requirements to support, for customized performance improvement and knowledge management software',
           'Supported organizational change programs by delivering training strategies, curriculum, courseware, custom software solutions, and training facilitation',
@@ -101,7 +118,7 @@ export async function migrateHardcodedData() {
         startDate: '2002-01-01',
         endDate: '2011-12-31',
         isCurrent: false,
-        displayOrder: 5,
+        displayOrder: 6,
         responsibilities: [
           'Master Training Specialist (2009-2011)',
           'Training Program Manager (2005-2009)',

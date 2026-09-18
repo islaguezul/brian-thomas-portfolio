@@ -123,7 +123,7 @@ export function buildEnhancementPrompt(context: PromptContext): string {
 
   const personalContext = context.personalContext || {
     name: 'Brian Thomas',
-    yearsExperience: 13,
+    yearsExperience: 15,
     targetRole: 'Director, AI & Automation'
   };
 
