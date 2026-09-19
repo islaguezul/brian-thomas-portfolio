@@ -1,5 +1,5 @@
 // AI Prompt Engineering System
-// Sophisticated prompting for Senior Technical Product Manager positioning
+// Sophisticated prompting for Director, AI & Automation positioning
 
 export interface FieldConstraints {
   minWords: number;
@@ -67,12 +67,12 @@ const FIELD_CONTEXTS = {
   },
   executiveSummary: {
     role: 'Senior Hiring Manager at a top tech company',
-    objective: 'Demonstrate immediate value for Senior Technical PM roles with concrete evidence',
+    objective: 'Demonstrate immediate value for director-level AI and automation roles with concrete evidence',
     style: 'Professional but personable - like a compelling opening statement in an interview',
     avoid: 'Generic achievements, vague statements, overused corporate language'
   },
   description: {
-    role: 'Technical Product Manager peer reviewing your portfolio',
+    role: 'AI and automation leader peer reviewing your portfolio',
     objective: 'Quickly convey technical sophistication and product thinking',
     style: 'Crisp, technical, intriguing - like a product pitch to engineers',
     avoid: 'Marketing fluff, oversimplification'
@@ -123,8 +123,8 @@ export function buildEnhancementPrompt(context: PromptContext): string {
 
   const personalContext = context.personalContext || {
     name: 'Brian Thomas',
-    yearsExperience: 13,
-    targetRole: 'Senior Technical Product Manager'
+    yearsExperience: 15,
+    targetRole: 'Director, AI & Automation'
   };
 
   const writingStyle = WRITING_PATTERNS.brian;
@@ -159,7 +159,7 @@ PERSONAL WRITING PATTERNS TO INCORPORATE:
 - ${writingStyle.style.sentenceVariation}
 - Tone: ${writingStyle.style.tone}
 
-SENIOR TPM POSITIONING:
+DIRECTOR-LEVEL POSITIONING:
 - Emphasize strategic thinking and technical depth
 - Highlight cross-functional leadership without using the cliché term
 - Show ability to drive ambiguous, complex initiatives
@@ -168,7 +168,7 @@ SENIOR TPM POSITIONING:
 
 Generate enhanced text that:
 1. Sounds genuinely human and matches Brian's writing style
-2. Positions clearly for Senior Technical PM roles
+2. Positions clearly for director-level AI and automation roles
 3. Passes ATS keyword scans for senior positions
 4. Avoids AI detection through natural language variation
 5. Compels hiring managers within 5 seconds of reading
@@ -256,5 +256,5 @@ export function getSecurePrompt(key: string): string {
   // In production, these would come from secure environment variables
   // This way, inspecting the repo doesn't reveal the actual prompts
   const envKey = `AI_PROMPT_${key.toUpperCase()}`;
-  return process.env[envKey] || buildEnhancementPrompt({ field: key, currentValue: '', role: 'Technical Product Manager' });
+  return process.env[envKey] || buildEnhancementPrompt({ field: key, currentValue: '', role: 'Director, AI & Automation' });
 }

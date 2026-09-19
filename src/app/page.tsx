@@ -6,8 +6,8 @@ import { getPersonalInfo, getProjects, getWorkExperience, getSkillCategories } f
 import type { Tenant } from '@/middleware'
 
 export const metadata: Metadata = {
-  title: 'Brian Thomas | Technical Product Manager',
-  description: 'Technical Product Manager with 10+ years transforming complex technical challenges into scalable business solutions.',
+  title: 'Brian Thomas | Director, AI & Automation',
+  description: 'Director, AI & Automation with 10+ years transforming complex technical challenges into scalable business solutions.',
 }
 
 export default async function Home() {
@@ -24,7 +24,7 @@ export default async function Home() {
 
   const fallbackInfo = {
     name: 'Brian Thomas',
-    title: 'Technical Product Manager',
+    title: 'Director, AI & Automation',
     email: '',
   }
 

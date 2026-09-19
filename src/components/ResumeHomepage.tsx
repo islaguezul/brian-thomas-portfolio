@@ -23,7 +23,7 @@ const ResumeHomepage: React.FC = () => {
           <div className="space-y-6">
             {/* Subhead */}
             <p className="text-blue-400 font-semibold text-lg tracking-wide uppercase">
-              Technical Product Manager
+              Director, AI & Automation
             </p>
 
             {/* Main Headline */}
@@ -101,7 +101,7 @@ const ResumeHomepage: React.FC = () => {
               Brian Thomas
             </h5>
             <p className="text-sm text-slate-400 max-w-md mx-auto">
-              Technical Product Manager | AI Enthusiast | Process Innovator
+              Director, AI & Automation | AI Enthusiast | Process Innovator
             </p>
           </div>
           <div className="mt-8 pt-8 border-t border-slate-800 text-center">

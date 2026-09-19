@@ -223,7 +223,7 @@ const PDFDocument = ({ personalInfo, experience, education, tenant }: PDFDocumen
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.name}>{personalInfo?.name || 'Brian Thomas'}</Text>
-        <Text style={styles.title}>{personalInfo?.title || 'Technical Product Manager'}</Text>
+        <Text style={styles.title}>{personalInfo?.title || 'Director, AI & Automation'}</Text>
         <View style={styles.contactRow}>
           <View style={styles.contactItem}>
             <Link style={styles.link} src={websiteUrl}>

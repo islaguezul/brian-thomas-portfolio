@@ -147,7 +147,7 @@ const Resume: React.FC = () => {
           {/* Professional Header */}
           <div className="mb-10">
             <h1 className="text-4xl font-bold mb-2 text-blue-400 print:text-gray-800">Brian Thomas</h1>
-            <p className="text-xl text-slate-300 mb-6 print:text-gray-600">Technical Product Manager</p>
+            <p className="text-xl text-slate-300 mb-6 print:text-gray-600">Director, AI & Automation</p>
             
             <div className="grid md:grid-cols-2 gap-4 text-slate-300 print:text-gray-600">
               <div className="flex items-center gap-2">
