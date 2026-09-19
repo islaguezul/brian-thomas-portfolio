@@ -1,5 +1,12 @@
 import { sql } from '@vercel/postgres';
-import { Database, AlertCircle, CheckCircle } from 'lucide-react';
+import { Database, AlertCircle, CheckCircle, Sparkles } from 'lucide-react';
+import ContentUpdateButton from '@/components/admin/ContentUpdateButton';
+import {
+  NEW_ROLE,
+  PERSONAL_INFO_UPDATE,
+  getContentUpdateStatus,
+  type TenantContentUpdateStatus,
+} from '@/lib/database/content-updates/2026-09-director-ai-automation';
 
 async function checkDatabaseStatus() {
   try {
@@ -46,8 +53,20 @@ async function checkDatabaseStatus() {
   }
 }
 
+async function checkContentUpdateStatus(): Promise<TenantContentUpdateStatus[]> {
+  try {
+    return await getContentUpdateStatus((text, values) => sql.query(text, values));
+  } catch (error) {
+    console.error('Content update status check error:', error);
+    return [];
+  }
+}
+
 export default async function DatabasePage() {
   const status = await checkDatabaseStatus();
+  const contentUpdateStatus = status.connected ? await checkContentUpdateStatus() : [];
+  const contentUpdateApplied =
+    contentUpdateStatus.length > 0 && contentUpdateStatus.every((s) => s.applied || !s.hasPersonalInfo);
 
   return (
     <div className="space-y-8">
@@ -127,6 +146,54 @@ export default async function DatabasePage() {
         )}
       </div>
 
+
+      <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-white mb-2 flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-blue-400" />
+          Content Updates
+        </h2>
+        <p className="text-gray-400 text-sm mb-6">
+          One-click updates to live content, applied to both tenants. Safe to run more than once.
+        </p>
+
+        <div className="p-4 bg-gray-800 rounded-lg space-y-4">
+          <div>
+            <h3 className="text-white font-medium">{PERSONAL_INFO_UPDATE.title} (September 2026)</h3>
+            <ul className="mt-2 text-sm text-gray-400 list-disc list-inside space-y-1">
+              <li>Title, tagline, and executive summary for the new role; years of experience set to {PERSONAL_INFO_UPDATE.yearsExperience}</li>
+              <li>Adds {NEW_ROLE.title} at {NEW_ROLE.company} as the current role with {NEW_ROLE.responsibilities.length} responsibilities</li>
+              <li>Closes out Blue Origin as of April 2026</li>
+            </ul>
+          </div>
+
+          {contentUpdateStatus.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {contentUpdateStatus.map((s) => (
+                <span
+                  key={s.tenant}
+                  className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${
+                    s.applied
+                      ? 'bg-green-500/10 border-green-500/20 text-green-400'
+                      : s.hasPersonalInfo
+                        ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400'
+                        : 'bg-gray-700 border-gray-600 text-gray-400'
+                  }`}
+                >
+                  {s.applied ? <CheckCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                  {s.tenant}: {s.applied ? 'applied' : s.hasPersonalInfo ? 'pending' : 'no data'}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <ContentUpdateButton
+            endpoint="/api/admin/database/content-update-2026-09"
+            label={contentUpdateApplied ? 'Re-apply content update' : 'Apply content update'}
+            confirmText="Apply the Director, AI & Automation content update to both tenants? Existing personal info fields will be overwritten with the new copy."
+            disabled={!status.connected}
+          />
+        </div>
+      </div>
 
       <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-white mb-4">Database Information</h3>
